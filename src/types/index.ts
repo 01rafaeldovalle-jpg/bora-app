@@ -1,0 +1,62 @@
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string; // Nome do ícone do Lucide
+  color: string; // Ex: 'coral', 'teal', etc.
+}
+
+export interface Place {
+  id: string;
+  name: string;
+  description: string;
+  address: string;
+  phone?: string;
+  instagram_handle?: string;
+  website_url?: string;
+  category_id: string;
+  latitude: number;
+  longitude: number;
+  image_url: string;
+  avg_rating: number;
+  review_count: number;
+  price_range: '$' | '$$' | '$$$'; // Faixa de preço
+  is_featured: boolean;
+  is_verified: boolean;
+  operating_hours?: {
+    [key: string]: string;
+  };
+}
+
+export interface Event {
+  id: string;
+  name: string;
+  description: string;
+  place_id?: string;
+  category_id: string;
+  latitude: number;
+  longitude: number;
+  starts_at: string;
+  ends_at: string;
+  price: number; // 0 se gratuito
+  image_url: string;
+  ticket_url?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  full_name: string;
+  avatar_url?: string;
+  email: string;
+  favorites: string[]; // Array de place_ids
+}
+
+export interface Review {
+  id: string;
+  place_id: string;
+  user_name: string;
+  user_avatar?: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
