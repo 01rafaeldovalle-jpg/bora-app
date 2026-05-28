@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Bora! — Descubra Experiências em Curitiba</title>
-  <meta name="description" content="Descubra os melhores lugares, restaurantes, parques e experiências em Curitiba com o Bora!">
+  <title>Giro — Descubra Experiências em Curitiba</title>
+  <meta name="description" content="Descubra os melhores lugares, restaurantes, parques e experiências em Curitiba com o Giro!">
   <meta name="theme-color" content="#0d0724">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -220,9 +220,55 @@
       color: #ff5422;
       transform: rotate(15deg);
     }
+
+    @keyframes giro-spin-pulse {
+      0% {
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 0px rgba(255, 84, 34, 0));
+      }
+      50% {
+        transform: rotate(15deg) scale(1.05);
+        filter: drop-shadow(0 0 15px rgba(255, 84, 34, 0.4));
+      }
+      100% {
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 0px rgba(255, 84, 34, 0));
+      }
+    }
+    .animate-giro-spin {
+      animation: giro-spin-pulse 3s ease-in-out infinite;
+    }
   </style>
 </head>
 <body class="bg-brand-indigo-950 text-slate-100 overflow-x-hidden pb-16">
+
+  <!-- TELA DE ABERTURA (Splash Screen) -->
+  <div id="splash-screen" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-brand-indigo-950 to-slate-950 transition-opacity duration-700 ease-in-out">
+    <div class="flex flex-col items-center gap-6">
+      <!-- Glow effect -->
+      <div class="relative w-28 h-28 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-[34px] bg-gradient-to-tr from-brand-coral-500 to-amber-500 opacity-25 blur-lg animate-pulse"></div>
+        <!-- SVG Logo Giro -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-24 h-24 relative z-10 animate-giro-spin">
+          <defs>
+            <linearGradient id="splashCoralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff7e58" />
+              <stop offset="100%" stop-color="#ff5422" />
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="30" fill="url(#splashCoralGradient)" />
+          <path d="M50 22 L62 42 L50 36 L38 42 Z" fill="#ffffff" />
+          <path d="M50 78 L38 58 L50 64 L62 58 Z" fill="#e2e8f0" />
+          <circle cx="50" cy="50" r="8" fill="#1b0e3f" />
+          <circle cx="50" cy="50" r="4" fill="#ffffff" />
+        </svg>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <h2 class="text-3xl font-outfit font-black tracking-tight text-white animate-pulse">Giro</h2>
+        <span class="text-[10px] text-brand-teal-400 font-bold tracking-widest uppercase mt-1">Descubra Experiências</span>
+      </div>
+    </div>
+  </div>
 
   <!-- FRAME EXTERNO RESPONSIVO: Layout Inteligente no Desktop e Mobile -->
   <div class="min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-brand-indigo-950 to-slate-950">
@@ -231,7 +277,7 @@
       
       <!-- Top Decorator Desktop -->
       <div class="hidden md:flex justify-between items-center px-8 py-3 bg-brand-indigo-950/80 border-b border-white/5">
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Bora! Curitiba · Modo Desktop Inteligente</span>
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Giro Curitiba · Modo Desktop Inteligente</span>
         <div class="flex gap-1.5">
           <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
           <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
@@ -252,7 +298,7 @@
                 <i data-lucide="compass" class="w-5 h-5 text-white animate-spin-slow"></i>
               </div>
               <div>
-                <h1 class="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-white to-brand-coral-100 bg-clip-text text-transparent">Bora!</h1>
+                <h1 class="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-white to-brand-coral-100 bg-clip-text text-transparent">Giro</h1>
                 <div class="flex items-center gap-1 text-[10px] text-brand-teal-400 font-medium tracking-wider uppercase mt-[-2px]">
                   <i data-lucide="map-pin" class="w-3 h-3"></i>
                   <span>Curitiba - PR</span>
@@ -305,6 +351,54 @@
       </nav>
 
     </main>
+  </div>
+
+  <!-- BOTTOM SHEET LOGIN -->
+  <div id="login-sheet" class="fixed inset-0 z-[10000] invisible">
+    <!-- Backdrop -->
+    <div onclick="closeLoginSheet()" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="login-sheet-backdrop"></div>
+    <!-- Sheet Panel -->
+    <div class="absolute bottom-0 left-0 right-0 w-full max-w-lg mx-auto bg-brand-indigo-950 border-t border-white/10 rounded-t-[32px] p-6 shadow-2xl transition-transform duration-300 transform translate-y-full flex flex-col gap-6" id="login-sheet-panel">
+      <!-- Handle bar -->
+      <div class="w-12 h-1.5 bg-white/15 rounded-full mx-auto cursor-pointer" onclick="closeLoginSheet()"></div>
+      
+      <div class="text-center space-y-2 mt-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-coral-500/10 text-brand-coral-500 mb-2">
+          <i data-lucide="heart" class="w-6 h-6 fill-brand-coral-500 text-brand-coral-500"></i>
+        </div>
+        <h3 class="text-lg font-outfit font-extrabold text-white">Falta pouco!</h3>
+        <p class="text-xs text-slate-300 max-w-xs mx-auto leading-relaxed">
+          Faça login para salvar seus locais favoritos e planejar seu Giro.
+        </p>
+      </div>
+
+      <!-- Login buttons -->
+      <div class="space-y-3">
+        <!-- Google button -->
+        <button onclick="simulateGoogleLogin()" class="w-full h-12 rounded-2xl bg-white text-black font-semibold text-sm flex items-center justify-center gap-2 hover:bg-slate-100 transition-all btn-premium shadow-md">
+          <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Entrar com o Google
+        </button>
+
+        <!-- Email button -->
+        <button onclick="simulateEmailLogin()" class="w-full h-12 rounded-2xl bg-brand-indigo-900 text-white border border-white/10 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-brand-indigo-900/80 transition-all btn-premium">
+          <i data-lucide="mail" class="w-5 h-5 text-slate-300"></i>
+          Entrar com e-mail
+        </button>
+      </div>
+
+      <!-- Footer indicator -->
+      <div class="text-center mt-2 pb-2">
+        <button onclick="closeLoginSheet()" class="text-xs text-slate-400 font-semibold hover:text-white transition-all">
+          Talvez mais tarde
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- JAVASCRIPT APP LOGIC -->
@@ -408,7 +502,7 @@
     // APP STATE
     let currentTab = 'home';
     let viewMode = 'swipe'; // 'swipe' (Tinder Cards) ou 'list' (Visualização de iFood)
-    let favorites = JSON.parse(localStorage.getItem('bora_favorites')) || [];
+    let favorites = JSON.parse(localStorage.getItem('giro_favorites')) || JSON.parse(localStorage.getItem('bora_favorites')) || [];
     let selectedPlace = null;
     let searchQuery = '';
     let selectedCategory = null;
@@ -421,11 +515,190 @@
     let swipeQueue = [...MOCK_PLACES];
     let activeCardIndex = 0;
 
+    // Login and location state
+    let isLoggedIn = false;
+    let userCoords = null;
+    let pendingAction = null;
+    let userLocationMarker = null;
+    let userLocationDesktopMarker = null;
+
+    // TOAST NOTIFICATION SYSTEM
+    function showToast(message, duration = 4000) {
+      const existingToast = document.getElementById('giro-toast');
+      if (existingToast) existingToast.remove();
+
+      const toast = document.createElement('div');
+      toast.id = 'giro-toast';
+      toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-[99999] w-[90%] max-w-sm bg-brand-indigo-950/90 backdrop-blur-md rounded-2xl border border-white/10 px-4 py-3 shadow-2xl flex items-center gap-3 transition-all duration-300 translate-y-10 opacity-0';
+      
+      const iconDiv = document.createElement('div');
+      iconDiv.className = 'flex items-center justify-center w-8 h-8 rounded-full bg-brand-coral-500/20 text-brand-coral-500 shrink-0';
+      iconDiv.innerHTML = '<i data-lucide="map-pin" class="w-4 h-4"></i>';
+      toast.appendChild(iconDiv);
+      
+      const textSpan = document.createElement('span');
+      textSpan.className = 'text-xs font-semibold text-slate-200';
+      textSpan.innerText = message;
+      toast.appendChild(textSpan);
+      
+      document.body.appendChild(toast);
+      lucide.createIcons();
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-10', 'opacity-0');
+      }, 50);
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, duration);
+    }
+
+    // GEOLOCATION DETECTION & FALLBACK
+    function requestUserLocation() {
+      if (!navigator.geolocation) {
+        handleLocationFallback();
+        return;
+      }
+
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 6000,
+        maximumAge: 0
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userCoords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          
+          // Center maps
+          if (mainMap) {
+            mainMap.setView([userCoords.lat, userCoords.lng], 15, { animate: true });
+          }
+          if (desktopMap) {
+            desktopMap.setView([userCoords.lat, userCoords.lng], 15, { animate: true });
+          }
+          
+          addUserLocationMarker(userCoords.lat, userCoords.lng);
+        },
+        (error) => {
+          handleLocationFallback();
+        },
+        options
+      );
+    }
+
+    function handleLocationFallback() {
+      userCoords = { lat: -25.4290, lng: -49.2671 }; // Centro de Curitiba
+      
+      if (mainMap) {
+        mainMap.setView([userCoords.lat, userCoords.lng], 13, { animate: true });
+      }
+      if (desktopMap) {
+        desktopMap.setView([userCoords.lat, userCoords.lng], 13, { animate: true });
+      }
+      
+      showToast("Mostrando a região de Curitiba. Ative o GPS para ver locais próximos a você.", 5000);
+    }
+
+    function addUserLocationMarker(lat, lng) {
+      const userLocationIcon = L.divIcon({
+        html: '<div class="user-location-marker"></div>',
+        className: 'custom-user-marker',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+
+      if (mainMap) {
+        if (userLocationMarker) mainMap.removeLayer(userLocationMarker);
+        userLocationMarker = L.marker([lat, lng], { icon: userLocationIcon }).addTo(mainMap);
+      }
+      if (desktopMap) {
+        if (userLocationDesktopMarker) desktopMap.removeLayer(userLocationDesktopMarker);
+        userLocationDesktopMarker = L.marker([lat, lng], { icon: userLocationIcon }).addTo(desktopMap);
+      }
+    }
+
+    // CONTEXTUAL LOGIN SHEET HANDLERS
+    function promptLogin(action) {
+      pendingAction = action;
+      
+      const sheet = document.getElementById('login-sheet');
+      const backdrop = document.getElementById('login-sheet-backdrop');
+      const panel = document.getElementById('login-sheet-panel');
+      
+      if (!sheet) return;
+      sheet.classList.remove('invisible');
+      
+      setTimeout(() => {
+        backdrop.classList.replace('opacity-0', 'opacity-100');
+        panel.classList.replace('translate-y-full', 'translate-y-0');
+      }, 50);
+      
+      lucide.createIcons();
+    }
+
+    // Keep active tab menu functional
+    function closeLoginSheet() {
+      const sheet = document.getElementById('login-sheet');
+      const backdrop = document.getElementById('login-sheet-backdrop');
+      const panel = document.getElementById('login-sheet-panel');
+      
+      if (!sheet) return;
+      backdrop.classList.replace('opacity-100', 'opacity-0');
+      panel.classList.replace('translate-y-0', 'translate-y-full');
+      
+      setTimeout(() => {
+        sheet.classList.add('invisible');
+        pendingAction = null;
+      }, 300);
+    }
+
+    function simulateGoogleLogin() {
+      isLoggedIn = true;
+      closeLoginSheet();
+      
+      showToast("Conectado com o Google!", 3000);
+      
+      if (pendingAction) {
+        const { type, data } = pendingAction;
+        if (type === 'favorite') {
+          toggleFavorite(null, data);
+        } else if (type === 'swipe') {
+          handleCardSwiped(true);
+        }
+      }
+    }
+
+    function simulateEmailLogin() {
+      showToast("Opção de E-mail será habilitada em breve!", 3000);
+    }
+
     // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
       renderCurrentTab();
       initDesktopMap();
       lucide.createIcons();
+      
+      // Splash Screen timer (2.2s)
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.classList.add('opacity-0');
+          setTimeout(() => {
+            splash.remove();
+            // Start geolocation prompt right after splash fades out
+            requestUserLocation();
+          }, 700);
+        } else {
+          requestUserLocation();
+        }
+      }, 2200);
     });
 
     // WINDOW RESIZE EVENT
@@ -460,13 +733,19 @@
     // FAVORITES HANDLER
     function toggleFavorite(e, id) {
       if (e) e.stopPropagation();
+      
+      if (!isLoggedIn) {
+        promptLogin({ type: 'favorite', data: id });
+        return;
+      }
+      
       const index = favorites.indexOf(id);
       if (index > -1) {
         favorites.splice(index, 1);
       } else {
         favorites.push(id);
       }
-      localStorage.setItem('bora_favorites', JSON.stringify(favorites));
+      localStorage.setItem('giro_favorites', JSON.stringify(favorites));
       
       // Re-render
       renderCurrentTab();
@@ -570,7 +849,7 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950 via-brand-indigo-950/20 to-black/25"></div>
                 
                 <!-- Swipe Stamp Badges -->
-                <div id="badge-like" class="swipe-badge swipe-badge-like">Bora!</div>
+                <div id="badge-like" class="swipe-badge swipe-badge-like">Giro!</div>
                 <div id="badge-nope" class="swipe-badge swipe-badge-nope">Nem...</div>
 
                 <!-- Verified Badge & Category -->
@@ -791,10 +1070,16 @@
     function handleCardSwiped(liked) {
       if (liked) {
         const place = swipeQueue[activeCardIndex];
+        
+        if (!isLoggedIn) {
+          promptLogin({ type: 'swipe', data: place.id });
+          return;
+        }
+
         // Adiciona aos favoritos se já não estiver
         if (!favorites.includes(place.id)) {
           favorites.push(place.id);
-          localStorage.setItem('bora_favorites', JSON.stringify(favorites));
+          localStorage.setItem('giro_favorites', JSON.stringify(favorites));
         }
       }
 
@@ -914,8 +1199,8 @@
               <div class="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500">
                 <i data-lucide="heart" class="w-8 h-8 fill-brand-coral-500"></i>
               </div>
-              <h3 class="text-lg font-outfit font-bold text-white mb-2">Sem favoritos salvo</h3>
-              <p class="text-xs text-slate-400 max-w-xs leading-relaxed mb-6">Comece a dar 'Bora!' nos locais na aba Match para salvá-los aqui e iniciar o rolê.</p>
+              <h3 class="text-lg font-outfit font-bold text-white mb-2">Sem favoritos salvos</h3>
+              <p class="text-xs text-slate-400 max-w-xs leading-relaxed mb-6">Comece a dar 'Giro!' nos locais na aba Match para salvá-los aqui e iniciar o rolê.</p>
               <button onclick="switchTab('home')" class="bg-brand-coral-500 text-white font-semibold text-xs px-6 h-11 rounded-2xl btn-premium">Iniciar Matches</button>
             </div>
           `}
@@ -980,7 +1265,7 @@
           </div>
 
           <div class="text-center pt-8">
-            <span class="text-[9px] text-slate-500 font-bold tracking-widest uppercase">Bora! Curitiba MVP · v1.0.0</span>
+            <span class="text-[9px] text-slate-500 font-bold tracking-widest uppercase">Giro Curitiba MVP · v1.0.0</span>
           </div>
         </div>
       `;
@@ -994,7 +1279,8 @@
       if (!container || !isVisible) return;
       if (desktopMap) return; // Prevent double creation
 
-      const center = [-25.4372, -49.2700];
+      const defaultCenter = [-25.4290, -49.2671];
+      const center = userCoords ? [userCoords.lat, userCoords.lng] : defaultCenter;
       desktopMap = L.map(container, {
         zoomControl: true,
         attributionControl: false
@@ -1011,7 +1297,7 @@
           <div class="place-marker-custom" style="
             background-color: ${isFav ? '#ff5422' : '#7e5fd6'};
             border: 2px solid white;
-          ">B!</div>
+          ">G!</div>
         `;
 
         const customIcon = L.divIcon({
@@ -1057,7 +1343,7 @@
             background-color: ${color};
             transform: ${scale};
             z-index: ${isCurrent ? 9999 : 100};
-          ">B!</div>
+          ">G!</div>
         `;
 
         const customIcon = L.divIcon({
@@ -1080,12 +1366,13 @@
       const container = document.getElementById('map-element');
       if (!container) return;
 
-      const center = [-25.4372, -49.2700];
+      const defaultCenter = [-25.4290, -49.2671];
+      const center = userCoords ? [userCoords.lat, userCoords.lng] : defaultCenter;
       
       mainMap = L.map(container, {
         zoomControl: false,
         attributionControl: true
-      }).setView(selectedPlace ? [selectedPlace.latitude, selectedPlace.longitude] : center, 13);
+      }).setView(selectedPlace ? [selectedPlace.latitude, selectedPlace.longitude] : center, selectedPlace ? 15 : 13);
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; CARTO',
@@ -1105,7 +1392,7 @@
             background-color: ${isSelected ? '#ff5422' : '#7e5fd6'};
             transform: ${isSelected ? 'scale(1.2) translateY(-4px)' : 'scale(1)'};
             z-index: ${isSelected ? 9999 : 100};
-          ">B!</div>
+          ">G!</div>
         `;
 
         const customIcon = L.divIcon({
@@ -1139,7 +1426,7 @@
             background-color: ${isSelected ? '#ff5422' : '#7e5fd6'};
             transform: ${isSelected ? 'scale(1.2) translateY(-4px)' : 'scale(1)'};
             z-index: ${isSelected ? 9999 : 100};
-          ">B!</div>
+          ">G!</div>
         `;
         const customIcon = L.divIcon({
           html: iconHtml,
@@ -1175,7 +1462,7 @@
       Object.keys(mapMarkers).forEach(id => {
         const marker = mapMarkers[id];
         const iconHtml = `
-          <div class="place-marker-custom" style="background-color: #7e5fd6;">B!</div>
+          <div class="place-marker-custom" style="background-color: #7e5fd6;">G!</div>
         `;
         const customIcon = L.divIcon({
           html: iconHtml,
@@ -1211,7 +1498,7 @@
             <div class="place-marker-custom" style="
               background-color: ${isSelected ? '#ff5422' : '#7e5fd6'};
               transform: ${isSelected ? 'scale(1.2) translateY(-4px)' : 'scale(1)'};
-            ">B!</div>
+            ">G!</div>
           `;
           const customIcon = L.divIcon({
             html: iconHtml,
@@ -1267,7 +1554,7 @@
             
             <div class="border-t border-white/5 pt-4">
               <div class="flex items-center justify-between mb-3">
-                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Bora chegar lá:</span>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Giro de chegada:</span>
               </div>
               <div class="grid grid-cols-3 gap-2">
                 <button onclick="openRoute(event, '${place.id}', 'google-maps')" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/5 hover:bg-brand-coral-500 hover:text-white border border-white/5 text-slate-200 transition-all">
