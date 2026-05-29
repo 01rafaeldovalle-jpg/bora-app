@@ -10,19 +10,48 @@ interface FavoritesProps {
   onFavoriteToggle: (id: string) => void;
   onSelectPlace: (place: Place) => void;
   setTab: (tab: 'home' | 'explore' | 'favorites' | 'profile') => void;
+  activeCoords?: { lat: number; lng: number };
 }
+
+// Fórmula matemática de Haversine para distâncias em km
+const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Raio da Terra em km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distância em km
+};
 
 export default function Favorites({ 
   favorites, 
   onFavoriteToggle,
   onSelectPlace,
-  setTab
+  setTab,
+  activeCoords
 }: FavoritesProps) {
-  // Obter apenas os locais que estão favoritados
-  const favoritedPlaces = MOCK_PLACES.filter(place => favorites.includes(place.id));
+  // Obter apenas os locais que estão favoritados com a distância calculada
+  const favoritedPlaces = React.useMemo(() => {
+    const places = MOCK_PLACES.filter(place => favorites.includes(place.id));
+    return places.map(place => {
+      if (activeCoords) {
+        const distance = getHaversineDistance(
+          activeCoords.lat,
+          activeCoords.lng,
+          place.latitude,
+          place.longitude
+        );
+        return { ...place, distance };
+      }
+      return place;
+    });
+  }, [favorites, activeCoords]);
 
   return (
-    <div className="min-h-screen pb-24 text-slate-100">
+    <div className="pb-24 text-slate-100">
       <Header title="Meus Favoritos" showLocationSelector={false} />
 
       <div className="px-6 py-4">

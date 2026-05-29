@@ -26,7 +26,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   };
 
   return (
-    <div className="min-h-screen pb-24 text-slate-100">
+    <div className="pb-24 text-slate-100">
       <Header title="Meu Perfil" showLocationSelector={false} />
 
       <div className="px-6 py-4 max-w-md mx-auto">

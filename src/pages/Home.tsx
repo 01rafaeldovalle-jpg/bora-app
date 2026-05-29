@@ -18,22 +18,65 @@ interface HomeProps {
   onSelectPlace: (place: Place) => void;
   favorites: string[];
   onFavoriteToggle: (id: string) => void;
+  activeCoords?: { lat: number; lng: number };
 }
 
-export default function Home({ onSelectPlace, favorites, onFavoriteToggle }: HomeProps) {
+// Fórmula matemática de Haversine para distâncias em km
+const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Raio da Terra em km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distância em km
+};
+
+export default function Home({ onSelectPlace, favorites, onFavoriteToggle, activeCoords }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Filtrar locais com base na busca e categoria selecionada
-  const filteredPlaces = MOCK_PLACES.filter(place => {
-    const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          place.address.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
-    return matchesSearch && matchesCategory;
-  });
+  // Injetar distâncias nos locais em tempo real
+  const placesWithDistance = React.useMemo(() => {
+    return MOCK_PLACES.map(place => {
+      if (activeCoords) {
+        const distance = getHaversineDistance(
+          activeCoords.lat,
+          activeCoords.lng,
+          place.latitude,
+          place.longitude
+        );
+        return { ...place, distance };
+      }
+      return place;
+    });
+  }, [activeCoords]);
 
-  const featuredPlaces = MOCK_PLACES.filter(p => p.is_featured);
+  // Filtrar locais com base na busca e categoria selecionada e ordenar por proximidade
+  const filteredPlaces = React.useMemo(() => {
+    const filtered = placesWithDistance.filter(place => {
+      const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            place.address.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
+      return matchesSearch && matchesCategory;
+    });
+
+    if (activeCoords) {
+      filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    }
+    return filtered;
+  }, [placesWithDistance, searchQuery, selectedCategory, activeCoords]);
+
+  const featuredPlaces = React.useMemo(() => {
+    const featured = placesWithDistance.filter(p => p.is_featured);
+    if (activeCoords) {
+      featured.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    }
+    return featured;
+  }, [placesWithDistance, activeCoords]);
 
   return (
     <div className="pb-24 text-slate-100">

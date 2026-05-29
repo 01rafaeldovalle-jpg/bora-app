@@ -1,35 +1,412 @@
-import React from 'react';
-import { Compass, Sparkles, MapPin } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Compass, Sparkles, MapPin, ChevronDown, Search, Locate, X } from 'lucide-react';
 
 interface HeaderProps {
   title?: string;
   showLocationSelector?: boolean;
 }
 
-export default function Header({ title = 'Bora!', showLocationSelector = true }: HeaderProps) {
-  return (
-    <header className="glass-panel sticky top-0 z-50 flex items-center justify-between px-6 py-4 text-white">
-      <div className="flex items-center gap-2">
-        {/* LOGO DO BORA! Criada do zero em SVG/CSS de acordo com psicologia de cores */}
-        <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md">
-          <Compass className="w-5 h-5 text-white animate-pulse" />
-        </div>
-        <div>
-          <h1 className="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-brand-coral-300 bg-clip-text text-transparent">
-            {title}
-          </h1>
-          {showLocationSelector && (
-            <div className="flex items-center gap-1 text-[10px] text-brand-teal-400 font-medium tracking-wider uppercase mt-[-2px]">
-              <MapPin className="w-3 h-3" />
-              <span>Curitiba - PR</span>
-            </div>
-          )}
-        </div>
-      </div>
+export default function Header({ title = 'Giro', showLocationSelector = true }: HeaderProps) {
+  const [theme, setThemeState] = useState<'light' | 'dark'>('dark');
+  const [locationLabel, setLocationLabel] = useState('Curitiba - PR');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [waitingListCity, setWaitingListCity] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  
+  const debounceRef = useRef<any>(null);
 
-      <button className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 hover:bg-brand-coral-500 hover:text-white transition-all btn-premium">
-        <Sparkles className="w-4 h-4 text-brand-gold-400" />
-      </button>
-    </header>
+  useEffect(() => {
+    // 1. Detectar o tema inicial
+    let initialTheme = localStorage.getItem('giro_theme') as 'light' | 'dark' | null;
+    if (!initialTheme) {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        initialTheme = 'dark';
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        initialTheme = 'light';
+      } else {
+        const hour = new Date().getHours();
+        initialTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
+      }
+    }
+    applyTheme(initialTheme);
+
+    // Escutar eventos externos de mudança de tema
+    const handleThemeChange = (e: any) => {
+      setThemeState(e.detail.theme);
+    };
+    window.addEventListener('giro-theme-change', handleThemeChange);
+
+    // Escutar eventos externos de mudança de localização para manter sincronizado
+    const handleLocationChange = (e: any) => {
+      setLocationLabel(e.detail.label);
+    };
+    window.addEventListener('giro-location-change', handleLocationChange);
+
+    // 2. Tentar geolocalização automática por GPS na inicialização
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          
+          const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`;
+          fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
+            .then(res => res.json())
+            .then(data => {
+              let label = 'Curitiba - PR';
+              if (data && data.address) {
+                const road = data.address.road || '';
+                const suburb = data.address.suburb || data.address.neighbourhood || data.address.city_district || '';
+                if (road && suburb) {
+                  label = `${road}, ${suburb}`;
+                } else {
+                  label = suburb || data.address.city || 'Curitiba - PR';
+                }
+              }
+              setLocationLabel(label);
+              window.dispatchEvent(
+                new CustomEvent('giro-location-change', {
+                  detail: { lat, lng, label }
+                })
+              );
+            })
+            .catch(() => {});
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+      );
+    }
+
+    return () => {
+      window.removeEventListener('giro-theme-change', handleThemeChange);
+      window.removeEventListener('giro-location-change', handleLocationChange);
+    };
+  }, []);
+
+  const applyTheme = (t: 'light' | 'dark') => {
+    setThemeState(t);
+    if (t === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('giro_theme', t);
+    window.dispatchEvent(new CustomEvent('giro-theme-change', { detail: { theme: t } }));
+  };
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    applyTheme(nextTheme);
+  };
+
+  // Buscar localização no Nominatim OSM
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setWaitingListCity(null);
+    setIsSubscribed(false);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (!val.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    setIsLoading(true);
+
+    debounceRef.current = setTimeout(() => {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&addressdetails=1&limit=5`;
+      fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
+        .then((res) => res.json())
+        .then((data) => {
+          setSuggestions(data || []);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+          setIsLoading(false);
+        });
+    }, 500);
+  };
+
+  // Selecionar localização sugerida
+  const handleSelectLocation = (item: any) => {
+    const lat = parseFloat(item.lat);
+    const lon = parseFloat(item.lon);
+
+    // Validação da Região de Curitiba (Bounding Box)
+    // Latitude: -25.65 até -25.30 | Longitude: -49.40 até -49.15
+    const isCuritiba = lat >= -25.65 && lat <= -25.30 && lon >= -49.40 && lon <= -49.15;
+
+    if (isCuritiba) {
+      let label = 'Curitiba - PR';
+      if (item.address) {
+        const suburb = item.address.suburb || item.address.neighbourhood || item.address.city_district || '';
+        if (suburb) {
+          label = `${suburb} - PR`;
+        }
+      }
+
+      setLocationLabel(label);
+
+      // Disparar o CustomEvent global
+      window.dispatchEvent(
+        new CustomEvent('giro-location-change', {
+          detail: { lat, lng: lon, label }
+        })
+      );
+
+      // Fechar modal
+      setIsModalOpen(false);
+      setSearchQuery('');
+      setSuggestions([]);
+    } else {
+      // Exibir Lista de Espera
+      const city = item.address
+        ? item.address.city || item.address.town || item.address.village || item.address.municipality || 'sua cidade'
+        : 'sua cidade';
+      setWaitingListCity(city);
+    }
+  };
+
+  // Registrar na lista de espera
+  const handleWaitingListSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    const list = JSON.parse(localStorage.getItem('giro_waiting_list') || '[]');
+    list.push({ email, city: waitingListCity, timestamp: new Date().toISOString() });
+    localStorage.setItem('giro_waiting_list', JSON.stringify(list));
+
+    setIsSubscribed(true);
+    setEmail('');
+  };
+
+  const handleLocationFallback = () => {
+    const lat = -25.4290;
+    const lng = -49.2671;
+    const label = 'Curitiba - PR';
+    setLocationLabel(label);
+    window.dispatchEvent(
+      new CustomEvent('giro-location-change', {
+        detail: { lat, lng, label }
+      })
+    );
+    setIsLoading(false);
+    setIsModalOpen(false);
+  };
+
+  // Usar GPS
+  const handleUseGPS = () => {
+    if (!navigator.geolocation) {
+      handleLocationFallback();
+      return;
+    }
+
+    setIsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        // Fazer a geocodificação reversa para obter a rua e o bairro
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`;
+        fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
+          .then(res => res.json())
+          .then(data => {
+            let label = 'Curitiba - PR';
+            if (data && data.address) {
+              const road = data.address.road || '';
+              const suburb = data.address.suburb || data.address.neighbourhood || data.address.city_district || '';
+              if (road && suburb) {
+                label = `${road}, ${suburb}`;
+              } else {
+                label = suburb || data.address.city || 'Curitiba - PR';
+              }
+            }
+            setLocationLabel(label);
+            window.dispatchEvent(
+              new CustomEvent('giro-location-change', {
+                detail: { lat, lng, label }
+              })
+            );
+            setIsLoading(false);
+            setIsModalOpen(false);
+          })
+          .catch(err => {
+            console.error("Erro na geocodificação reversa:", err);
+            handleLocationFallback();
+          });
+      },
+      (error) => {
+        console.error("Erro ao obter GPS:", error);
+        handleLocationFallback();
+      },
+      { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+    );
+  };
+
+  return (
+    <>
+      <header className="glass-panel sticky top-0 z-50 flex items-center justify-between px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
+        <div className="flex items-center gap-2">
+          {/* LOGO DO GIRO */}
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md">
+            <Compass className="w-5 h-5 text-white animate-pulse" />
+          </div>
+          <div>
+            <h1 className="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-600 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent transition-colors duration-300">
+              {title}
+            </h1>
+            {showLocationSelector && (
+              <div 
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-1 text-[10px] text-brand-teal-500 dark:text-brand-teal-400 font-semibold tracking-wider uppercase mt-[-2px] cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95"
+              >
+                <MapPin className="w-3 h-3" />
+                <span>{locationLabel}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <button 
+          onClick={handleToggleTheme}
+          className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-brand-coral-500 dark:hover:bg-brand-coral-500 hover:text-white transition-all btn-premium"
+        >
+          <Sparkles className={`w-4 h-4 transition-colors ${theme === 'dark' ? 'text-brand-gold-400' : 'text-slate-500'}`} />
+        </button>
+      </header>
+
+      {/* BOTTOM SHEET / MODAL DE LOCALIZAÇÃO MANUAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[10000] flex items-end justify-center">
+          {/* Backdrop */}
+          <div 
+            onClick={() => setIsModalOpen(false)}
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 animate-fade-in"
+          />
+          
+          {/* Sheet Panel */}
+          <div className="relative w-full max-w-lg bg-slate-50 dark:bg-brand-indigo-950 border-t border-slate-200 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl z-10 animate-slide-up flex flex-col gap-6 text-slate-900 dark:text-slate-100 max-h-[85vh]">
+            {/* Handle bar / Close */}
+            <div className="flex justify-between items-center">
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full cursor-pointer" onClick={() => setIsModalOpen(false)} />
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-brand-coral-500 hover:text-white transition-all btn-premium shadow-md shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="space-y-1">
+              <h3 className="text-lg font-outfit font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-brand-coral-500" /> Definir Localização
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Pesquise bairros, ruas ou pontos turísticos para simular sua localização no Giro.</p>
+            </div>
+
+            {/* Input de Busca */}
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                <Search className="w-4 h-4 text-slate-400" />
+              </span>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full h-12 pl-10 pr-4 rounded-2xl bg-white dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-sm outline-none transition-colors duration-300 focus:border-brand-coral-500 dark:focus:border-brand-coral-500" 
+                placeholder="Para onde quer dar um Giro?"
+              />
+            </div>
+
+            {/* Botão GPS */}
+            <button 
+              onClick={handleUseGPS}
+              className="w-full h-11 rounded-2xl bg-brand-coral-500/10 hover:bg-brand-coral-500/20 text-brand-coral-600 dark:text-brand-coral-400 border border-brand-coral-500/20 dark:border-brand-coral-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 btn-premium"
+            >
+              <Locate className="w-4 h-4" /> Usar minha localização atual (GPS)
+            </button>
+
+            {/* Sugestões ou Lista de Espera */}
+            <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
+              {isLoading && (
+                <div className="flex items-center justify-center py-6 gap-2 text-xs text-slate-500">
+                  <div className="w-4 h-4 border-2 border-brand-coral-500 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Buscando endereços...</span>
+                </div>
+              )}
+
+              {!isLoading && waitingListCity && (
+                <div className="p-5 bg-brand-coral-500/10 border border-brand-coral-500/20 rounded-2xl flex flex-col gap-3">
+                  {isSubscribed ? (
+                    <div className="text-center space-y-2 py-2">
+                      <div className="text-2xl">🎉</div>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">Inscrição Confirmada!</h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">Avisaremos você assim que o Giro chegar em <strong>{waitingListCity}</strong>!</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-full bg-brand-coral-500/20 flex items-center justify-center shrink-0 text-brand-coral-500 font-bold text-sm">🚀</div>
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white">O Giro ainda não chegou em {waitingListCity}!</h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">No momento, estamos ativos apenas em Curitiba - PR. Deixe seu e-mail para entrar na lista de espera!</p>
+                        </div>
+                      </div>
+                      <form onSubmit={handleWaitingListSubmit} className="flex gap-2">
+                        <input 
+                          type="email" 
+                          required 
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="Seu e-mail" 
+                          className="flex-1 h-9 px-3 rounded-xl bg-white dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-[11px] text-slate-900 dark:text-white outline-none"
+                        />
+                        <button type="submit" className="h-9 px-4 rounded-xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-[11px] btn-premium">Me avise</button>
+                      </form>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {!isLoading && !waitingListCity && suggestions.length > 0 && (
+                suggestions.map((item, idx) => {
+                  const subtitle = item.address
+                    ? [item.address.road, item.address.suburb || item.address.neighbourhood, item.address.city || item.address.town].filter(Boolean).join(', ')
+                    : item.display_name;
+
+                  return (
+                    <div 
+                      key={idx}
+                      onClick={() => handleSelectLocation(item)}
+                      className="p-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-2xl cursor-pointer hover:border-brand-coral-500/30 transition-all flex items-start gap-3 active:scale-[0.99] duration-200"
+                    >
+                      <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">{item.display_name.split(',')[0]}</div>
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">{subtitle}</div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+
+              {!isLoading && !waitingListCity && searchQuery && suggestions.length === 0 && (
+                <div className="p-4 text-center text-xs text-slate-500">
+                  Nenhum endereço encontrado. Tente pesquisar com termos mais simples.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

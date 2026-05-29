@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Place } from '../../types';
 import L from 'leaflet';
 
@@ -23,6 +23,49 @@ export default function LeafletMap({
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
   const userMarkerRef = useRef<L.Marker | null>(null);
+  
+  // Guardar referência da camada de tiles para mudar a URL de forma dinâmica e instantânea
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
+
+  // Escutar o tema reativo
+  const [currentTheme, setCurrentTheme] = useState<'light' | 'dark'>(() => {
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    const handleThemeChange = (e: any) => {
+      setCurrentTheme(e.detail.theme);
+    };
+    window.addEventListener('giro-theme-change', handleThemeChange);
+    return () => window.removeEventListener('giro-theme-change', handleThemeChange);
+  }, []);
+
+  // Escutar o evento de mudança de localização manual (Modo Passaporte)
+  useEffect(() => {
+    const handleLocationChange = (e: any) => {
+      const map = mapRef.current;
+      if (!map) return;
+      
+      const latLng: L.LatLngExpression = [e.detail.lat, e.detail.lng];
+      map.setView(latLng, 15, { animate: true });
+
+      const userIcon = L.divIcon({
+        html: '<div class="user-location-marker"></div>',
+        className: 'user-marker-container',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      });
+
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setLatLng(latLng);
+      } else {
+        userMarkerRef.current = L.marker(latLng, { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+      }
+    };
+
+    window.addEventListener('giro-location-change', handleLocationChange);
+    return () => window.removeEventListener('giro-location-change', handleLocationChange);
+  }, []);
 
   // Inicializar o mapa
   useEffect(() => {
@@ -34,12 +77,18 @@ export default function LeafletMap({
       attributionControl: true
     }).setView(center, zoom);
 
-    // Usar CartoDB Dark Matter para um design Dark premium e futurista (100% CUSTO ZERO)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // Usar tema do mapa dinâmico baseado no tema inicial
+    const initialTileUrl = currentTheme === 'dark'
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+    const tileLayer = L.tileLayer(initialTileUrl, {
       attribution: '&copy; OpenStreetMap &copy; CARTO',
       subdomains: 'abcd',
       maxZoom: 20
     }).addTo(map);
+
+    tileLayerRef.current = tileLayer;
 
     // Adicionar zoom control customizado no canto superior direito
     L.control.zoom({
@@ -55,6 +104,16 @@ export default function LeafletMap({
       }
     };
   }, []);
+
+  // Atualizar tiles quando o tema mudar
+  useEffect(() => {
+    if (tileLayerRef.current) {
+      const newUrl = currentTheme === 'dark'
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+      tileLayerRef.current.setUrl(newUrl);
+    }
+  }, [currentTheme]);
 
   // Atualizar marcadores dos locais
   useEffect(() => {
@@ -80,7 +139,7 @@ export default function LeafletMap({
           transform: ${isSelected ? 'scale(1.2) translateY(-4px)' : 'scale(1)'};
           z-index: ${isSelected ? 9999 : 100};
         ">
-          <span style="font-size: 11px; font-weight: 800;">B!</span>
+          <span style="font-size: 11px; font-weight: 800;">G!</span>
         </div>
       `;
 
@@ -142,12 +201,12 @@ export default function LeafletMap({
   }, [selectedPlace]);
 
   return (
-    <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-premium border border-white/5 bg-brand-indigo-950">
+    <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-premium border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-brand-indigo-950 transition-colors duration-300">
       <div ref={mapContainerRef} className="w-full h-full" />
       
       {/* Indicador de carregamento ou mapa offline */}
-      <div className="absolute bottom-3 left-3 z-[400] glass-card px-3 py-1 rounded-full text-[10px] text-slate-400 font-medium border border-white/5">
-        Offline Map Tile Server
+      <div className="absolute bottom-3 left-3 z-[400] glass-card px-3 py-1 rounded-full text-[10px] text-slate-500 dark:text-slate-400 font-medium border border-slate-200/50 dark:border-white/5 transition-all duration-300">
+        Mapa Curitiba (Offline Cache)
       </div>
     </div>
   );

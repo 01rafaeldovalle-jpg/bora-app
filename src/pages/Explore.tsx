@@ -11,31 +11,78 @@ interface ExploreProps {
   onFavoriteToggle: (id: string) => void;
   selectedPlace: Place | null;
   setSelectedPlace: (place: Place | null) => void;
+  activeCoords?: { lat: number; lng: number };
 }
+
+const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Raio da Terra em km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distância em km
+};
 
 export default function Explore({ 
   favorites, 
   onFavoriteToggle,
   selectedPlace,
-  setSelectedPlace 
+  setSelectedPlace,
+  activeCoords
 }: ExploreProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filtrar locais no mapa
-  const filteredPlaces = MOCK_PLACES.filter(place => {
-    return place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-           place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           place.address.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  const filteredPlaces = React.useMemo(() => {
+    return MOCK_PLACES.filter(place => {
+      return place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+             place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             place.address.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [searchQuery]);
+
+  // Injetar distâncias nos locais do mapa
+  const placesWithDistance = React.useMemo(() => {
+    return filteredPlaces.map(place => {
+      if (activeCoords) {
+        const distance = getHaversineDistance(
+          activeCoords.lat,
+          activeCoords.lng,
+          place.latitude,
+          place.longitude
+        );
+        return { ...place, distance };
+      }
+      return place;
+    });
+  }, [filteredPlaces, activeCoords]);
+
+  // Se selecionadoPlace existe, também calculamos a distância dele
+  const selectedPlaceWithDistance = React.useMemo(() => {
+    if (!selectedPlace) return null;
+    if (activeCoords) {
+      const distance = getHaversineDistance(
+        activeCoords.lat,
+        activeCoords.lng,
+        selectedPlace.latitude,
+        selectedPlace.longitude
+      );
+      return { ...selectedPlace, distance };
+    }
+    return selectedPlace;
+  }, [selectedPlace, activeCoords]);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden text-slate-100">
+    <div className="relative w-full h-full overflow-hidden text-slate-100">
       {/* MAPA EM TELA CHEIA */}
       <div className="absolute inset-0 z-0">
         <LeafletMap 
-          places={filteredPlaces}
-          selectedPlace={selectedPlace}
-          userLocation={null} // Pode ser estendido com a geolocalização do Capacitor futuramente
+          places={placesWithDistance}
+          selectedPlace={selectedPlaceWithDistance}
+          userLocation={activeCoords ? { latitude: activeCoords.lat, longitude: activeCoords.lng } : null}
           onMarkerClick={(place) => setSelectedPlace(place)}
         />
       </div>
@@ -67,7 +114,7 @@ export default function Explore({
             </button>
             
             <PlaceCard
-              place={selectedPlace}
+              place={selectedPlaceWithDistance || selectedPlace}
               isFavorited={favorites.includes(selectedPlace.id)}
               onFavoriteToggle={onFavoriteToggle}
             />

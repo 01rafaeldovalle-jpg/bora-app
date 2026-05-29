@@ -26,6 +26,7 @@ export interface Place {
   operating_hours?: {
     [key: string]: string;
   };
+  distance?: number; // Distância calculada em km
 }
 
 export interface Event {
