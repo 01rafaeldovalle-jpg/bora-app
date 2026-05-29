@@ -86,6 +86,19 @@ export default function Home({ onSelectPlace, favorites, onFavoriteToggle, activ
     setActiveCardIndex(0);
   }, [searchQuery, selectedCategory]);
 
+  // Listen to home reset events (e.g. from header logo click)
+  React.useEffect(() => {
+    const handleReset = () => {
+      setSearchQuery('');
+      setSelectedCategory(null);
+      setViewMode('swipe');
+      setActiveCardIndex(0);
+    };
+
+    window.addEventListener('giro-home-reset', handleReset);
+    return () => window.removeEventListener('giro-home-reset', handleReset);
+  }, []);
+
   const swipeQueue = filteredPlaces;
   const activePlace = swipeQueue[activeCardIndex] || null;
   const nextPlace = swipeQueue[(activeCardIndex + 1) % swipeQueue.length] || null;

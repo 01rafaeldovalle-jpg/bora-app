@@ -250,29 +250,39 @@ export default function Header({ title = 'Giro', showLocationSelector = true }: 
     );
   };
 
+  const handleLogoClick = () => {
+    setIsModalOpen(false); // Fechar a modal de localização se estiver aberta
+    window.dispatchEvent(new CustomEvent('giro-go-home'));
+  };
+
   return (
     <>
       <header className="glass-panel sticky top-0 z-50 flex items-center justify-between px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
-        <div className="flex items-center gap-2">
-          {/* LOGO DO GIRO */}
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md">
-            <Compass className="w-5 h-5 text-white animate-pulse" />
-          </div>
-          <div>
-            <h1 className="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-600 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent transition-colors duration-300">
+        <div className="flex flex-col">
+          <div 
+            onClick={handleLogoClick}
+            className="flex items-center gap-2 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 self-start"
+          >
+            {/* LOGO DO GIRO */}
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
+              <Compass className="w-5 h-5 text-white animate-pulse" />
+            </div>
+            <h1 className="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-600 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent transition-colors duration-300 leading-tight">
               {title}
             </h1>
-            {showLocationSelector && (
+          </div>
+          {showLocationSelector && (
+            <div className="pl-[44px] mt-[-2px]">
               <div 
                 onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-1 text-[10px] text-brand-teal-500 dark:text-brand-teal-400 font-semibold tracking-wider uppercase mt-[-2px] cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95"
+                className="flex items-center gap-1 text-[10px] text-brand-teal-500 dark:text-brand-teal-400 font-semibold tracking-wider uppercase cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95 inline-flex"
               >
                 <MapPin className="w-3 h-3" />
                 <span>{locationLabel}</span>
                 <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <button 

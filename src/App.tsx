@@ -29,6 +29,19 @@ export default function App() {
     }
   }, [currentTab]);
 
+  // Listen to go-home events from header logo click
+  useEffect(() => {
+    const handleGoHome = () => {
+      setTab('home');
+      setMapFilterFavoritesOnly(false);
+      setSelectedPlace(null);
+      window.dispatchEvent(new CustomEvent('giro-home-reset'));
+    };
+
+    window.addEventListener('giro-go-home', handleGoHome);
+    return () => window.removeEventListener('giro-go-home', handleGoHome);
+  }, []);
+
   // Haversine Distance helper
   const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371; // Raio da Terra em km
