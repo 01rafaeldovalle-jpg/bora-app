@@ -319,79 +319,59 @@
   <!-- PRINCIPAL CONTAINER FLUIDO E RESPONSIVO -->
   <div class="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 transition-colors duration-300 overflow-hidden">
     
-    <main id="main-app-container" class="w-full h-full flex flex-col relative overflow-hidden">
+    <main id="main-app-container" class="w-full max-w-md mx-auto h-full flex flex-col relative overflow-hidden md:border-x border-slate-200 dark:border-white/5 md:shadow-2xl bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
 
-      <!-- APP CONTENT AREA -->
-      <div class="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
+      <!-- HEADER -->
+      <header class="glass-panel sticky top-0 z-50 flex items-center justify-between px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
+        <div class="flex flex-col">
+          <div onclick="handleHeaderLogoClick()" class="flex items-center gap-2 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 self-start">
+            <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
+              <i data-lucide="compass" class="w-5 h-5 text-white animate-spin-slow"></i>
+            </div>
+            <h1 class="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-600 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent transition-colors duration-300 leading-tight">Giro</h1>
+          </div>
+          <div class="pl-[44px] mt-[-2px]">
+            <div onclick="openLocationSheet()" class="flex items-center gap-1 text-[10px] text-brand-teal-600 dark:text-brand-teal-400 font-semibold tracking-wider uppercase cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95 inline-flex">
+              <i data-lucide="map-pin" class="w-3 h-3"></i>
+              <span id="header-location-label">Curitiba - PR</span>
+              <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 dark:text-slate-500"></i>
+            </div>
+          </div>
+        </div>
         
-        <!-- COLUNA 1: Interface do App Principal (Sidebar no Desktop) -->
-        <div class="w-full md:w-[420px] lg:w-[460px] shrink-0 flex flex-col h-full border-r border-slate-200 dark:border-white/5 relative z-10 bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
-          
-          <!-- HEADER -->
-          <header class="glass-panel sticky top-0 z-50 flex items-center justify-between px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
-            <div class="flex flex-col">
-              <div onclick="handleHeaderLogoClick()" class="flex items-center gap-2 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 self-start">
-                <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
-                  <i data-lucide="compass" class="w-5 h-5 text-white animate-spin-slow"></i>
-                </div>
-                <h1 class="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-600 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent transition-colors duration-300 leading-tight">Giro</h1>
-              </div>
-              <div class="pl-[44px] mt-[-2px]">
-                <div onclick="openLocationSheet()" class="flex items-center gap-1 text-[10px] text-brand-teal-600 dark:text-brand-teal-400 font-semibold tracking-wider uppercase cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95 inline-flex">
-                  <i data-lucide="map-pin" class="w-3 h-3"></i>
-                  <span id="header-location-label">Curitiba - PR</span>
-                  <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 dark:text-slate-500"></i>
-                </div>
-              </div>
-            </div>
-            
-            <button onclick="toggleTheme()" class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-brand-coral-500 dark:hover:bg-brand-coral-500 hover:text-white transition-all btn-premium">
-              <i id="theme-icon" data-lucide="sparkles" class="w-4 h-4 text-brand-gold-400"></i>
-            </button>
-          </header>
+        <button onclick="toggleTheme()" class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-brand-coral-500 dark:hover:bg-brand-coral-500 hover:text-white transition-all btn-premium">
+          <i id="theme-icon" data-lucide="sparkles" class="w-4 h-4 text-brand-gold-400"></i>
+        </button>
+      </header>
 
-          <!-- TABS CONTENT CONTAINER -->
-          <div id="tab-content" class="flex-1 overflow-y-auto max-h-[calc(100dvh-128px)]">
-            <!-- Renderizado dinamicamente via JS -->
-          </div>
-
-          <!-- BOTTOM NAVIGATION BAR (No rodapé da Sidebar no Desktop e fixo no Mobile) -->
-          <nav class="glass-panel sticky bottom-0 left-0 right-0 z-[1000] pb-safe-bottom border-t border-slate-200 dark:border-white/5">
-            <div class="flex items-center justify-around h-16 w-full px-4">
-              <button onclick="switchTab('home')" id="btn-tab-home" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-                <i data-lucide="home" class="w-5 h-5 text-brand-coral-500"></i>
-                <span class="text-[10px] font-semibold mt-1 text-brand-coral-500">Início</span>
-              </button>
-              <button onclick="switchTab('explore')" id="btn-tab-explore" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-                <i data-lucide="map" class="w-5 h-5 text-slate-400"></i>
-                <span class="text-[10px] font-medium mt-1 text-slate-400">Explorar</span>
-              </button>
-              <button onclick="switchTab('favorites')" id="btn-tab-favorites" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-                <i data-lucide="heart" class="w-5 h-5 text-slate-400"></i>
-                <span class="text-[10px] font-medium mt-1 text-slate-400">Favoritos</span>
-              </button>
-              <button onclick="switchTab('profile')" id="btn-tab-profile" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-                <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
-                <span class="text-[10px] font-medium mt-1 text-slate-400">Perfil</span>
-              </button>
-            </div>
-          </nav>
-        </div>
-
-        <!-- COLUNA 2: Mapa Persistente Lado-a-Lado no Desktop (Estilo Airbnb/Yelp) -->
-        <div id="desktop-map-column" class="hidden md:block flex-1 relative h-full bg-slate-100 dark:bg-brand-indigo-950 transition-colors duration-300">
-          <div id="desktop-map-element" class="w-full h-full shadow-inner relative">
-            <!-- Leaflet Map rendered here for desktop view -->
-          </div>
-          <!-- Botão Voltar para os Matches no Desktop -->
-          <div id="desktop-back-btn-container" class="absolute top-6 left-6 z-[1000] hidden w-[240px]">
-            <button onclick="handleCloseSavedPins(event)" class="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium">
-              <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para os Matches
-            </button>
-          </div>
-        </div>
-
+      <!-- TABS CONTENT CONTAINER -->
+      <div id="tab-content" class="flex-1 overflow-y-auto max-h-[calc(100dvh-128px)]">
+        <!-- Renderizado dinamicamente via JS -->
       </div>
+
+      <!-- BOTTOM NAVIGATION BAR (Fixo no rodapé) -->
+      <nav class="glass-panel sticky bottom-0 left-0 right-0 z-[1000] pb-safe-bottom border-t border-slate-200 dark:border-white/5">
+        <div class="flex items-center justify-around h-16 w-full px-4">
+          <button onclick="switchTab('home')" id="btn-tab-home" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="home" class="w-5 h-5 text-brand-coral-500"></i>
+            <span class="text-[10px] font-semibold mt-1 text-brand-coral-500">Início</span>
+          </button>
+          <button onclick="switchTab('explore')" id="btn-tab-explore" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="map" class="w-5 h-5 text-slate-400"></i>
+            <span class="text-[10px] font-medium mt-1 text-slate-400">Explorar</span>
+          </button>
+          <button onclick="switchTab('favorites')" id="btn-tab-favorites" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="heart" class="w-5 h-5 text-slate-400"></i>
+            <span class="text-[10px] font-medium mt-1 text-slate-400">Favoritos</span>
+          </button>
+          <button onclick="switchTab('profile')" id="btn-tab-profile" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+            <span class="text-[10px] font-medium mt-1 text-slate-400">Perfil</span>
+          </button>
+        </div>
+      </nav>
+
+    </main>
 
   <!-- BOTTOM SHEET LOGIN -->
   <div id="login-sheet" class="fixed inset-0 z-[10000] invisible">

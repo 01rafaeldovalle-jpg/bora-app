@@ -202,45 +202,11 @@ export default function App() {
 
   return (
     <div className="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 font-sans overflow-hidden transition-colors duration-300">
-      <main id="main-app-container" className="w-full h-full flex flex-col relative overflow-hidden">
-        
-        {/* Content Tabs area */}
-        <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
-          
-          {/* COLUNA 1: Interface do App Principal (Sidebar no Desktop) */}
-          <div className="w-full md:w-[420px] lg:w-[460px] shrink-0 flex flex-col h-full border-r border-slate-200 dark:border-white/5 relative z-10 bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
-            <main className="flex-1 w-full relative bg-transparent pb-16 h-full overflow-y-auto">
-              {renderTabContent()}
-            </main>
-            <BottomNavigation currentTab={currentTab} setTab={setTab} />
-          </div>
-
-          {/* Persistent Desktop Map (Airbnb Style) */}
-          {isDesktopMapOpen && (
-            <div className="hidden md:block flex-1 relative h-full bg-slate-100/50 dark:bg-brand-indigo-950/10 transition-colors duration-300 animate-fade-in">
-              <div className="w-full h-full overflow-hidden shadow-inner bg-white dark:bg-brand-indigo-950 flex flex-col items-center justify-center transition-colors duration-300 relative">
-                <LeafletMap 
-                  places={desktopPlaces}
-                  selectedPlace={selectedPlace}
-                  userLocation={activeCoords ? { latitude: activeCoords.lat, longitude: activeCoords.lng } : null}
-                  onMarkerClick={(place) => setSelectedPlace(place)}
-                  fitBoundsOnChange={mapFilterFavoritesOnly}
-                />
-                
-                {mapFilterFavoritesOnly && (
-                  <div className="absolute top-6 left-6 z-[1000] animate-slide-up w-[240px]">
-                    <button 
-                      onClick={handleCloseSavedPins}
-                      className="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium transition-all"
-                    >
-                      <ArrowLeft className="w-4 h-4" /> Voltar para os Matches
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+      <main id="main-app-container" className="w-full max-w-md mx-auto h-full flex flex-col relative overflow-hidden md:border-x border-slate-200 dark:border-white/5 md:shadow-2xl bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
+        <div className="flex-1 w-full relative bg-transparent pb-16 h-full overflow-y-auto">
+          {renderTabContent()}
         </div>
+        <BottomNavigation currentTab={currentTab} setTab={setTab} />
       </main>
     </div>
   );
