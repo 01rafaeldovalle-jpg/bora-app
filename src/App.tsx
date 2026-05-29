@@ -201,29 +201,24 @@ export default function App() {
   };
 
   return (
-    <div className="h-dvh max-h-dvh md:h-screen md:min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-brand-indigo-950 dark:to-slate-950 font-sans overflow-hidden transition-colors duration-300">
-      <div className={`w-full ${isDesktopMapOpen ? 'max-w-lg md:max-w-4xl' : 'max-w-lg md:max-w-lg'} mx-auto bg-white/80 dark:bg-brand-indigo-950/40 md:shadow-lg md:rounded-[36px] relative shadow-2xl h-full md:h-auto md:min-h-[850px] border border-slate-200 dark:border-white/5 flex flex-col justify-between overflow-hidden transition-all duration-300`}>
+    <div className="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 font-sans overflow-hidden transition-colors duration-300">
+      <main id="main-app-container" className="w-full h-full flex flex-col relative overflow-hidden">
         
-        {/* Top Decorator for Desktop */}
-        <div className="hidden md:flex justify-between items-center px-8 py-3 bg-slate-50 dark:bg-brand-indigo-950/80 border-b border-slate-200 dark:border-white/5 text-slate-800 dark:text-white transition-colors duration-300">
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Giro Curitiba · Modo Desktop Inteligent</span>
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
-          </div>
-        </div>
-
         {/* Content Tabs area */}
         <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
-          <main className="flex-1 w-full relative bg-slate-50/20 dark:bg-brand-indigo-950/20 border-r border-slate-200 dark:border-white/5 pb-16 h-full md:min-h-0 overflow-y-auto transition-colors duration-300">
-            {renderTabContent()}
-          </main>
+          
+          {/* COLUNA 1: Interface do App Principal (Sidebar no Desktop) */}
+          <div className="w-full md:w-[420px] lg:w-[460px] shrink-0 flex flex-col h-full border-r border-slate-200 dark:border-white/5 relative z-10 bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
+            <main className="flex-1 w-full relative bg-transparent pb-16 h-full overflow-y-auto">
+              {renderTabContent()}
+            </main>
+            <BottomNavigation currentTab={currentTab} setTab={setTab} />
+          </div>
 
           {/* Persistent Desktop Map (Airbnb Style) */}
           {isDesktopMapOpen && (
-            <div className="hidden md:block md:w-[380px] lg:w-[450px] relative p-4 bg-slate-100/50 dark:bg-brand-indigo-950/10 transition-colors duration-300 animate-fade-in">
-              <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-200 dark:border-white/5 shadow-inner bg-white dark:bg-brand-indigo-950 flex flex-col items-center justify-center transition-colors duration-300 relative">
+            <div className="hidden md:block flex-1 relative h-full bg-slate-100/50 dark:bg-brand-indigo-950/10 transition-colors duration-300 animate-fade-in">
+              <div className="w-full h-full overflow-hidden shadow-inner bg-white dark:bg-brand-indigo-950 flex flex-col items-center justify-center transition-colors duration-300 relative">
                 <LeafletMap 
                   places={desktopPlaces}
                   selectedPlace={selectedPlace}
@@ -233,7 +228,7 @@ export default function App() {
                 />
                 
                 {mapFilterFavoritesOnly && (
-                  <div className="absolute top-8 left-8 right-8 z-[1000] animate-slide-up">
+                  <div className="absolute top-6 left-6 z-[1000] animate-slide-up w-[240px]">
                     <button 
                       onClick={handleCloseSavedPins}
                       className="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium transition-all"
@@ -246,11 +241,7 @@ export default function App() {
             </div>
           )}
         </div>
-
-        {/* Bottom Mobile Navigation */}
-        <BottomNavigation currentTab={currentTab} setTab={setTab} />
-      </div>
+      </main>
     </div>
   );
 }
-

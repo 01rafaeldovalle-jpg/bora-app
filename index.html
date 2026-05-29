@@ -316,26 +316,16 @@
     </div>
   </div>
 
-  <!-- FRAME EXTERNO RESPONSIVO: Layout Inteligente no Desktop e Mobile -->
-  <div class="h-dvh max-h-dvh md:min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-brand-indigo-950 to-slate-950 overflow-hidden">
+  <!-- PRINCIPAL CONTAINER FLUIDO E RESPONSIVO -->
+  <div class="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 transition-colors duration-300 overflow-hidden">
     
-    <main id="main-app-container" class="w-full max-w-lg md:max-w-4xl mx-auto bg-brand-indigo-950/40 md:glass-card md:rounded-[36px] relative shadow-2xl h-full md:h-auto md:min-h-[850px] border border-white/5 flex flex-col justify-between overflow-hidden">
-      
-      <!-- Top Decorator Desktop -->
-      <div class="hidden md:flex justify-between items-center px-8 py-3 bg-brand-indigo-950/80 border-b border-white/5">
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Giro Curitiba · Modo Desktop Inteligente</span>
-        <div class="flex gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
-          <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
-          <div class="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
-        </div>
-      </div>
+    <main id="main-app-container" class="w-full h-full flex flex-col relative overflow-hidden">
 
       <!-- APP CONTENT AREA -->
-      <div class="flex-1 flex flex-col md:flex-row h-full">
+      <div class="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
         
-        <!-- COLUNA 1: Interface do App Principal -->
-        <div class="flex-1 flex flex-col h-full border-r border-white/5 relative z-10">
+        <!-- COLUNA 1: Interface do App Principal (Sidebar no Desktop) -->
+        <div class="w-full md:w-[420px] lg:w-[460px] shrink-0 flex flex-col h-full border-r border-slate-200 dark:border-white/5 relative z-10 bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
           
           <!-- HEADER -->
           <header class="glass-panel sticky top-0 z-50 flex items-center justify-between px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
@@ -361,52 +351,47 @@
           </header>
 
           <!-- TABS CONTENT CONTAINER -->
-          <div id="tab-content" class="flex-1 overflow-y-auto max-h-[calc(100dvh-128px)] md:max-h-[680px]">
+          <div id="tab-content" class="flex-1 overflow-y-auto max-h-[calc(100dvh-128px)]">
             <!-- Renderizado dinamicamente via JS -->
           </div>
+
+          <!-- BOTTOM NAVIGATION BAR (No rodapé da Sidebar no Desktop e fixo no Mobile) -->
+          <nav class="glass-panel sticky bottom-0 left-0 right-0 z-[1000] pb-safe-bottom border-t border-slate-200 dark:border-white/5">
+            <div class="flex items-center justify-around h-16 w-full px-4">
+              <button onclick="switchTab('home')" id="btn-tab-home" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+                <i data-lucide="home" class="w-5 h-5 text-brand-coral-500"></i>
+                <span class="text-[10px] font-semibold mt-1 text-brand-coral-500">Início</span>
+              </button>
+              <button onclick="switchTab('explore')" id="btn-tab-explore" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+                <i data-lucide="map" class="w-5 h-5 text-slate-400"></i>
+                <span class="text-[10px] font-medium mt-1 text-slate-400">Explorar</span>
+              </button>
+              <button onclick="switchTab('favorites')" id="btn-tab-favorites" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+                <i data-lucide="heart" class="w-5 h-5 text-slate-400"></i>
+                <span class="text-[10px] font-medium mt-1 text-slate-400">Favoritos</span>
+              </button>
+              <button onclick="switchTab('profile')" id="btn-tab-profile" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+                <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+                <span class="text-[10px] font-medium mt-1 text-slate-400">Perfil</span>
+              </button>
+            </div>
+          </nav>
         </div>
 
         <!-- COLUNA 2: Mapa Persistente Lado-a-Lado no Desktop (Estilo Airbnb/Yelp) -->
-        <div id="desktop-map-column" class="hidden md:block md:w-[380px] lg:w-[450px] relative h-[780px]">
-          <div class="absolute inset-0 p-4">
-            <div id="desktop-map-element" class="w-full h-full rounded-2xl overflow-hidden shadow-inner border border-white/5 relative">
-              <!-- Leaflet Map rendered here for desktop view -->
-            </div>
-            <!-- Botão Voltar para os Matches no Desktop -->
-            <div id="desktop-back-btn-container" class="absolute top-8 left-8 right-8 z-[1000] hidden">
-              <button onclick="handleCloseSavedPins(event)" class="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para os Matches
-              </button>
-            </div>
+        <div id="desktop-map-column" class="hidden md:block flex-1 relative h-full bg-slate-100 dark:bg-brand-indigo-950 transition-colors duration-300">
+          <div id="desktop-map-element" class="w-full h-full shadow-inner relative">
+            <!-- Leaflet Map rendered here for desktop view -->
+          </div>
+          <!-- Botão Voltar para os Matches no Desktop -->
+          <div id="desktop-back-btn-container" class="absolute top-6 left-6 z-[1000] hidden w-[240px]">
+            <button onclick="handleCloseSavedPins(event)" class="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para os Matches
+            </button>
           </div>
         </div>
 
       </div>
-
-      <!-- BOTTOM NAVIGATION BAR -->
-      <nav class="glass-panel sticky bottom-0 left-0 right-0 z-[1000] pb-safe-bottom">
-        <div class="flex items-center justify-around h-16 max-w-lg mx-auto px-4">
-          <button onclick="switchTab('home')" id="btn-tab-home" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-            <i data-lucide="home" class="w-5 h-5 text-brand-coral-500"></i>
-            <span class="text-[10px] font-semibold mt-1 text-brand-coral-500">Início</span>
-          </button>
-          <button onclick="switchTab('explore')" id="btn-tab-explore" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-            <i data-lucide="map" class="w-5 h-5 text-slate-400"></i>
-            <span class="text-[10px] font-medium mt-1 text-slate-400">Explorar</span>
-          </button>
-          <button onclick="switchTab('favorites')" id="btn-tab-favorites" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-            <i data-lucide="heart" class="w-5 h-5 text-slate-400"></i>
-            <span class="text-[10px] font-medium mt-1 text-slate-400">Favoritos</span>
-          </button>
-          <button onclick="switchTab('profile')" id="btn-tab-profile" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
-            <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
-            <span class="text-[10px] font-medium mt-1 text-slate-400">Perfil</span>
-          </button>
-        </div>
-      </nav>
-
-    </main>
-  </div>
 
   <!-- BOTTOM SHEET LOGIN -->
   <div id="login-sheet" class="fixed inset-0 z-[10000] invisible">
@@ -1170,8 +1155,13 @@
 
     // WINDOW RESIZE EVENT
     window.addEventListener('resize', () => {
-      // Re-init map layout on width change
       initDesktopMap();
+      if (desktopMap) {
+        desktopMap.invalidateSize();
+      }
+      if (mainMap) {
+        mainMap.invalidateSize();
+      }
     });
 
     // NAVIGATION TABS
@@ -1865,7 +1855,10 @@
       const isVisible = window.getComputedStyle(document.getElementById('desktop-map-column')).display !== 'none';
       
       if (!container || !isVisible) return;
-      if (desktopMap) return; // Prevent double creation
+      if (desktopMap) {
+        desktopMap.invalidateSize();
+        return;
+      }
 
       const defaultCenter = [-25.4290, -49.2671];
       const center = userCoords ? [userCoords.lat, userCoords.lng] : defaultCenter;
