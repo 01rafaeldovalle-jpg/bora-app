@@ -165,9 +165,11 @@
     /* Swipe Tinder Cards styles */
     .swiper-container {
       position: relative;
-      height: 480px;
+      height: 52dvh;
+      min-height: 380px;
+      max-height: 450px;
       width: 100%;
-      max-width: 380px;
+      max-width: 350px;
       margin: 0 auto;
       perspective: 1000px;
     }
@@ -240,7 +242,7 @@
     }
   </style>
 </head>
-<body class="bg-brand-indigo-950 text-slate-100 overflow-x-hidden pb-16">
+<body class="bg-brand-indigo-950 text-slate-100 overflow-hidden h-dvh max-h-dvh">
 
   <!-- TELA DE ABERTURA (Splash Screen) -->
   <div id="splash-screen" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-brand-indigo-950 to-slate-950 transition-opacity duration-700 ease-in-out">
@@ -271,9 +273,9 @@
   </div>
 
   <!-- FRAME EXTERNO RESPONSIVO: Layout Inteligente no Desktop e Mobile -->
-  <div class="min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-brand-indigo-950 to-slate-950">
+  <div class="h-dvh max-h-dvh md:min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-brand-indigo-950 to-slate-950 overflow-hidden">
     
-    <main class="w-full max-w-lg md:max-w-4xl mx-auto bg-brand-indigo-950/40 md:glass-card md:rounded-[36px] relative shadow-2xl min-h-screen md:min-h-[850px] border border-white/5 flex flex-col justify-between overflow-hidden">
+    <main class="w-full max-w-lg md:max-w-4xl mx-auto bg-brand-indigo-950/40 md:glass-card md:rounded-[36px] relative shadow-2xl h-full md:h-auto md:min-h-[850px] border border-white/5 flex flex-col justify-between overflow-hidden">
       
       <!-- Top Decorator Desktop -->
       <div class="hidden md:flex justify-between items-center px-8 py-3 bg-brand-indigo-950/80 border-b border-white/5">
@@ -312,7 +314,7 @@
           </header>
 
           <!-- TABS CONTENT CONTAINER -->
-          <div id="tab-content" class="flex-1 overflow-y-auto max-h-[calc(100vh-128px)] md:max-h-[680px]">
+          <div id="tab-content" class="flex-1 overflow-y-auto max-h-[calc(100dvh-128px)] md:max-h-[680px]">
             <!-- Renderizado dinamicamente via JS -->
           </div>
         </div>
@@ -833,9 +835,12 @@
           <div class="swiper-container select-none">
             <!-- BACKGROUND CARD -->
             ${swipeQueue.length > 1 ? `
-              <div class="swiper-card glass-card opacity-60 scale-[0.93] translate-y-4 -z-10 pointer-events-none">
-                <img src="${nextPlace.image_url}" class="w-full h-[65%] object-cover">
-                <div class="p-5 h-[35%] bg-brand-indigo-900/90 flex flex-col justify-center">
+              <div class="swiper-card glass-card opacity-60 scale-[0.93] translate-y-4 -z-10 pointer-events-none flex flex-col">
+                <div class="relative aspect-video max-h-[26dvh] md:max-h-[30dvh] overflow-hidden bg-brand-indigo-950">
+                  <img src="${nextPlace.image_url}" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950 via-brand-indigo-950/20 to-black/25"></div>
+                </div>
+                <div class="p-5 flex-1 bg-brand-indigo-900/90 flex flex-col justify-center border-t border-white/5">
                   <h3 class="text-base font-outfit font-bold text-white/50">${nextPlace.name}</h3>
                   <p class="text-xs text-slate-500">${nextPlace.address}</p>
                 </div>
@@ -844,7 +849,7 @@
 
             <!-- ACTIVE SWIPABLE CARD -->
             <div id="active-card" class="swiper-card glass-card z-10 flex flex-col">
-              <div class="relative flex-1 bg-brand-indigo-950 overflow-hidden">
+              <div class="relative aspect-video max-h-[26dvh] md:max-h-[30dvh] bg-brand-indigo-950 overflow-hidden">
                 <img src="${activePlace.image_url}" class="w-full h-full object-cover" draggable="false">
                 <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950 via-brand-indigo-950/20 to-black/25"></div>
                 
@@ -1527,7 +1532,7 @@
       const isFav = favorites.includes(place.id);
       return `
         <div onclick="viewPlaceOnMap('${place.id}')" class="glass-card rounded-3xl overflow-hidden hover:border-brand-coral-500/20 active:scale-[0.99] transition-all duration-300 cursor-pointer flex flex-col h-full group">
-          <div class="relative aspect-[16/10] overflow-hidden bg-brand-indigo-950">
+          <div class="relative aspect-video max-h-[30dvh] overflow-hidden bg-brand-indigo-950">
             <img src="${place.image_url}" alt="${place.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" draggable="false">
             <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950/70 to-transparent"></div>
             

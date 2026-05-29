@@ -63,7 +63,7 @@ export default function PlaceCard({
       className="glass-card rounded-3xl overflow-hidden hover:scale-[1.02] hover:border-brand-coral-500/20 active:scale-[0.99] transition-all duration-300 cursor-pointer flex flex-col h-full group"
     >
       {/* Imagem com Loader e Favorito */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-brand-indigo-950">
+      <div className="relative aspect-video max-h-[30dvh] overflow-hidden bg-brand-indigo-950">
         {!isImgLoaded && (
           <div className="absolute inset-0 bg-brand-indigo-900/40 animate-pulse flex items-center justify-center">
             <span className="text-xs text-slate-400">Carregando...</span>

@@ -15,7 +15,7 @@ export default function App() {
 
   // Carregar favoritos salvos do localStorage
   useEffect(() => {
-    const savedFavs = localStorage.getItem('bora_favorites');
+    const savedFavs = localStorage.getItem('giro_favorites') || localStorage.getItem('bora_favorites');
     if (savedFavs) {
       try {
         setFavorites(JSON.parse(savedFavs));
@@ -31,7 +31,7 @@ export default function App() {
       const updated = prev.includes(id) 
         ? prev.filter((favId) => favId !== id) 
         : [...prev, id];
-      localStorage.setItem('bora_favorites', JSON.stringify(updated));
+      localStorage.setItem('giro_favorites', JSON.stringify(updated));
       return updated;
     });
   };
@@ -89,12 +89,12 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-brand-indigo-950 to-slate-950 font-sans">
-      <div className="w-full max-w-lg md:max-w-4xl mx-auto bg-brand-indigo-950/40 md:glass-card md:rounded-[36px] relative shadow-2xl min-h-screen md:min-h-[800px] border border-white/5 flex flex-col justify-between overflow-hidden">
+    <div className="h-dvh max-h-dvh md:h-screen md:min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-brand-indigo-950 to-slate-950 font-sans overflow-hidden">
+      <div className="w-full max-w-lg md:max-w-4xl mx-auto bg-brand-indigo-950/40 md:glass-card md:rounded-[36px] relative shadow-2xl h-full md:h-auto md:min-h-[850px] border border-white/5 flex flex-col justify-between overflow-hidden">
         
         {/* Top Decorator for Desktop */}
         <div className="hidden md:flex justify-between items-center px-8 py-3 bg-brand-indigo-950/80 border-b border-white/5 text-white">
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Bora! Curitiba · Modo Desktop Inteligente</span>
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Giro Curitiba · Modo Desktop Inteligente</span>
           <div className="flex gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
@@ -103,8 +103,8 @@ export default function App() {
         </div>
 
         {/* Content Tabs area */}
-        <div className="flex-1 flex flex-col md:flex-row h-full">
-          <main className="flex-1 w-full relative bg-brand-indigo-950/20 border-r border-white/5 pb-16 min-h-screen md:min-h-0 overflow-y-auto">
+        <div className="flex-1 flex flex-col md:flex-row h-full overflow-hidden">
+          <main className="flex-1 w-full relative bg-brand-indigo-950/20 border-r border-white/5 pb-16 h-full md:min-h-0 overflow-y-auto">
             {renderTabContent()}
           </main>
 

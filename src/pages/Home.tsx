@@ -36,7 +36,7 @@ export default function Home({ onSelectPlace, favorites, onFavoriteToggle }: Hom
   const featuredPlaces = MOCK_PLACES.filter(p => p.is_featured);
 
   return (
-    <div className="min-h-screen pb-24 text-slate-100">
+    <div className="pb-24 text-slate-100">
       <Header />
 
       {/* Hero Header Banner */}
@@ -52,7 +52,7 @@ export default function Home({ onSelectPlace, favorites, onFavoriteToggle }: Hom
             </span>
             
             <h2 className="text-2xl font-outfit font-extrabold leading-tight text-white mb-2">
-              Bora encontrar o próximo rolê?
+              Giro para encontrar o próximo rolê?
             </h2>
             <p className="text-xs text-slate-300 leading-relaxed max-w-xs">
               Locais, parques, cafés e experiências a um clique de distância, com rotas rápidas no celular.
