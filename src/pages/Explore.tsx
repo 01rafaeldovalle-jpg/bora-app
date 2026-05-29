@@ -14,6 +14,7 @@ interface ExploreProps {
   activeCoords?: { lat: number; lng: number };
   showOnlyFavoritesOnMap?: boolean;
   onCloseOnlyFavorites?: () => void;
+  searchRadius?: number;
 }
 
 const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -35,7 +36,8 @@ export default function Explore({
   setSelectedPlace,
   activeCoords,
   showOnlyFavoritesOnMap = false,
-  onCloseOnlyFavorites
+  onCloseOnlyFavorites,
+  searchRadius
 }: ExploreProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -46,11 +48,16 @@ export default function Explore({
       : MOCK_PLACES;
 
     return basePlaces.filter(place => {
-      return place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-             place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             place.address.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            place.address.toLowerCase().includes(searchQuery.toLowerCase());
+      if (showOnlyFavoritesOnMap) return matchesSearch;
+      const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity)
+        ? true
+        : getHaversineDistance(activeCoords.lat, activeCoords.lng, place.latitude, place.longitude) <= searchRadius;
+      return matchesSearch && matchesRadius;
     });
-  }, [searchQuery, showOnlyFavoritesOnMap, favorites]);
+  }, [searchQuery, showOnlyFavoritesOnMap, favorites, activeCoords, searchRadius]);
 
   // Injetar distâncias nos locais do mapa
   const placesWithDistance = React.useMemo(() => {

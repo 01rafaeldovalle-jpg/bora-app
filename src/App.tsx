@@ -21,6 +21,7 @@ export default function App() {
   });
   const [mapFilterFavoritesOnly, setMapFilterFavoritesOnly] = useState(false);
   const [isDesktopMapOpen, setIsDesktopMapOpen] = useState(true);
+  const [searchRadius, setSearchRadius] = useState<number>(10.0);
 
   // Reset filter when changing tabs to anything other than home or explore
   useEffect(() => {
@@ -59,19 +60,25 @@ export default function App() {
     const base = mapFilterFavoritesOnly 
       ? MOCK_PLACES.filter(place => favorites.includes(place.id))
       : MOCK_PLACES;
-    return base.map(place => {
-      if (activeCoords) {
-        const distance = getHaversineDistance(
-          activeCoords.lat,
-          activeCoords.lng,
-          place.latitude,
-          place.longitude
-        );
-        return { ...place, distance };
-      }
-      return place;
-    });
-  }, [mapFilterFavoritesOnly, favorites, activeCoords]);
+    return base
+      .map(place => {
+        if (activeCoords) {
+          const distance = getHaversineDistance(
+            activeCoords.lat,
+            activeCoords.lng,
+            place.latitude,
+            place.longitude
+          );
+          return { ...place, distance };
+        }
+        return place;
+      })
+      .filter(place => {
+        if (mapFilterFavoritesOnly) return true;
+        if (!activeCoords || searchRadius === Infinity) return true;
+        return (place.distance || 0) <= searchRadius;
+      });
+  }, [mapFilterFavoritesOnly, favorites, activeCoords, searchRadius]);
 
   const handlePinClick = () => {
     setMapFilterFavoritesOnly(true);
@@ -147,6 +154,8 @@ export default function App() {
             onFavoriteToggle={handleFavoriteToggle}
             activeCoords={activeCoords}
             onPinClick={handlePinClick}
+            searchRadius={searchRadius}
+            setSearchRadius={setSearchRadius}
           />
         );
       case 'explore':
@@ -159,6 +168,7 @@ export default function App() {
             activeCoords={activeCoords}
             showOnlyFavoritesOnMap={mapFilterFavoritesOnly}
             onCloseOnlyFavorites={handleCloseSavedPins}
+            searchRadius={searchRadius}
           />
         );
       case 'favorites':

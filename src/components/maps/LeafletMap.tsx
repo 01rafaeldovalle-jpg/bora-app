@@ -73,11 +73,16 @@ export default function LeafletMap({
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
+    const initialCenter = userLocation
+      ? [userLocation.latitude, userLocation.longitude] as L.LatLngExpression
+      : center;
+    const initialZoom = userLocation ? 15 : zoom;
+
     // Configura o mapa
     const map = L.map(mapContainerRef.current, {
       zoomControl: false, // Tirar o zoom control padrão para estilizar customizado
       attributionControl: true
-    }).setView(center, zoom);
+    }).setView(initialCenter, initialZoom);
 
     // Usar tema do mapa dinâmico baseado no tema inicial
     const initialTileUrl = currentTheme === 'dark'

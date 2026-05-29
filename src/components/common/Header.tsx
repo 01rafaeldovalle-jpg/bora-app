@@ -4,9 +4,48 @@ import { Compass, Sparkles, MapPin, ChevronDown, Search, Locate, X } from 'lucid
 interface HeaderProps {
   title?: string;
   showLocationSelector?: boolean;
+  searchRadius?: number;
+  setSearchRadius?: (radius: number) => void;
 }
 
-export default function Header({ title = 'Giro', showLocationSelector = true }: HeaderProps) {
+const formatAddressLabel = (address: any) => {
+  if (!address) return 'Curitiba - PR';
+  
+  let road = address.road || '';
+  let suburb = address.suburb || address.neighbourhood || address.city_district || '';
+  
+  if (road) {
+    road = road.replace(/^Rua\s+/i, 'R. ')
+               .replace(/^Avenida\s+/i, 'Av. ')
+               .replace(/^Alameda\s+/i, 'Al. ')
+               .replace(/^Travessa\s+/i, 'Tv. ')
+               .replace(/^Praça\s+/i, 'Pça. ');
+  }
+  
+  if (road && suburb) {
+    const fullLabel = `${road}, ${suburb}`;
+    if (fullLabel.length <= 30) {
+      return fullLabel;
+    } else {
+      const parts = road.split(' ');
+      const shortenedRoad = parts[0] + ' ' + (parts.slice(-1)[0] || '');
+      const shortLabel = `${shortenedRoad}, ${suburb}`;
+      if (shortLabel.length <= 30) {
+        return shortLabel;
+      }
+      return `${suburb}, Curitiba`;
+    }
+  }
+  
+  return suburb ? `${suburb}, Curitiba` : (address.city || 'Curitiba - PR');
+};
+
+export default function Header({ 
+  title = 'Giro', 
+  showLocationSelector = true,
+  searchRadius = 10.0,
+  setSearchRadius
+}: HeaderProps) {
   const [theme, setThemeState] = useState<'light' | 'dark'>('dark');
   const [locationLabel, setLocationLabel] = useState('Curitiba - PR');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,16 +96,7 @@ export default function Header({ title = 'Giro', showLocationSelector = true }: 
           fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
             .then(res => res.json())
             .then(data => {
-              let label = 'Curitiba - PR';
-              if (data && data.address) {
-                const road = data.address.road || '';
-                const suburb = data.address.suburb || data.address.neighbourhood || data.address.city_district || '';
-                if (road && suburb) {
-                  label = `${road}, ${suburb}`;
-                } else {
-                  label = suburb || data.address.city || 'Curitiba - PR';
-                }
-              }
+              const label = formatAddressLabel(data?.address);
               setLocationLabel(label);
               window.dispatchEvent(
                 new CustomEvent('giro-location-change', {
@@ -218,16 +248,7 @@ export default function Header({ title = 'Giro', showLocationSelector = true }: 
         fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
           .then(res => res.json())
           .then(data => {
-            let label = 'Curitiba - PR';
-            if (data && data.address) {
-              const road = data.address.road || '';
-              const suburb = data.address.suburb || data.address.neighbourhood || data.address.city_district || '';
-              if (road && suburb) {
-                label = `${road}, ${suburb}`;
-              } else {
-                label = suburb || data.address.city || 'Curitiba - PR';
-              }
-            }
+            const label = formatAddressLabel(data?.address);
             setLocationLabel(label);
             window.dispatchEvent(
               new CustomEvent('giro-location-change', {
@@ -343,6 +364,38 @@ export default function Header({ title = 'Giro', showLocationSelector = true }: 
             >
               <Locate className="w-4 h-4" /> Usar minha localização atual (GPS)
             </button>
+
+            {/* Seletor de Raio de Busca */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                Raio de busca (Distância)
+              </label>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {[
+                  { label: '500m', value: 0.5 },
+                  { label: '1.5 km', value: 1.5 },
+                  { label: '3 km', value: 3.0 },
+                  { label: '5 km', value: 5.0 },
+                  { label: '10 km', value: 10.0 },
+                  { label: 'Sem limite', value: Infinity }
+                ].map((opt) => {
+                  const isActive = searchRadius === opt.value;
+                  return (
+                    <button
+                      key={opt.label}
+                      onClick={() => setSearchRadius && setSearchRadius(opt.value)}
+                      className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all ${
+                        isActive
+                          ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md'
+                          : 'bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Sugestões ou Lista de Espera */}
             <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">

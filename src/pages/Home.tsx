@@ -20,6 +20,8 @@ interface HomeProps {
   onFavoriteToggle: (id: string) => void;
   activeCoords?: { lat: number; lng: number };
   onPinClick?: () => void;
+  searchRadius?: number;
+  setSearchRadius?: (radius: number) => void;
 }
 
 // Fórmula matemática de Haversine para distâncias em km
@@ -35,7 +37,15 @@ const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: nu
   return R * c; // Distância em km
 };
 
-export default function Home({ onSelectPlace, favorites, onFavoriteToggle, activeCoords, onPinClick }: HomeProps) {
+export default function Home({ 
+  onSelectPlace, 
+  favorites, 
+  onFavoriteToggle, 
+  activeCoords, 
+  onPinClick,
+  searchRadius,
+  setSearchRadius
+}: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'swipe' | 'list'>('swipe');
@@ -64,22 +74,26 @@ export default function Home({ onSelectPlace, favorites, onFavoriteToggle, activ
                             place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             place.address.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
-      return matchesSearch && matchesCategory;
+      const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
+      return matchesSearch && matchesCategory && matchesRadius;
     });
 
     if (activeCoords) {
       filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return filtered;
-  }, [placesWithDistance, searchQuery, selectedCategory, activeCoords]);
+  }, [placesWithDistance, searchQuery, selectedCategory, activeCoords, searchRadius]);
 
   const featuredPlaces = React.useMemo(() => {
-    const featured = placesWithDistance.filter(p => p.is_featured);
+    const featured = placesWithDistance.filter(p => {
+      const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (p.distance || 0) <= searchRadius;
+      return p.is_featured && matchesRadius;
+    });
     if (activeCoords) {
       featured.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return featured;
-  }, [placesWithDistance, activeCoords]);
+  }, [placesWithDistance, activeCoords, searchRadius]);
 
   // Reset active card index when filter changes
   React.useEffect(() => {
@@ -123,7 +137,7 @@ export default function Home({ onSelectPlace, favorites, onFavoriteToggle, activ
 
   return (
     <div className="pb-24 text-slate-100">
-      <Header />
+      <Header searchRadius={searchRadius} setSearchRadius={setSearchRadius} />
 
       {/* Hero Header Banner */}
       <div className="px-6 py-4">
