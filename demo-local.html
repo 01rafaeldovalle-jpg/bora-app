@@ -1845,7 +1845,8 @@
     // DESKTOP REGION MAP INITIALIZATION (Airbnb layout)
     function initDesktopMap() {
       const container = document.getElementById('desktop-map-element');
-      const isVisible = window.getComputedStyle(document.getElementById('desktop-map-column')).display !== 'none';
+      const column = document.getElementById('desktop-map-column');
+      const isVisible = column && window.getComputedStyle(column).display !== 'none';
       
       if (!container || !isVisible) return;
       if (desktopMap) {
