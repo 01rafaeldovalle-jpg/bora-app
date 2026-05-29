@@ -4,7 +4,7 @@ import { MOCK_PLACES } from '../utils/constants';
 import LeafletMap from '../components/maps/LeafletMap';
 import SearchBar from '../components/common/SearchBar';
 import PlaceCard from '../components/places/PlaceCard';
-import { MapPin, X, Navigation } from 'lucide-react';
+import { MapPin, X, Navigation, ArrowLeft } from 'lucide-react';
 
 interface ExploreProps {
   favorites: string[];
@@ -12,6 +12,8 @@ interface ExploreProps {
   selectedPlace: Place | null;
   setSelectedPlace: (place: Place | null) => void;
   activeCoords?: { lat: number; lng: number };
+  showOnlyFavoritesOnMap?: boolean;
+  onCloseOnlyFavorites?: () => void;
 }
 
 const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -31,18 +33,24 @@ export default function Explore({
   onFavoriteToggle,
   selectedPlace,
   setSelectedPlace,
-  activeCoords
+  activeCoords,
+  showOnlyFavoritesOnMap = false,
+  onCloseOnlyFavorites
 }: ExploreProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filtrar locais no mapa
   const filteredPlaces = React.useMemo(() => {
-    return MOCK_PLACES.filter(place => {
+    const basePlaces = showOnlyFavoritesOnMap
+      ? MOCK_PLACES.filter(place => favorites.includes(place.id))
+      : MOCK_PLACES;
+
+    return basePlaces.filter(place => {
       return place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
              place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
              place.address.toLowerCase().includes(searchQuery.toLowerCase());
     });
-  }, [searchQuery]);
+  }, [searchQuery, showOnlyFavoritesOnMap, favorites]);
 
   // Injetar distâncias nos locais do mapa
   const placesWithDistance = React.useMemo(() => {
@@ -84,11 +92,12 @@ export default function Explore({
           selectedPlace={selectedPlaceWithDistance}
           userLocation={activeCoords ? { latitude: activeCoords.lat, longitude: activeCoords.lng } : null}
           onMarkerClick={(place) => setSelectedPlace(place)}
+          fitBoundsOnChange={showOnlyFavoritesOnMap}
         />
       </div>
 
       {/* SEARCH BAR OVERLAY (Flutuando no Topo) */}
-      <div className="absolute top-4 left-0 right-0 z-50 px-4 max-w-lg mx-auto">
+      <div className="absolute top-4 left-0 right-0 z-50 px-4 max-w-lg mx-auto flex flex-col gap-3">
         <div className="glass-card rounded-2xl border border-white/10 shadow-premium">
           <SearchBar 
             value={searchQuery} 
@@ -99,6 +108,15 @@ export default function Explore({
             placeholder="Pesquisar no mapa..."
           />
         </div>
+
+        {showOnlyFavoritesOnMap && onCloseOnlyFavorites && (
+          <button 
+            onClick={onCloseOnlyFavorites}
+            className="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium transition-all animate-fade-in"
+          >
+            <ArrowLeft className="w-4 h-4" /> Voltar para os Matches
+          </button>
+        )}
       </div>
 
       {/* SELECIONADO PLACE DRAWER / CARD OVERLAY (Flutuando na parte inferior) */}

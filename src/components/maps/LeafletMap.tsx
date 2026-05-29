@@ -9,6 +9,7 @@ interface LeafletMapProps {
   onMarkerClick?: (place: Place) => void;
   center?: [number, number];
   zoom?: number;
+  fitBoundsOnChange?: boolean;
 }
 
 export default function LeafletMap({
@@ -17,7 +18,8 @@ export default function LeafletMap({
   userLocation,
   onMarkerClick,
   center = [-25.4372, -49.2700], // Centro de Curitiba por padrão
-  zoom = 13
+  zoom = 13,
+  fitBoundsOnChange = false
 }: LeafletMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -199,6 +201,20 @@ export default function LeafletMap({
       });
     }
   }, [selectedPlace]);
+
+  // Ajustar visualização para conter todos os pins mostrados
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !places || places.length === 0) return;
+
+    if (fitBoundsOnChange) {
+      setTimeout(() => {
+        const markers = places.map(p => L.marker([p.latitude, p.longitude]));
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.15));
+      }, 100);
+    }
+  }, [places, fitBoundsOnChange]);
 
   return (
     <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-premium border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-brand-indigo-950 transition-colors duration-300">

@@ -294,7 +294,7 @@
   <!-- FRAME EXTERNO RESPONSIVO: Layout Inteligente no Desktop e Mobile -->
   <div class="h-dvh max-h-dvh md:min-h-screen flex flex-col justify-between md:py-8 md:px-4 bg-gradient-to-br from-brand-indigo-950 to-slate-950 overflow-hidden">
     
-    <main class="w-full max-w-lg md:max-w-4xl mx-auto bg-brand-indigo-950/40 md:glass-card md:rounded-[36px] relative shadow-2xl h-full md:h-auto md:min-h-[850px] border border-white/5 flex flex-col justify-between overflow-hidden">
+    <main id="main-app-container" class="w-full max-w-lg md:max-w-4xl mx-auto bg-brand-indigo-950/40 md:glass-card md:rounded-[36px] relative shadow-2xl h-full md:h-auto md:min-h-[850px] border border-white/5 flex flex-col justify-between overflow-hidden">
       
       <!-- Top Decorator Desktop -->
       <div class="hidden md:flex justify-between items-center px-8 py-3 bg-brand-indigo-950/80 border-b border-white/5">
@@ -342,8 +342,14 @@
         <!-- COLUNA 2: Mapa Persistente Lado-a-Lado no Desktop (Estilo Airbnb/Yelp) -->
         <div id="desktop-map-column" class="hidden md:block md:w-[380px] lg:w-[450px] relative h-[780px]">
           <div class="absolute inset-0 p-4">
-            <div id="desktop-map-element" class="w-full h-full rounded-2xl overflow-hidden shadow-inner border border-white/5">
+            <div id="desktop-map-element" class="w-full h-full rounded-2xl overflow-hidden shadow-inner border border-white/5 relative">
               <!-- Leaflet Map rendered here for desktop view -->
+            </div>
+            <!-- Botão Voltar para os Matches no Desktop -->
+            <div id="desktop-back-btn-container" class="absolute top-8 left-8 right-8 z-[1000] hidden">
+              <button onclick="handleCloseSavedPins(event)" class="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para os Matches
+              </button>
             </div>
           </div>
         </div>
@@ -575,6 +581,7 @@
     // Swipe queue state
     let swipeQueue = [...MOCK_PLACES];
     let activeCardIndex = 0;
+    let mapFilterFavoritesOnly = false;
 
     // Login and location state
     let isLoggedIn = false;
@@ -1073,6 +1080,9 @@
     // NAVIGATION TABS
     function switchTab(tabId) {
       currentTab = tabId;
+      if (tabId !== 'explore') {
+        mapFilterFavoritesOnly = false;
+      }
       
       // Update nav buttons style
       ['home', 'explore', 'favorites', 'profile'].forEach(id => {
@@ -1145,6 +1155,72 @@
       if (!place) return;
       selectedPlace = place;
       switchTab('explore');
+    }
+
+    function handlePinButtonClick(e) {
+      if (e) e.stopPropagation();
+      
+      mapFilterFavoritesOnly = true;
+
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        switchTab('explore');
+      } else {
+        // No Desktop: expandir coluna do mapa e re-renderizar pins
+        const mapColumn = document.getElementById('desktop-map-column');
+        const mainContainer = document.getElementById('main-app-container');
+        const backBtn = document.getElementById('desktop-back-btn-container');
+        
+        if (mapColumn) {
+          mapColumn.classList.remove('hidden');
+          mapColumn.style.display = 'block';
+        }
+        if (mainContainer) {
+          mainContainer.classList.remove('md:max-w-lg');
+          mainContainer.classList.add('md:max-w-4xl');
+        }
+        if (backBtn) {
+          backBtn.classList.remove('hidden');
+        }
+        
+        // Inicializar ou re-renderizar
+        if (!desktopMap) {
+          initDesktopMap();
+        } else {
+          renderDesktopMapPins();
+        }
+      }
+    }
+
+    function handleCloseSavedPins(e) {
+      if (e) e.stopPropagation();
+      
+      mapFilterFavoritesOnly = false;
+      
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        switchTab('home');
+      } else {
+        // No Desktop: recolher coluna do mapa
+        const mapColumn = document.getElementById('desktop-map-column');
+        const mainContainer = document.getElementById('main-app-container');
+        const backBtn = document.getElementById('desktop-back-btn-container');
+        
+        if (mapColumn) {
+          mapColumn.classList.add('hidden');
+          mapColumn.style.display = 'none';
+        }
+        if (mainContainer) {
+          mainContainer.classList.remove('md:max-w-4xl');
+          mainContainer.classList.add('md:max-w-lg');
+        }
+        if (backBtn) {
+          backBtn.classList.add('hidden');
+        }
+        
+        // Re-renderizar os pins completos no desktopMap caso volte a abri-lo depois
+        renderDesktopMapPins();
+      }
     }
 
     // SWITCH VIEW MODE BETWEEN TINDER SWIPE & IFOOD LIST
@@ -1318,7 +1394,7 @@
               <button onclick="swipeNope()" class="w-14 h-14 rounded-full bg-brand-indigo-900 border border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white active:scale-90 transition-all">
                 <i data-lucide="x" class="w-6 h-6"></i>
               </button>
-              <button onclick="viewPlaceOnMap('${swipeQueue[activeCardIndex].id}')" class="w-11 h-11 rounded-full bg-brand-indigo-900 border border-white/5 flex items-center justify-center text-brand-teal-400 shadow-md hover:bg-brand-teal-500 hover:text-white active:scale-90 transition-all">
+              <button onclick="handlePinButtonClick(event)" class="w-11 h-11 rounded-full bg-brand-indigo-900 border border-white/5 flex items-center justify-center text-brand-teal-400 shadow-md hover:bg-brand-teal-500 hover:text-white active:scale-90 transition-all">
                 <i data-lucide="map-pin" class="w-5 h-5"></i>
               </button>
               <button onclick="swipeLike()" class="w-14 h-14 rounded-full bg-brand-indigo-900 border border-white/5 flex items-center justify-center text-brand-teal-400 shadow-lg hover:bg-brand-teal-500 hover:text-white active:scale-90 transition-all">
@@ -1696,7 +1772,23 @@
       }).addTo(desktopMap);
 
       // Add pins
-      MOCK_PLACES.forEach(place => {
+      renderDesktopMapPins();
+    }
+
+    function renderDesktopMapPins() {
+      if (!desktopMap) return;
+
+      // Limpar marcadores anteriores do mapa desktop
+      Object.keys(desktopMarkers).forEach(id => {
+        desktopMap.removeLayer(desktopMarkers[id]);
+      });
+      desktopMarkers = {};
+
+      const placesToRender = mapFilterFavoritesOnly 
+        ? MOCK_PLACES.filter(place => favorites.includes(place.id))
+        : MOCK_PLACES;
+
+      placesToRender.forEach(place => {
         const isFav = favorites.includes(place.id);
         const iconHtml = `
           <div class="place-marker-custom" style="
@@ -1727,6 +1819,13 @@
 
         desktopMarkers[place.id] = marker;
       });
+
+      if (mapFilterFavoritesOnly && placesToRender.length > 0) {
+        setTimeout(() => {
+          const group = new L.featureGroup(placesToRender.map(p => L.marker([p.latitude, p.longitude])));
+          desktopMap.fitBounds(group.getBounds().pad(0.15));
+        }, 100);
+      }
     }
 
     // UPDATE DESKTOP MAP HIGHLIGHT ON FAVORITES OR SWIPES
@@ -1788,12 +1887,20 @@
         maxZoom: 20
       }).addTo(mainMap);
 
-      const filtered = MOCK_PLACES.filter(place => {
-        return place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-               place.description.toLowerCase().includes(searchQuery.toLowerCase());
+      // Limpar marcadores anteriores do mapa
+      Object.keys(mapMarkers).forEach(id => {
+        mainMap.removeLayer(mapMarkers[id]);
       });
+      mapMarkers = {};
 
-      filtered.forEach(place => {
+      const placesToRender = mapFilterFavoritesOnly 
+        ? MOCK_PLACES.filter(place => favorites.includes(place.id))
+        : MOCK_PLACES.filter(place => {
+            return place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                   place.description.toLowerCase().includes(searchQuery.toLowerCase());
+          });
+
+      placesToRender.forEach(place => {
         const isSelected = selectedPlace && selectedPlace.id === place.id;
         
         const iconHtml = `
@@ -1817,6 +1924,13 @@
 
         mapMarkers[place.id] = marker;
       });
+
+      if (mapFilterFavoritesOnly && placesToRender.length > 0) {
+        setTimeout(() => {
+          const group = new L.featureGroup(placesToRender.map(p => L.marker([p.latitude, p.longitude])));
+          mainMap.fitBounds(group.getBounds().pad(0.15));
+        }, 100);
+      }
 
       if (selectedPlace) {
         selectPlaceFromMap(selectedPlace);
