@@ -80,6 +80,21 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     };
   }, []);
 
+  // Escutar eventos de sincronização de preferências vindo do App.tsx
+  useEffect(() => {
+    const handleSync = (e: CustomEvent<string[]>) => {
+      if (e.detail && Array.isArray(e.detail)) {
+        setUserPreferences(e.detail);
+        localStorage.setItem('giro_preferences', JSON.stringify(e.detail));
+      }
+    };
+
+    window.addEventListener('giro-preferences-sync' as any, handleSync);
+    return () => {
+      window.removeEventListener('giro-preferences-sync' as any, handleSync);
+    };
+  }, []);
+
   const handleGoogleLogin = async () => {
     if (supabase) {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -179,6 +194,17 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   const saveCadastrais = async () => {
     if (supabase && session) {
       await supabase.auth.updateUser({ data: { full_name: editName } });
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ full_name: editName, nickname: editNickname })
+          .eq('id', session.user.id);
+        if (error) {
+          console.error('Erro ao atualizar dados cadastrais no Supabase profiles:', error);
+        }
+      } catch (e) {
+        console.error('Erro ao atualizar dados cadastrais no profiles:', e);
+      }
     }
     const savedUser = localStorage.getItem('giro_mock_user');
     if (savedUser) {
@@ -190,6 +216,25 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       setMockSession({ ...mockSession, user: { ...mockSession.user, user_metadata: { ...mockSession.user.user_metadata, full_name: editName } } });
     }
     setIsCadastraisOpen(false);
+  };
+
+  const savePreferences = async (prefsToSave: string[]) => {
+    localStorage.setItem('giro_preferences', JSON.stringify(prefsToSave));
+    const activeSession = session || mockSession;
+    if (supabase && activeSession?.user && !mockSession) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ preferences: prefsToSave })
+          .eq('id', activeSession.user.id);
+        if (error) {
+          console.error('Erro ao salvar preferências no Supabase:', error);
+        }
+      } catch (e) {
+        console.error('Erro ao salvar preferências no Supabase:', e);
+      }
+    }
+    setIsPrefsSheetOpen(false);
   };
 
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -694,8 +739,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
           <div 
             className="absolute inset-0" 
             onClick={() => {
-              localStorage.setItem('giro_preferences', JSON.stringify(userPreferences));
-              setIsPrefsSheetOpen(false);
+              savePreferences(userPreferences);
             }} 
           />
           
@@ -705,8 +749,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             <div 
               className="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer mb-5 shrink-0" 
               onClick={() => {
-                localStorage.setItem('giro_preferences', JSON.stringify(userPreferences));
-                setIsPrefsSheetOpen(false);
+                savePreferences(userPreferences);
               }}
             />
             
@@ -746,8 +789,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             {/* Confirm button */}
             <button
               onClick={() => {
-                localStorage.setItem('giro_preferences', JSON.stringify(userPreferences));
-                setIsPrefsSheetOpen(false);
+                savePreferences(userPreferences);
               }}
               className="w-full py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/20 shrink-0"
             >

@@ -1,0 +1,3032 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Giro — Descubra Experiências em Curitiba</title>
+  <meta name="description" content="Descubra os melhores lugares, restaurantes, parques e experiências em Curitiba com o Giro!">
+  <meta name="theme-color" content="#0d0724">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="/logo-icon.svg">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS & JS CDN (Custo Zero Maps) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    // Custom tailwind config for design system
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              coral: {
+                50: '#fff4f0',
+                100: '#ffe6dc',
+                200: '#ffcfbe',
+                500: '#ff5422', // Ação Primária
+                600: '#f03b0a',
+              },
+              teal: {
+                400: '#2dd4bf',
+                500: '#14b8a6',
+              },
+              indigo: {
+                900: '#1b0e3f', // Fundo Dark Principal
+                950: '#0d0724', // Fundo Dark Super Escuro
+              },
+              gold: {
+                400: '#fbbf24',
+                500: '#f59e0b',
+              }
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Giro 3D Coin Utilities */
+    .transform-style-3d {
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    /* Rotação automática da moeda baseada no tema da tag HTML */
+    html:not(.dark) .coin-container {
+      transform: rotateY(180deg);
+    }
+
+    /* Shimmer stamp badge effect */
+    .shimmer-badge-overlay {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.45) 50%,
+        rgba(255, 255, 255, 0) 70%
+      );
+      transform: rotate(45deg);
+      animation: shimmer-effect 3s infinite linear;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer-effect {
+      0% {
+        transform: translateX(-150%) rotate(45deg);
+      }
+      100% {
+        transform: translateX(150%) rotate(45deg);
+      }
+    }
+
+    body {
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Inter', sans-serif;
+      background-color: #F8F9FC;
+      color: #0F172A;
+      overflow-x: hidden;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    .dark body {
+      background-color: #0d0724;
+      color: #f1f5f9;
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .dark .glass-card {
+      background: rgba(27, 14, 63, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    
+    .dark .glass-panel {
+      background: rgba(13, 7, 36, 0.85);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    
+    .btn-premium {
+      transition: all 0.2s ease;
+    }
+    
+    .btn-premium:active {
+      transform: scale(0.95);
+    }
+    
+    /* Leaflet customization */
+    .leaflet-container {
+      background-color: #0d0724 !important;
+    }
+    .leaflet-bar {
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+    .leaflet-bar a {
+      background-color: rgba(27, 14, 63, 0.9) !important;
+      color: #f1f5f9 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .leaflet-bar a:hover {
+      background-color: #ff5422 !important;
+      color: #ffffff !important;
+    }
+    .leaflet-control-attribution {
+      background: rgba(13, 7, 36, 0.8) !important;
+      color: #64748b !important;
+      font-size: 8px !important;
+    }
+    
+    /* User Location pulsing marker */
+    @keyframes radar-pulse {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+      25% {
+        opacity: 0.85;
+      }
+      100% {
+        transform: scale(2.0);
+        opacity: 0;
+      }
+    }
+    .user-location-marker {
+      width: 16px;
+      height: 16px;
+      background: #ff5422; /* Coral */
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 210, 255, 0.8), inset 0 0 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+    .user-location-marker::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border: 3px solid #00d2ff; /* Vibrant Blue */
+      border-radius: 50%;
+      opacity: 0;
+      animation: radar-pulse 2s cubic-bezier(0.215, 0.610, 0.355, 1) infinite;
+      pointer-events: none;
+    }
+    .custom-user-marker {
+      overflow: visible !important;
+    }
+    
+    .place-marker-custom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      color: white;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .place-marker-custom:hover {
+      transform: scale(1.15) translateY(-2px);
+    }
+    
+    /* Hide scrollbar */
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-none {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Swipe Tinder Cards styles */
+    .swiper-container {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      max-height: 420px;
+      max-width: 340px;
+      margin: 0 auto;
+      perspective: 1000px;
+    }
+
+    .swiper-card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 28px;
+      overflow: hidden;
+      transform-origin: center bottom;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .swiper-card:active {
+      cursor: grabbing;
+    }
+
+    /* Swipe Badge overlays */
+    .swipe-badge {
+      position: absolute;
+      top: 30px;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: rotate(-15deg);
+      z-index: 100;
+      pointer-events: none;
+      transition: opacity 0.1s ease;
+    }
+
+    .swipe-badge-like {
+      left: 30px;
+      border: 4px solid #14b8a6;
+      color: #14b8a6;
+      transform: rotate(-15deg);
+    }
+
+    .swipe-badge-nope {
+      right: 30px;
+      border: 4px solid #ff5422;
+      color: #ff5422;
+      transform: rotate(15deg);
+    }
+
+    @keyframes giro-spin-pulse {
+      0% {
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 0px rgba(255, 84, 34, 0));
+      }
+      50% {
+        transform: rotate(15deg) scale(1.05);
+        filter: drop-shadow(0 0 15px rgba(255, 84, 34, 0.4));
+      }
+      100% {
+        transform: rotate(0deg) scale(1);
+        filter: drop-shadow(0 0 0px rgba(255, 84, 34, 0));
+      }
+    }
+    .animate-giro-spin {
+      animation: giro-spin-pulse 3s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-brand-indigo-950 text-slate-100 overflow-hidden h-dvh max-h-dvh">
+
+  <!-- TELA DE ABERTURA (Splash Screen) -->
+  <div id="splash-screen" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-gradient-to-br from-brand-indigo-950 to-slate-950 transition-opacity duration-700 ease-in-out">
+    <div class="flex flex-col items-center gap-6">
+      <!-- Glow effect -->
+      <div class="relative w-28 h-28 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-[34px] bg-gradient-to-tr from-brand-coral-500 to-amber-500 opacity-25 blur-lg animate-pulse"></div>
+        <!-- SVG Logo Giro -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-24 h-24 relative z-10 animate-giro-spin">
+          <defs>
+            <linearGradient id="splashCoralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff7e58" />
+              <stop offset="100%" stop-color="#ff5422" />
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="30" fill="url(#splashCoralGradient)" />
+          <path d="M50 22 L62 42 L50 36 L38 42 Z" fill="#ffffff" />
+          <path d="M50 78 L38 58 L50 64 L62 58 Z" fill="#e2e8f0" />
+          <circle cx="50" cy="50" r="8" fill="#1b0e3f" />
+          <circle cx="50" cy="50" r="4" fill="#ffffff" />
+        </svg>
+      </div>
+      <div class="flex flex-col items-center gap-1">
+        <h2 class="text-3xl font-outfit font-black tracking-tight text-white animate-pulse">Giro</h2>
+        <span class="text-[10px] text-brand-teal-400 font-bold tracking-widest uppercase mt-1">Descubra Experiências</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINCIPAL CONTAINER FLUIDO E RESPONSIVO -->
+  <div class="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 transition-colors duration-300 overflow-hidden">
+    
+    <main id="main-app-container" class="w-full h-full flex flex-col relative overflow-hidden bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
+
+      <!-- HEADER -->
+      <header class="glass-panel sticky top-0 z-50 px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
+        <div class="w-full max-w-6xl mx-auto flex items-center justify-between">
+          <div class="flex flex-col">
+            <div onclick="handleHeaderLogoClick()" class="flex items-center gap-2 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 self-start">
+              <div class="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
+                <i data-lucide="compass" class="w-5 h-5 text-white animate-spin-slow"></i>
+              </div>
+              <h1 class="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-500 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent leading-tight">Giro</h1>
+            </div>
+            <div class="pl-[44px] mt-[-2px]">
+              <div onclick="openLocationSheet()" class="flex items-center gap-1 text-[10px] text-brand-teal-600 dark:text-brand-teal-400 font-semibold tracking-wider uppercase cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95 inline-flex">
+                <i data-lucide="map-pin" class="w-3 h-3"></i>
+                <span id="header-location-label">Curitiba - PR</span>
+                <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400 dark:text-slate-500"></i>
+              </div>
+            </div>
+          </div>
+          
+          <button onclick="toggleTheme()" class="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full relative focus:outline-none" aria-label="Alterar Tema">
+            <div class="coin-container w-8 h-8 relative transition-transform duration-500 transform-style-3d pointer-events-none">
+              <!-- FACE NOITE (LUA) - Visível no modo Dark -->
+              <div class="coin-face coin-face-dark absolute inset-0 rounded-full flex items-center justify-center bg-brand-indigo-900 border border-white/10 text-brand-teal-400 backface-hidden">
+                <i data-lucide="moon" class="w-4 h-4"></i>
+              </div>
+              <!-- FACE DIA (SOL) - Visível no modo Light (Rotacionada em 180 graus) -->
+              <div class="coin-face coin-face-light absolute inset-0 rounded-full flex items-center justify-center bg-amber-500 border border-amber-400 text-white backface-hidden rotate-y-180">
+                <i data-lucide="sun" class="w-4 h-4"></i>
+              </div>
+            </div>
+          </button>
+        </div>
+      </header>
+
+      <!-- TABS CONTENT CONTAINER -->
+      <div id="tab-content" class="flex-1 flex flex-col min-h-0">
+        <!-- Renderizado dinamicamente via JS -->
+      </div>
+
+      <!-- BOTTOM NAVIGATION BAR (Fixo no rodapé) -->
+      <nav class="glass-panel sticky bottom-0 left-0 right-0 z-[1000] pb-safe-bottom border-t border-slate-200 dark:border-white/5">
+        <div class="flex items-center justify-around h-16 w-full max-w-lg mx-auto px-4">
+          <button onclick="switchTab('home')" id="btn-tab-home" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="home" class="w-5 h-5 text-brand-coral-500"></i>
+            <span class="text-[10px] font-semibold mt-1 text-brand-coral-500">Início</span>
+          </button>
+          <button onclick="switchTab('explore')" id="btn-tab-explore" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="map" class="w-5 h-5 text-slate-400"></i>
+            <span class="text-[10px] font-medium mt-1 text-slate-400">Explorar</span>
+          </button>
+          <button onclick="switchTab('favorites')" id="btn-tab-favorites" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="heart" class="w-5 h-5 text-slate-400"></i>
+            <span class="text-[10px] font-medium mt-1 text-slate-400">Favoritos</span>
+          </button>
+          <button onclick="switchTab('profile')" id="btn-tab-profile" class="flex flex-col items-center justify-center flex-1 h-full relative group transition-all duration-300">
+            <i data-lucide="user" class="w-5 h-5 text-slate-400"></i>
+            <span class="text-[10px] font-medium mt-1 text-slate-400">Perfil</span>
+          </button>
+        </div>
+      </nav>
+
+    </main>
+
+  <!-- BOTTOM SHEET LOGIN -->
+  <div id="login-sheet" class="fixed inset-0 z-[10000] invisible">
+    <!-- Backdrop -->
+    <div onclick="closeLoginSheet()" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="login-sheet-backdrop"></div>
+    <!-- Sheet Panel -->
+    <div class="absolute bottom-0 left-0 right-0 w-full max-w-lg mx-auto bg-white dark:bg-brand-indigo-950 border-t border-slate-100 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl transition-transform duration-300 transform translate-y-full flex flex-col gap-6" id="login-sheet-panel">
+      <!-- Handle bar -->
+      <div class="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer" onclick="closeLoginSheet()"></div>
+      
+      <!-- OPTIONS VIEW (default) -->
+      <div id="auth-view-options">
+        <div class="text-center space-y-2 mt-2">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-coral-500/10 text-brand-coral-500 mb-2">
+            <i data-lucide="heart" class="w-6 h-6 fill-brand-coral-500 text-brand-coral-500"></i>
+          </div>
+          <h3 class="text-lg font-outfit font-extrabold text-slate-900 dark:text-white">Falta pouco!</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
+            Faça login para salvar seus locais favoritos e planejar seu Giro.
+          </p>
+        </div>
+        <div class="space-y-3 mt-6">
+          <button onclick="simulateGoogleLogin()" class="w-full h-12 rounded-2xl bg-white dark:bg-white text-slate-800 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-slate-100 transition-all btn-premium shadow-md border border-slate-100">
+            <svg class="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Entrar com o Google
+          </button>
+          <button onclick="showAuthView('email-login')" class="w-full h-12 rounded-2xl bg-brand-indigo-900 text-white border border-white/10 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-brand-indigo-900/80 transition-all btn-premium">
+            <i data-lucide="mail" class="w-5 h-5 text-slate-300"></i>
+            Entrar com e-mail
+          </button>
+        </div>
+        <div class="text-center mt-4 pb-2">
+          <button onclick="closeLoginSheet()" class="text-xs text-slate-400 font-semibold hover:text-slate-900 dark:hover:text-white transition-all">
+            Talvez mais tarde
+          </button>
+        </div>
+      </div>
+
+      <!-- EMAIL LOGIN VIEW -->
+      <div id="auth-view-email-login" class="hidden">
+        <div class="text-center space-y-2 mt-2">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-coral-500/10 text-brand-coral-500 mb-2">
+            <i data-lucide="mail" class="w-6 h-6 text-brand-coral-500"></i>
+          </div>
+          <h3 class="text-lg font-outfit font-extrabold text-slate-900 dark:text-white">Entrar com E-mail</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
+            Use seu e-mail e senha para acessar sua conta.
+          </p>
+        </div>
+        <div class="space-y-3 mt-6">
+          <button onclick="showAuthView('options')" class="text-xs text-brand-coral-500 hover:text-brand-coral-600 font-semibold flex items-center gap-1 transition-colors">
+            ← Voltar
+          </button>
+          <div class="relative">
+            <i data-lucide="mail" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+            <input type="email" id="login-email-input" placeholder="seu@email.com" class="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+          </div>
+          <div class="relative">
+            <i data-lucide="lock" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+            <input type="password" id="login-password-input" placeholder="Senha" class="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-11 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+            <button type="button" onclick="togglePasswordVisibility('login-password-input', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div id="auth-error-login" class="text-xs text-rose-500 font-semibold text-center hidden"></div>
+          <button onclick="handleEmailLogin()" class="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm transition-all btn-premium shadow-md shadow-brand-coral-500/20">
+            Entrar
+          </button>
+          <p class="text-xs text-center text-slate-500 dark:text-slate-400">
+            Não tem conta? <button onclick="showAuthView('email-signup')" class="text-brand-coral-500 font-bold hover:underline">Cadastre-se</button>
+          </p>
+        </div>
+      </div>
+
+      <!-- EMAIL SIGNUP VIEW -->
+      <div id="auth-view-email-signup" class="hidden">
+        <div class="text-center space-y-2 mt-2">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-coral-500/10 text-brand-coral-500 mb-2">
+            <i data-lucide="user-plus" class="w-6 h-6 text-brand-coral-500"></i>
+          </div>
+          <h3 class="text-lg font-outfit font-extrabold text-slate-900 dark:text-white">Criar Conta</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-300 max-w-xs mx-auto leading-relaxed">
+            Preencha os dados abaixo para criar sua conta no Giro.
+          </p>
+        </div>
+        <div class="space-y-3 mt-6">
+          <button onclick="showAuthView('options')" class="text-xs text-brand-coral-500 hover:text-brand-coral-600 font-semibold flex items-center gap-1 transition-colors">
+            ← Voltar
+          </button>
+          <div class="relative">
+            <i data-lucide="user" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+            <input type="text" id="signup-name-input" placeholder="Nome completo" class="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+          </div>
+          <div class="relative">
+            <i data-lucide="mail" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+            <input type="email" id="signup-email-input" placeholder="seu@email.com" class="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+          </div>
+          <div class="relative">
+            <i data-lucide="lock" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+            <input type="password" id="signup-password-input" placeholder="Senha (min. 6 caracteres)" class="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-11 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+            <button type="button" onclick="togglePasswordVisibility('signup-password-input', this)" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+              <i data-lucide="eye" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div id="auth-error-signup" class="text-xs text-rose-500 font-semibold text-center hidden"></div>
+          <button onclick="handleEmailSignup()" class="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm transition-all btn-premium shadow-md shadow-brand-coral-500/20">
+            Criar Conta
+          </button>
+          <p class="text-xs text-center text-slate-500 dark:text-slate-400">
+            Já tem conta? <button onclick="showAuthView('email-login')" class="text-brand-coral-500 font-bold hover:underline">Faça login</button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET DADOS CADASTRAIS -->
+  <div id="cadastrais-sheet" class="fixed inset-0 z-[10000] invisible">
+    <div onclick="closeCadastraisSheet()" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="cadastrais-sheet-backdrop"></div>
+    <div class="absolute bottom-0 left-0 right-0 w-full max-w-lg mx-auto bg-white dark:bg-brand-indigo-950 border-t border-slate-100 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl transition-transform duration-300 transform translate-y-full flex flex-col" id="cadastrais-sheet-panel">
+      <div class="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer mb-5" onclick="closeCadastraisSheet()"></div>
+
+      <div class="text-center mb-6">
+        <h3 class="text-base font-outfit font-extrabold text-slate-900 dark:text-white">Dados Cadastrais</h3>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Edite seus dados pessoais</p>
+      </div>
+
+      <div class="space-y-4 mb-6">
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Nome Completo</label>
+          <div class="relative">
+            <i data-lucide="user" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+            <input type="text" id="cadastrais-name-input" class="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Nickname</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold pointer-events-none">@</span>
+            <input type="text" id="cadastrais-nickname-input" class="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+          </div>
+        </div>
+
+        <div>
+          <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">E-mail</label>
+          <div class="relative">
+            <i data-lucide="mail" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+            <i data-lucide="lock" class="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300 pointer-events-none"></i>
+            <input type="email" id="cadastrais-email-display" readonly class="w-full h-12 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 text-sm text-slate-400 pl-10 pr-10 cursor-not-allowed" />
+          </div>
+        </div>
+      </div>
+
+      <button onclick="saveCadastrais()" class="w-full py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/20 flex items-center justify-center gap-2">
+        <i data-lucide="save" class="w-4 h-4"></i>
+        Salvar Alterações
+      </button>
+    </div>
+  </div>
+
+  <!-- BOTTOM SHEET LOCALIZAÇÃO (MODO PASSAPORTE) -->
+  <div id="location-sheet" class="fixed inset-0 z-[10000] invisible">
+    <!-- Backdrop -->
+    <div onclick="closeLocationSheet()" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="location-sheet-backdrop"></div>
+    <!-- Sheet Panel -->
+    <div class="absolute bottom-0 left-0 right-0 w-full max-w-lg mx-auto bg-slate-50 dark:bg-brand-indigo-950 border-t border-slate-200 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl transition-transform duration-300 transform translate-y-full flex flex-col gap-6 text-slate-900 dark:text-slate-100" id="location-sheet-panel">
+      <!-- Handle bar -->
+      <div class="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer" onclick="closeLocationSheet()"></div>
+      
+      <div class="space-y-1">
+        <h3 class="text-lg font-outfit font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-5 h-5 text-brand-coral-500"></i> Definir Localização
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Pesquise bairros, ruas ou pontos turísticos para simular sua localização no Giro.</p>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+        </span>
+        <input type="text" id="location-search-input" oninput="onLocationSearchInput(this.value)" class="w-full h-12 pl-10 pr-4 rounded-2xl bg-white dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-sm outline-none transition-colors duration-300 focus:border-brand-coral-500 dark:focus:border-brand-coral-500" placeholder="Para onde quer dar um Giro?">
+      </div>
+
+      <!-- Quick GPS Button -->
+      <button onclick="useCurrentGPSLocation()" class="w-full h-11 rounded-2xl bg-brand-coral-500/10 hover:bg-brand-coral-500/20 text-brand-coral-600 dark:text-brand-coral-400 border border-brand-coral-500/20 dark:border-brand-coral-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 btn-premium">
+        <i data-lucide="locate" class="w-4 h-4"></i> Usar minha localização atual (GPS)
+      </button>
+
+      <!-- Seletor de Raio de Busca -->
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+          Raio de busca (Distância)
+        </label>
+        <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <button onclick="setRadiusFilter(0.5)" id="radius-btn-0.5" class="radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30">500m</button>
+          <button onclick="setRadiusFilter(1.5)" id="radius-btn-1.5" class="radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30">1.5 km</button>
+          <button onclick="setRadiusFilter(3)" id="radius-btn-3" class="radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30">3 km</button>
+          <button onclick="setRadiusFilter(5)" id="radius-btn-5" class="radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30">5 km</button>
+          <button onclick="setRadiusFilter(10)" id="radius-btn-10" class="radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-brand-coral-500 border-brand-coral-500 text-white shadow-md">10 km</button>
+          <button onclick="setRadiusFilter(Infinity)" id="radius-btn-Infinity" class="radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30">Sem limite</button>
+        </div>
+      </div>
+
+      <!-- Nominatim suggestions / Waiting list container -->
+      <div id="location-results-container" class="max-h-[220px] overflow-y-auto space-y-2 scrollbar-none">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // DATA CONSTANTS (Curitiba Mock Data)
+    const CATEGORIES = [
+      { id: '1', name: 'Parques e Lazer', slug: 'parques', icon: 'trees', color: 'teal' },
+      { id: '2', name: 'Gastronomia', slug: 'gastronomia', icon: 'utensils', color: 'coral' },
+      { id: '3', name: 'Cafés e Doces', slug: 'cafes', icon: 'coffee', color: 'gold' },
+      { id: '4', name: 'Vida Noturna', slug: 'noite', icon: 'wine', color: 'indigo' },
+      { id: '5', name: 'Cultura & Arte', slug: 'cultura', icon: 'sparkles', color: 'teal' }
+    ];
+
+    const MOCK_PLACES = [
+      {
+        id: 'p1',
+        name: 'Jardim Botânico de Curitiba',
+        description: 'Um dos principais cartões-postais da cidade. Possui uma estufa icônica inspirada no Palácio de Cristal de Londres, jardins geométricos e o Museu Botânico.',
+        address: 'R. Eng. Ostoja Roguski, s/n - Jardim Botânico',
+        category_id: '1',
+        latitude: -25.4431,
+        longitude: -49.2397,
+        image_url: 'https://images.unsplash.com/photo-1599839462784-5f50a8a6ba20?auto=format&fit=crop&w=800&q=80',
+        avg_rating: 4.8,
+        price_range: '$',
+        is_featured: true,
+        is_verified: true
+      },
+      {
+        id: 'p2',
+        name: 'Ópera de Arame',
+        description: 'Teatro tubular construído com estrutura de aço e teto de policarbonato, integrado a um cenário natural de pedreira desativada, lagos e cachoeira.',
+        address: 'R. João Gava, 970 - Abranches',
+        category_id: '5',
+        latitude: -25.3853,
+        longitude: -49.2766,
+        image_url: 'https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=800&q=80',
+        avg_rating: 4.7,
+        price_range: '$$',
+        is_featured: true,
+        is_verified: true
+      },
+      {
+        id: 'p3',
+        name: 'Parque Barigui',
+        description: 'O maior e mais frequentado parque de Curitiba. Conta com pistas de corrida, lagos imensos e as famosas capivaras residentes da cidade.',
+        address: 'Av. Cândido Hartmann, s/n - Bigorrilho',
+        category_id: '1',
+        latitude: -25.4248,
+        longitude: -49.3075,
+        image_url: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=800&q=80',
+        avg_rating: 4.8,
+        price_range: '$',
+        is_featured: false,
+        is_verified: true
+      },
+      {
+        id: 'p4',
+        name: 'Bar do Alemão',
+        description: 'Tradicional taberna germânica no coração do Centro Histórico. Famosa pelo chopp Submarino e pelo Eisbein (joelho de porco).',
+        address: 'R. Dr. Claudino dos Santos, 63 - São Francisco',
+        category_id: '4',
+        latitude: -25.4267,
+        longitude: -49.2721,
+        image_url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
+        avg_rating: 4.6,
+        price_range: '$$',
+        is_featured: true,
+        is_verified: true
+      },
+      {
+        id: 'p5',
+        name: 'Terrazza 40',
+        description: 'Restaurante panorâmico no topo do Edifício Champagnat. Oferece alta gastronomia italiana e uruguaia com uma vista de 360 graus espetacular.',
+        address: 'R. Padre Anchieta, 1287 - Bigorrilho',
+        category_id: '2',
+        latitude: -25.4309,
+        longitude: -49.2931,
+        image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80',
+        avg_rating: 4.7,
+        price_range: '$$$',
+        is_featured: true,
+        is_verified: true
+      },
+      {
+        id: 'p6',
+        name: 'Lucca Cafés Especiais',
+        description: 'Uma das cafeterias mais premiadas do Brasil, pioneira em cafés especiais de micro-lotes torrados no local e confeitaria de excelência.',
+        address: 'Alameda Pres. Taunay, 40 - Batel',
+        category_id: '3',
+        latitude: -25.4378,
+        longitude: -49.2825,
+        image_url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=800&q=80',
+        avg_rating: 4.5,
+        price_range: '$$',
+        is_featured: false,
+        is_verified: true
+      }
+    ];
+
+    // APP STATE
+    let currentTab = 'home';
+    let viewMode = 'swipe'; // 'swipe' (Tinder Cards) ou 'list' (Visualização de iFood)
+    let favorites = [];
+    try {
+      favorites = JSON.parse(localStorage.getItem('giro_favorites')) || JSON.parse(localStorage.getItem('bora_favorites')) || [];
+    } catch(e) { console.warn('Erro ao ler favoritos do localStorage:', e); favorites = []; }
+    let selectedPlace = null;
+    let searchQuery = '';
+    let selectedCategory = null;
+    let profileSubTab = 'personal'; // 'personal' ou 'business'
+    let theme = 'dark';
+    let userAvatar = null;
+    let badgeLevel = 'gold';
+    let userPreferences = ['pet', 'outdoor', 'live-music'];
+    try {
+      const savedPrefs = localStorage.getItem('giro_preferences');
+      if (savedPrefs) {
+        const parsed = JSON.parse(savedPrefs);
+        if (Array.isArray(parsed)) {
+          userPreferences = parsed;
+        }
+      }
+    } catch(e) { console.warn('Erro ao ler preferências do localStorage:', e); userPreferences = ['pet', 'outdoor', 'live-music']; }
+    let currentUser = null;
+    let mainMap = null;
+    let desktopMap = null;
+    let mainTileLayer = null;
+    let desktopTileLayer = null;
+    let mapMarkers = {};
+    let desktopMarkers = {};
+    
+    // Swipe queue state
+    let swipeQueue = [...MOCK_PLACES];
+    let activeCardIndex = 0;
+    let mapFilterFavoritesOnly = false;
+    let searchRadius = 10.0;
+    let currentSuggestions = [];
+
+    // Login and location state
+    let isLoggedIn = false;
+    let userCoords = null;
+    let pendingAction = null;
+    let userLocationMarker = null;
+    let userLocationDesktopMarker = null;
+
+    // INTELLIGENT THEME LOGIC
+    function initTheme() {
+      let savedTheme = localStorage.getItem('giro_theme');
+      if (!savedTheme) {
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+        if (prefersDark) {
+          savedTheme = 'dark';
+        } else if (prefersLight) {
+          savedTheme = 'light';
+        } else {
+          const hour = new Date().getHours();
+          savedTheme = (hour >= 6 && hour < 18) ? 'light' : 'dark';
+        }
+      }
+      setTheme(savedTheme);
+    }
+
+    function setTheme(newTheme) {
+      theme = newTheme;
+      if (newTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('giro_theme', newTheme);
+      updateMapTiles();
+    }
+
+    function toggleTheme() {
+      const nextTheme = theme === 'dark' ? 'light' : 'dark';
+      setTheme(nextTheme);
+    }
+
+    // PROFILE TAB HANDLERS
+    function openVanillaCropModal(imageSrc, onComplete) {
+      // Create Modal Container
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4';
+      
+      let zoom = 1.0;
+      let offsetX = 0;
+      let offsetY = 0;
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      
+      modal.innerHTML = `
+        <div class="glass-card w-full max-w-md rounded-[32px] border border-white/5 overflow-hidden flex flex-col">
+          <!-- Header -->
+          <div class="p-5 border-b border-white/5 text-center">
+            <h3 class="text-base font-outfit font-bold text-white">Ajustar Foto de Perfil</h3>
+            <p class="text-[10px] text-slate-400 mt-1">Arraste para mover e use o slider para ampliar</p>
+          </div>
+
+          <!-- Crop Viewport Container -->
+          <div class="relative w-full h-72 bg-brand-indigo-950/40 overflow-hidden cursor-move touch-none select-none flex items-center justify-center" id="crop-viewport">
+            <!-- Crop Guide (Circle Mask) -->
+            <div class="absolute w-48 h-48 rounded-full border-2 border-brand-coral-500/80 shadow-[0_0_0_9999px_rgba(13,7,36,0.6)] pointer-events-none z-10"></div>
+            <!-- Interactive Image -->
+            <img src="${imageSrc}" id="crop-image" class="max-w-none origin-center absolute pointer-events-none" style="transform: translate(0px, 0px) scale(1);" />
+          </div>
+
+          <!-- Controls -->
+          <div class="p-5 flex flex-col gap-4">
+            <!-- Zoom Slider -->
+            <div class="flex items-center gap-3">
+              <span class="text-[10px] font-bold text-slate-400 uppercase">Zoom</span>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.1"
+                value="1"
+                id="crop-zoom-slider"
+                class="flex-1 accent-brand-coral-500 bg-white/10 rounded-lg h-1.5 cursor-pointer"
+              />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+              <button id="crop-cancel-btn" class="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-all text-slate-300 active:scale-95">
+                Cancelar
+              </button>
+              <button id="crop-save-btn" class="flex-1 py-3 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/10">
+                Confirmar Corte
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      const viewport = modal.querySelector('#crop-viewport');
+      const img = modal.querySelector('#crop-image');
+      const zoomSlider = modal.querySelector('#crop-zoom-slider');
+      const cancelBtn = modal.querySelector('#crop-cancel-btn');
+      const saveBtn = modal.querySelector('#crop-save-btn');
+      
+      let imgWidth = 0;
+      let imgHeight = 0;
+      
+      const tempImg = new Image();
+      tempImg.onload = function() {
+        const scale = Math.max(200 / tempImg.width, 200 / tempImg.height);
+        imgWidth = tempImg.width * scale;
+        imgHeight = tempImg.height * scale;
+        img.style.width = imgWidth + 'px';
+        img.style.height = imgHeight + 'px';
+        updateTransform();
+      };
+      tempImg.src = imageSrc;
+      
+      function updateTransform() {
+        img.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${zoom})`;
+      }
+      
+      function handleDragStart(x, y) {
+        isDragging = true;
+        startX = x - offsetX;
+        startY = y - offsetY;
+      }
+      
+      function handleDragMove(x, y) {
+        if (!isDragging) return;
+        offsetX = x - startX;
+        offsetY = y - startY;
+        updateTransform();
+      }
+      
+      function handleDragEnd() {
+        isDragging = false;
+      }
+      
+      viewport.addEventListener('mousedown', (e) => {
+        handleDragStart(e.clientX, e.clientY);
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (isDragging) handleDragMove(e.clientX, e.clientY);
+      });
+      window.addEventListener('mouseup', handleDragEnd);
+      
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          handleDragStart(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      });
+      viewport.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length === 1) {
+          handleDragMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      });
+      viewport.addEventListener('touchend', handleDragEnd);
+      
+      zoomSlider.addEventListener('input', (e) => {
+        zoom = Number(e.target.value);
+        updateTransform();
+      });
+      
+      cancelBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      saveBtn.addEventListener('click', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 300;
+        const ctx = canvas.getContext('2d');
+        
+        const cropImgEl = new Image();
+        cropImgEl.onload = function() {
+          ctx.fillStyle = '#0d0724';
+          ctx.fillRect(0, 0, 300, 300);
+          
+          const vpRect = viewport.getBoundingClientRect();
+          const maskSize = 192;
+          const canvasScale = 300 / maskSize;
+          
+          ctx.save();
+          
+          const centerX = 150;
+          const centerY = 150;
+          
+          ctx.translate(centerX, centerY);
+          ctx.scale(zoom * canvasScale, zoom * canvasScale);
+          
+          const relativeX = offsetX / zoom;
+          const relativeY = offsetY / zoom;
+          
+          ctx.translate(relativeX, relativeY);
+          
+          const scale = imgWidth / tempImg.width;
+          const drawW = tempImg.width * scale;
+          const drawH = tempImg.height * scale;
+          
+          ctx.drawImage(cropImgEl, -drawW / 2, -drawH / 2, drawW, drawH);
+          ctx.restore();
+          
+          const croppedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+          onComplete(croppedBase64);
+          document.body.removeChild(modal);
+        };
+        cropImgEl.src = imageSrc;
+      });
+    }
+
+    function handleAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          openVanillaCropModal(e.target.result, function(croppedBase64) {
+            userAvatar = croppedBase64;
+            renderCurrentTab();
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function openPreferencesSheet() {
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-[1000] flex items-end justify-center bg-black/60 backdrop-blur-[4px]';
+      
+      const prefs = [
+        { id: 'pet', label: '🐶 Pet Friendly' },
+        { id: 'vegan', label: '🌿 Vegano' },
+        { id: 'work', label: '💻 Trabalhar' },
+        { id: 'outdoor', label: '☀️ Ar Livre' },
+        { id: 'live-music', label: '🎶 Música ao Vivo' },
+        { id: 'date', label: '🍷 Encontro' },
+        { id: 'specialty-coffee', label: '☕ Café Especial' },
+        { id: 'craft-beer', label: '🍺 Cerveja Artesanal' },
+        { id: 'street-food', label: '🍕 Comida de Rua' },
+        { id: 'cultural', label: '🎨 Cultural' },
+        { id: 'kids', label: '🧒 Espaço Kids' },
+        { id: 'accessible', label: '♿ Acessível' }
+      ];
+      
+      let localPrefs = [...userPreferences];
+      
+      function renderGrid() {
+        return prefs.map(pref => {
+          const isActive = localPrefs.includes(pref.id);
+          return `
+            <button onclick="toggleSheetPreference('${pref.id}')" id="sheet-pref-${pref.id}" class="px-4 py-3 rounded-2xl text-xs font-semibold border flex items-center gap-2.5 transition-all duration-200 active:scale-95 text-left border-0 cursor-pointer ${
+              isActive 
+                ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md shadow-brand-coral-500/20' 
+                : 'border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10'
+            }">
+              <span class="text-sm shrink-0">${pref.label.split(' ')[0]}</span>
+              <span class="truncate">${pref.label.split(' ').slice(1).join(' ')}</span>
+            </button>
+          `;
+        }).join('');
+      }
+      
+      modal.innerHTML = `
+        <!-- Backdrop -->
+        <div id="pref-sheet-backdrop" class="absolute inset-0"></div>
+        
+        <!-- Drawer Panel -->
+        <div id="pref-sheet-panel" class="relative w-full max-w-md bg-white dark:bg-brand-indigo-950 border-t border-slate-100 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl z-10 transition-transform duration-300 transform translate-y-full flex flex-col" style="max-height: 80vh;">
+          <!-- Handle bar -->
+          <div id="pref-sheet-close" class="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer mb-5 shrink-0"></div>
+          
+          <div class="text-center mb-5 shrink-0">
+            <h3 class="text-base font-outfit font-bold text-slate-900 dark:text-white">Editar Preferências</h3>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Selecione o que você busca para calibrar seu Swipe ⚡</p>
+          </div>
+
+          <!-- Scrollable grid -->
+          <div id="pref-sheet-grid" class="flex-1 overflow-y-auto pr-1 grid grid-cols-2 gap-2 mb-6 min-h-0">
+            ${renderGrid()}
+          </div>
+
+          <!-- Confirm button -->
+          <button id="pref-sheet-confirm" class="w-full py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/20 border-0 cursor-pointer shrink-0">
+            Confirmar Alterações
+          </button>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      
+      const panel = modal.querySelector('#pref-sheet-panel');
+      const backdrop = modal.querySelector('#pref-sheet-backdrop');
+      const closeHandle = modal.querySelector('#pref-sheet-close');
+      const confirmBtn = modal.querySelector('#pref-sheet-confirm');
+      
+      setTimeout(() => {
+        panel.classList.remove('translate-y-full');
+        panel.classList.add('translate-y-0');
+      }, 10);
+      
+      function closeSheet() {
+        panel.classList.remove('translate-y-0');
+        panel.classList.add('translate-y-full');
+        setTimeout(() => {
+          document.body.removeChild(modal);
+        }, 300);
+      }
+      
+      window.toggleSheetPreference = function(id) {
+        const index = localPrefs.indexOf(id);
+        if (index > -1) {
+          localPrefs.splice(index, 1);
+        } else {
+          localPrefs.push(id);
+        }
+        modal.querySelector('#pref-sheet-grid').innerHTML = renderGrid();
+      };
+      
+      function saveAndClose() {
+        userPreferences = [...localPrefs];
+        localStorage.setItem('giro_preferences', JSON.stringify(userPreferences));
+        renderCurrentTab();
+        closeSheet();
+      }
+      
+      backdrop.addEventListener('click', saveAndClose);
+      closeHandle.addEventListener('click', saveAndClose);
+      confirmBtn.addEventListener('click', saveAndClose);
+    }
+
+    function cycleBadgeLevel() {
+      if (badgeLevel === 'gold') badgeLevel = 'silver';
+      else if (badgeLevel === 'silver') badgeLevel = 'bronze';
+      else badgeLevel = 'gold';
+      renderCurrentTab();
+    }
+
+    function togglePreference(pref) {
+      const idx = userPreferences.indexOf(pref);
+      if (idx > -1) {
+        userPreferences.splice(idx, 1);
+      } else {
+        userPreferences.push(pref);
+      }
+      renderCurrentTab();
+    }
+
+    function handleLogout() {
+      isLoggedIn = false;
+      currentUser = null;
+      showToast("Sessão encerrada com sucesso!", 3000);
+      renderCurrentTab();
+    }
+
+    function updateMapTiles() {
+      const newUrl = theme === 'dark' 
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' 
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+        
+      if (mainTileLayer) {
+        mainTileLayer.setUrl(newUrl);
+      }
+      if (desktopTileLayer) {
+        desktopTileLayer.setUrl(newUrl);
+      }
+    }
+
+    // PASSPORT LOCATION (MANUAL SEARCH & WAITING LIST) LOGIC
+    let locationDebounceTimeout = null;
+
+    function openLocationSheet() {
+      const sheet = document.getElementById('location-sheet');
+      const backdrop = document.getElementById('location-sheet-backdrop');
+      const panel = document.getElementById('location-sheet-panel');
+      const input = document.getElementById('location-search-input');
+      const container = document.getElementById('location-results-container');
+      
+      if (!sheet) return;
+      sheet.classList.remove('invisible');
+      input.value = '';
+      container.innerHTML = '';
+      
+      setTimeout(() => {
+        backdrop.classList.replace('opacity-0', 'opacity-100');
+        panel.classList.replace('translate-y-full', 'translate-y-0');
+        input.focus();
+      }, 50);
+      
+      lucide.createIcons();
+    }
+
+    function closeLocationSheet() {
+      const sheet = document.getElementById('location-sheet');
+      const backdrop = document.getElementById('location-sheet-backdrop');
+      const panel = document.getElementById('location-sheet-panel');
+      
+      if (!sheet) return;
+      backdrop.classList.replace('opacity-100', 'opacity-0');
+      panel.classList.replace('translate-y-0', 'translate-y-full');
+      
+      setTimeout(() => {
+        sheet.classList.add('invisible');
+      }, 300);
+    }
+
+    function formatAddressLabel(address) {
+      if (!address) return 'Curitiba - PR';
+      
+      let road = address.road || '';
+      let suburb = address.suburb || address.neighbourhood || address.city_district || '';
+      
+      if (road) {
+        road = road.replace(/^Rua\s+/i, 'R. ')
+                   .replace(/^Avenida\s+/i, 'Av. ')
+                   .replace(/^Alameda\s+/i, 'Al. ')
+                   .replace(/^Travessa\s+/i, 'Tv. ')
+                   .replace(/^Praça\s+/i, 'Pça. ');
+      }
+      
+      if (road && suburb) {
+        const fullLabel = `${road}, ${suburb}`;
+        if (fullLabel.length <= 30) {
+          return fullLabel;
+        } else {
+          const parts = road.split(' ');
+          const shortenedRoad = parts[0] + ' ' + (parts.slice(-1)[0] || '');
+          const shortLabel = `${shortenedRoad}, ${suburb}`;
+          if (shortLabel.length <= 30) {
+            return shortLabel;
+          }
+          return `${suburb}, Curitiba`;
+        }
+      }
+      
+      return suburb ? `${suburb}, Curitiba` : (address.city || 'Curitiba - PR');
+    }
+
+    function selectLocationByIndex(index) {
+      const item = currentSuggestions[index];
+      if (!item) return;
+      const lat = parseFloat(item.lat);
+      const lon = parseFloat(item.lon);
+      selectLocation(lat, lon, item.display_name, item.address);
+    }
+
+    function setRadiusFilter(radius) {
+      searchRadius = radius;
+      
+      // Update UI of pills
+      const pills = document.querySelectorAll('.radius-pill');
+      pills.forEach(pill => {
+        pill.className = "radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30";
+      });
+      
+      const activeId = radius === Infinity ? 'radius-btn-Infinity' : `radius-btn-${radius}`;
+      const activePill = document.getElementById(activeId);
+      if (activePill) {
+        activePill.className = "radius-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all bg-brand-coral-500 border-brand-coral-500 text-white shadow-md";
+      }
+      
+      // Re-render and update map pins
+      renderCurrentTab();
+      renderDesktopMapPins();
+      
+      // Update mainMap if open
+      if (mainMap) {
+        initLeafletMap();
+      }
+    }
+
+    function onLocationSearchInput(value) {
+      if (locationDebounceTimeout) clearTimeout(locationDebounceTimeout);
+      
+      const query = value.trim();
+      const container = document.getElementById('location-results-container');
+      
+      if (!query) {
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="flex items-center justify-center py-4 gap-2 text-xs text-slate-500">
+          <div class="w-4 h-4 border-2 border-brand-coral-500 border-t-transparent rounded-full animate-spin"></div>
+          <span>Buscando endereços...</span>
+        </div>
+      `;
+
+      locationDebounceTimeout = setTimeout(() => {
+        searchAddressNominatim(query);
+      }, 500);
+    }
+
+    function searchAddressNominatim(query) {
+      const container = document.getElementById('location-results-container');
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5`;
+
+      fetch(url, {
+        headers: {
+          'Accept-Language': 'pt-BR'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        currentSuggestions = data || [];
+        if (!data || data.length === 0) {
+          container.innerHTML = `
+            <div class="p-4 text-center text-xs text-slate-500">
+              Nenhum endereço encontrado. Tente pesquisar com termos mais simples.
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        currentSuggestions.forEach((item, idx) => {
+          const name = item.display_name;
+          const lat = parseFloat(item.lat);
+          const lon = parseFloat(item.lon);
+          
+          // Detectar cidade / bairro
+          let subtitle = '';
+          if (item.address) {
+            const road = item.address.road || '';
+            const suburb = item.address.suburb || item.address.neighbourhood || '';
+            const city = item.address.city || item.address.town || item.address.municipality || '';
+            subtitle = [road, suburb, city].filter(Boolean).join(', ');
+          }
+
+          html += `
+            <div onclick="selectLocationByIndex(${idx})" class="p-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-2xl cursor-pointer hover:border-brand-coral-500/30 transition-all flex items-start gap-3 active:scale-[0.99]">
+              <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">${item.display_name.split(',')[0]}</div>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">${subtitle || name}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+        lucide.createIcons();
+      })
+      .catch(error => {
+        container.innerHTML = `
+          <div class="p-4 text-center text-xs text-red-400">
+            Erro ao consultar os servidores de mapa. Verifique sua conexão.
+          </div>
+        `;
+      });
+    }
+
+    function selectLocation(lat, lon, displayName, address) {
+      // Bounding Box Curitiba
+      const isCuritiba = (lat >= -25.65 && lat <= -25.30) && (lon >= -49.40 && lon <= -49.15);
+
+      if (isCuritiba) {
+        let label = formatAddressLabel(address);
+        
+        userCoords = { lat, lng: lon };
+        document.getElementById('header-location-label').innerText = label;
+        
+        if (mainMap) {
+          mainMap.setView([lat, lon], 15, { animate: true });
+          addUserLocationMarker(lat, lon);
+        }
+        if (desktopMap) {
+          desktopMap.setView([lat, lon], 15, { animate: true });
+          addUserLocationMarker(lat, lon);
+        }
+
+        showToast(`Localização simulada para ${label.split(' - ')[0]}!`, 4000);
+        closeLocationSheet();
+      } else {
+        const container = document.getElementById('location-results-container');
+        const city = address ? (address.city || address.town || address.village || address.municipality || 'sua cidade') : 'sua cidade';
+        
+        container.innerHTML = `
+          <div class="p-5 bg-brand-coral-500/10 border border-brand-coral-500/20 rounded-2xl flex flex-col gap-3 mt-2">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-full bg-brand-coral-500/20 flex items-center justify-center shrink-0 text-brand-coral-500 font-bold text-sm">🚀</div>
+              <div class="space-y-1">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white">O Giro ainda não chegou em ${city}!</h4>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">No momento, estamos ativos apenas em Curitiba - PR. Deixe seu e-mail para entrar na lista de espera!</p>
+              </div>
+            </div>
+            <form onsubmit="submitWaitingList(event, '${city}')" class="flex gap-2 mt-1">
+              <input type="email" required id="waiting-list-email" placeholder="Seu e-mail" class="flex-1 h-9 px-3 rounded-xl bg-white dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-[11px] text-slate-900 dark:text-white outline-none">
+              <button type="submit" class="h-9 px-4 rounded-xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-[11px] btn-premium">Me avise</button>
+            </form>
+          </div>
+        `;
+      }
+    }
+
+    function submitWaitingList(e, city) {
+      e.preventDefault();
+      const email = document.getElementById('waiting-list-email').value;
+      
+      const list = JSON.parse(localStorage.getItem('giro_waiting_list')) || [];
+      list.push({ email, city, timestamp: new Date().toISOString() });
+      localStorage.setItem('giro_waiting_list', JSON.stringify(list));
+
+      const container = document.getElementById('location-results-container');
+      container.innerHTML = `
+        <div class="p-5 bg-brand-teal-500/10 border border-brand-teal-500/20 rounded-2xl text-center space-y-2 mt-2">
+          <div class="text-2xl">🎉</div>
+          <h4 class="text-xs font-bold text-slate-900 dark:text-white">Inscrição Confirmada!</h4>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">Avisaremos você no e-mail <strong>${email}</strong> assim que o Giro chegar em ${city}!</p>
+        </div>
+      `;
+    }
+
+    function useCurrentGPSLocation() {
+      requestUserLocation();
+      document.getElementById('header-location-label').innerText = 'Curitiba - PR';
+      closeLocationSheet();
+      showToast("Buscando sua localização GPS real...", 3000);
+    }
+
+    // TOAST NOTIFICATION SYSTEM
+    function showToast(message, duration = 4000) {
+      const existingToast = document.getElementById('giro-toast');
+      if (existingToast) existingToast.remove();
+
+      const toast = document.createElement('div');
+      toast.id = 'giro-toast';
+      toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 z-[99999] w-[90%] max-w-sm bg-brand-indigo-950/90 backdrop-blur-md rounded-2xl border border-white/10 px-4 py-3 shadow-2xl flex items-center gap-3 transition-all duration-300 translate-y-10 opacity-0';
+      
+      const iconDiv = document.createElement('div');
+      iconDiv.className = 'flex items-center justify-center w-8 h-8 rounded-full bg-brand-coral-500/20 text-brand-coral-500 shrink-0';
+      iconDiv.innerHTML = '<i data-lucide="map-pin" class="w-4 h-4"></i>';
+      toast.appendChild(iconDiv);
+      
+      const textSpan = document.createElement('span');
+      textSpan.className = 'text-xs font-semibold text-slate-200';
+      textSpan.innerText = message;
+      toast.appendChild(textSpan);
+      
+      document.body.appendChild(toast);
+      lucide.createIcons();
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-10', 'opacity-0');
+      }, 50);
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-10', 'opacity-0');
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }, duration);
+    }
+
+    // MATH UTILS FOR GEOLOCATION (HAVERSINE FORMULA)
+    function getHaversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Raio da Terra em km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // Distância em km
+    }
+
+    function formatDistance(distKm) {
+      if (distKm < 1) {
+        const meters = Math.round(distKm * 1000);
+        return `a ${meters} m de você`;
+      } else {
+        return `a ${distKm.toFixed(1)} km de você`;
+      }
+    }
+
+    // GEOLOCATION DETECTION, REVERSE GEOCIDING & FALLBACK
+    function reverseGeocode(lat, lng) {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`;
+      fetch(url, {
+        headers: {
+          'Accept-Language': 'pt-BR'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.address) {
+          const label = formatAddressLabel(data.address);
+          document.getElementById('header-location-label').innerText = label;
+          
+          // Re-renderizar para atualizar distâncias e ordenação nos feeds
+          renderCurrentTab();
+          updateDesktopMapHighlight();
+        }
+      })
+      .catch(err => {
+        console.error("Erro na geocodificação reversa:", err);
+        // Fallback em caso de falha da API
+        document.getElementById('header-location-label').innerText = 'Curitiba - PR';
+        renderCurrentTab();
+      });
+    }
+
+    function requestUserLocation() {
+      if (!navigator.geolocation) {
+        handleLocationFallback();
+        return;
+      }
+
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 6000,
+        maximumAge: 0
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userCoords = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          
+          // Center maps
+          if (mainMap) {
+            mainMap.setView([userCoords.lat, userCoords.lng], 15, { animate: true });
+          }
+          if (desktopMap) {
+            desktopMap.setView([userCoords.lat, userCoords.lng], 15, { animate: true });
+          }
+          
+          addUserLocationMarker(userCoords.lat, userCoords.lng);
+          reverseGeocode(userCoords.lat, userCoords.lng);
+        },
+        (error) => {
+          handleLocationFallback();
+        },
+        options
+      );
+    }
+
+    function handleLocationFallback() {
+      userCoords = { lat: -25.4290, lng: -49.2671 }; // Centro de Curitiba
+      
+      if (mainMap) {
+        mainMap.setView([userCoords.lat, userCoords.lng], 13, { animate: true });
+      }
+      if (desktopMap) {
+        desktopMap.setView([userCoords.lat, userCoords.lng], 13, { animate: true });
+      }
+      
+      addUserLocationMarker(userCoords.lat, userCoords.lng);
+      reverseGeocode(userCoords.lat, userCoords.lng);
+      
+      showToast("Mostrando a região de Curitiba. Ative o GPS para ver locais próximos a você.", 5000);
+    }
+
+    function addUserLocationMarker(lat, lng) {
+      const userLocationIcon = L.divIcon({
+        html: '<div class="user-location-marker"></div>',
+        className: 'custom-user-marker',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+
+      if (mainMap) {
+        if (userLocationMarker) mainMap.removeLayer(userLocationMarker);
+        userLocationMarker = L.marker([lat, lng], { icon: userLocationIcon }).addTo(mainMap);
+      }
+      if (desktopMap) {
+        if (userLocationDesktopMarker) desktopMap.removeLayer(userLocationDesktopMarker);
+        userLocationDesktopMarker = L.marker([lat, lng], { icon: userLocationIcon }).addTo(desktopMap);
+      }
+    }
+
+    // CONTEXTUAL LOGIN SHEET HANDLERS
+    function promptLogin(action) {
+      pendingAction = action;
+      
+      const sheet = document.getElementById('login-sheet');
+      const backdrop = document.getElementById('login-sheet-backdrop');
+      const panel = document.getElementById('login-sheet-panel');
+      
+      if (!sheet) return;
+      sheet.classList.remove('invisible');
+      
+      setTimeout(() => {
+        backdrop.classList.replace('opacity-0', 'opacity-100');
+        panel.classList.replace('translate-y-full', 'translate-y-0');
+      }, 50);
+      
+      lucide.createIcons();
+    }
+
+    // Keep active tab menu functional
+    function closeLoginSheet() {
+      const sheet = document.getElementById('login-sheet');
+      const backdrop = document.getElementById('login-sheet-backdrop');
+      const panel = document.getElementById('login-sheet-panel');
+      
+      if (!sheet) return;
+      backdrop.classList.replace('opacity-100', 'opacity-0');
+      panel.classList.replace('translate-y-0', 'translate-y-full');
+      
+      setTimeout(() => {
+        sheet.classList.add('invisible');
+        pendingAction = null;
+      }, 300);
+    }
+
+    function simulateGoogleLogin() {
+      isLoggedIn = true;
+      currentUser = {
+        name: "Rafael do Valle",
+        nickname: "@rafael_giro",
+        photoUrl: null
+      };
+      closeLoginSheet();
+      
+      showToast("Conectado com o Google!", 3000);
+      renderCurrentTab();
+      
+      if (pendingAction) {
+        const { type, data } = pendingAction;
+        if (type === 'favorite') {
+          toggleFavorite(null, data);
+        } else if (type === 'swipe') {
+          handleCardSwiped(true);
+        }
+      }
+    }
+
+    function simulateEmailLogin() {
+      showAuthView('email-login');
+    }
+
+    function showAuthView(view) {
+      ['auth-view-options', 'auth-view-email-login', 'auth-view-email-signup'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById('auth-view-' + view);
+      if (target) target.classList.remove('hidden');
+      // Re-render Lucide icons for newly visible elements
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+        lucide.createIcons();
+      }
+    }
+
+    function handleEmailLogin() {
+      const email = document.getElementById('login-email-input')?.value?.trim();
+      const password = document.getElementById('login-password-input')?.value;
+      const errorEl = document.getElementById('auth-error-login');
+      if (!email || !password) {
+        if (errorEl) { errorEl.textContent = 'Preencha e-mail e senha.'; errorEl.classList.remove('hidden'); }
+        return;
+      }
+      // Check localStorage mock user
+      const savedUser = localStorage.getItem('giro_mock_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed.email === email && parsed.password === password) {
+          isLoggedIn = true;
+          currentUser = { name: parsed.name, nickname: '@' + email.split('@')[0], photoUrl: null };
+          closeLoginSheet();
+          showAuthView('options');
+          showToast('Conectado com e-mail!', 3000);
+          renderCurrentTab();
+          return;
+        }
+      }
+      // Fallback mock login (demo mode)
+      isLoggedIn = true;
+      currentUser = { name: email.split('@')[0], nickname: '@' + email.split('@')[0], photoUrl: null };
+      closeLoginSheet();
+      showAuthView('options');
+      showToast('Conectado com e-mail!', 3000);
+      renderCurrentTab();
+    }
+
+    function handleEmailSignup() {
+      const name = document.getElementById('signup-name-input')?.value?.trim();
+      const email = document.getElementById('signup-email-input')?.value?.trim();
+      const password = document.getElementById('signup-password-input')?.value;
+      const errorEl = document.getElementById('auth-error-signup');
+      if (!name) { if (errorEl) { errorEl.textContent = 'Preencha seu nome completo.'; errorEl.classList.remove('hidden'); } return; }
+      if (!email) { if (errorEl) { errorEl.textContent = 'Preencha o e-mail.'; errorEl.classList.remove('hidden'); } return; }
+      if (!password || password.length < 6) { if (errorEl) { errorEl.textContent = 'A senha deve ter pelo menos 6 caracteres.'; errorEl.classList.remove('hidden'); } return; }
+      // Save to localStorage
+      localStorage.setItem('giro_mock_user', JSON.stringify({ email, password, name }));
+      isLoggedIn = true;
+      currentUser = { name, nickname: '@' + email.split('@')[0], photoUrl: null };
+      closeLoginSheet();
+      showAuthView('options');
+      showToast('Conta criada com sucesso!', 3000);
+      renderCurrentTab();
+    }
+
+    function openCadastraisSheet() {
+      const sheet = document.getElementById('cadastrais-sheet');
+      if (!sheet) return;
+      sheet.classList.remove('invisible');
+      requestAnimationFrame(() => {
+        document.getElementById('cadastrais-sheet-backdrop').classList.add('opacity-100');
+        document.getElementById('cadastrais-sheet-panel').classList.remove('translate-y-full');
+      });
+      // Pre-fill fields
+      if (currentUser) {
+        const nameEl = document.getElementById('cadastrais-name-input');
+        const nickEl = document.getElementById('cadastrais-nickname-input');
+        if (nameEl) nameEl.value = currentUser.name || '';
+        if (nickEl) nickEl.value = (currentUser.nickname || '').replace('@', '');
+      }
+      lucide.createIcons();
+    }
+
+    function closeCadastraisSheet() {
+      document.getElementById('cadastrais-sheet-backdrop')?.classList.remove('opacity-100');
+      document.getElementById('cadastrais-sheet-panel')?.classList.add('translate-y-full');
+      setTimeout(() => {
+        document.getElementById('cadastrais-sheet')?.classList.add('invisible');
+      }, 300);
+    }
+
+    function saveCadastrais() {
+      const name = document.getElementById('cadastrais-name-input')?.value?.trim();
+      const nickname = document.getElementById('cadastrais-nickname-input')?.value?.trim();
+      if (currentUser) {
+        if (name) currentUser.name = name;
+        if (nickname) currentUser.nickname = '@' + nickname.replace('@', '');
+      }
+      // Update localStorage mock user
+      const savedUser = localStorage.getItem('giro_mock_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (name) parsed.name = name;
+        localStorage.setItem('giro_mock_user', JSON.stringify(parsed));
+      }
+      closeCadastraisSheet();
+      showToast('Dados atualizados!', 3000);
+      renderCurrentTab();
+    }
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      renderCurrentTab();
+      initDesktopMap();
+      lucide.createIcons();
+      
+      // Splash Screen timer (2.2s)
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.classList.add('opacity-0');
+          setTimeout(() => {
+            splash.remove();
+            // Start geolocation prompt right after splash fades out
+            requestUserLocation();
+          }, 700);
+        } else {
+          requestUserLocation();
+        }
+      }, 2200);
+    });
+
+    // WINDOW RESIZE EVENT
+    window.addEventListener('resize', () => {
+      initDesktopMap();
+      if (desktopMap) {
+        desktopMap.invalidateSize();
+      }
+      if (mainMap) {
+        mainMap.invalidateSize();
+      }
+    });
+
+    // NAVIGATION TABS
+    function switchTab(tabId) {
+      console.log('[switchTab] Navegando para:', tabId);
+      try {
+        currentTab = tabId;
+        if (tabId === 'home') {
+          viewMode = 'swipe';
+        }
+        if (tabId !== 'explore') {
+          mapFilterFavoritesOnly = false;
+        }
+        
+        // Update nav buttons style
+        ['home', 'explore', 'favorites', 'profile'].forEach(id => {
+          const btn = document.getElementById(`btn-tab-${id}`);
+          if (!btn) return;
+          try {
+            const icon = btn.querySelector('i') || btn.querySelector('svg');
+            const text = btn.querySelector('span');
+            
+            if (icon) {
+              if (id === tabId) {
+                icon.setAttribute('class', 'w-5 h-5 text-brand-coral-500 scale-110 transition-all');
+              } else {
+                icon.setAttribute('class', 'w-5 h-5 text-slate-400 transition-all');
+              }
+            }
+            if (text) {
+              if (id === tabId) {
+                text.className = 'text-[10px] font-semibold mt-1 text-brand-coral-500';
+              } else {
+                text.className = 'text-[10px] font-medium mt-1 text-slate-400';
+              }
+            }
+          } catch(iconErr) {
+            console.warn('[switchTab] Erro ao estilizar botão', id, iconErr);
+          }
+        });
+        
+        renderCurrentTab();
+        lucide.createIcons();
+      } catch(err) {
+        console.error('[switchTab] Erro fatal:', err);
+      }
+    }
+
+    // FAVORITES HANDLER
+    function toggleFavorite(e, id) {
+      if (e) e.stopPropagation();
+      
+      if (!isLoggedIn) {
+        promptLogin({ type: 'favorite', data: id });
+        return;
+      }
+      
+      const index = favorites.indexOf(id);
+      if (index > -1) {
+        favorites.splice(index, 1);
+      } else {
+        favorites.push(id);
+      }
+      localStorage.setItem('giro_favorites', JSON.stringify(favorites));
+      
+      // Re-render
+      renderCurrentTab();
+      lucide.createIcons();
+      updateDesktopMapHighlight();
+    }
+
+    // REDIRECTS HANDLER (Uber, 99, Maps)
+    function openRoute(e, id, type) {
+      if (e) e.stopPropagation();
+      const place = MOCK_PLACES.find(p => p.id === id);
+      if (!place) return;
+
+      const { latitude: lat, longitude: lng, name, address } = place;
+      let url = '';
+
+      switch (type) {
+        case 'google-maps':
+          url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+          break;
+        case 'uber':
+          url = `https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=${lat}&dropoff[longitude]=${lng}&dropoff[nickname]=${encodeURIComponent(name)}&dropoff[formatted_address]=${encodeURIComponent(address)}`;
+          break;
+        case '99':
+          url = `https://99taxis.mobi/passenger/route?lat=${lat}&lng=${lng}&name=${encodeURIComponent(name)}`;
+          break;
+      }
+      window.open(url, '_blank');
+    }
+
+    // VIEW DETAILED PLACE (FROM HOME TO EXPLORE MAP)
+    function viewPlaceOnMap(id) {
+      const place = MOCK_PLACES.find(p => p.id === id);
+      if (!place) return;
+      selectedPlace = place;
+      switchTab('explore');
+    }
+
+    function handleHeaderLogoClick() {
+      // 1. Fechar a modal de localização se estiver aberta
+      closeLocationSheet();
+      
+      // 2. Limpar busca e categoria
+      searchQuery = '';
+      selectedCategory = null;
+      
+      // 3. Direcionar o usuário de volta para a aba 'home'
+      switchTab('home');
+    }
+
+    function handlePinButtonClick(e) {
+      if (e) e.stopPropagation();
+      
+      mapFilterFavoritesOnly = true;
+
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        switchTab('explore');
+      } else {
+        // No Desktop: expandir coluna do mapa e re-renderizar pins
+        const mapColumn = document.getElementById('desktop-map-column');
+        const mainContainer = document.getElementById('main-app-container');
+        const backBtn = document.getElementById('desktop-back-btn-container');
+        
+        if (mapColumn) {
+          mapColumn.classList.remove('hidden');
+          mapColumn.style.display = 'block';
+        }
+        if (mainContainer) {
+          mainContainer.classList.remove('md:max-w-lg');
+          mainContainer.classList.add('md:max-w-4xl');
+        }
+        if (backBtn) {
+          backBtn.classList.remove('hidden');
+        }
+        
+        // Inicializar ou re-renderizar
+        if (!desktopMap) {
+          initDesktopMap();
+        } else {
+          renderDesktopMapPins();
+        }
+      }
+    }
+
+    function handleCloseSavedPins(e) {
+      if (e) e.stopPropagation();
+      
+      mapFilterFavoritesOnly = false;
+      
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        switchTab('home');
+      } else {
+        // No Desktop: recolher coluna do mapa
+        const mapColumn = document.getElementById('desktop-map-column');
+        const mainContainer = document.getElementById('main-app-container');
+        const backBtn = document.getElementById('desktop-back-btn-container');
+        
+        if (mapColumn) {
+          mapColumn.classList.add('hidden');
+          mapColumn.style.display = 'none';
+        }
+        if (mainContainer) {
+          mainContainer.classList.remove('md:max-w-4xl');
+          mainContainer.classList.add('md:max-w-lg');
+        }
+        if (backBtn) {
+          backBtn.classList.add('hidden');
+        }
+        
+        // Re-renderizar os pins completos no desktopMap caso volte a abri-lo depois
+        renderDesktopMapPins();
+      }
+    }
+
+    // SWITCH VIEW MODE BETWEEN TINDER SWIPE & IFOOD LIST
+    function setViewMode(mode) {
+      viewMode = mode;
+      renderCurrentTab();
+      lucide.createIcons();
+    }
+
+    // RENDER CURRENT TAB CONTENT
+    function renderCurrentTab() {
+      console.log('[renderCurrentTab] Renderizando tab:', currentTab);
+      const content = document.getElementById('tab-content');
+      if (!content) {
+        console.error('[renderCurrentTab] Elemento #tab-content não encontrado!');
+        return;
+      }
+      
+      // Reset classes
+      content.className = "flex-1 flex flex-col min-h-0";
+      
+      try {
+        if (currentTab === 'home') {
+          if (viewMode === 'swipe') {
+            content.classList.add('overflow-hidden');
+            renderSwipeView(content);
+          } else {
+            content.classList.add('overflow-y-auto');
+            renderListView(content);
+          }
+        } else if (currentTab === 'explore') {
+          content.classList.add('overflow-hidden');
+          renderExplore(content);
+        } else if (currentTab === 'favorites') {
+          content.classList.add('overflow-y-auto');
+          renderFavorites(content);
+        } else if (currentTab === 'profile') {
+          content.classList.add('overflow-y-auto');
+          renderProfile(content);
+        }
+        console.log('[renderCurrentTab] Render concluído com sucesso.');
+      } catch(err) {
+        console.error('[renderCurrentTab] Erro ao renderizar tab "' + currentTab + '":', err);
+        content.innerHTML = '<div class="p-8 text-center text-rose-400 text-sm">Erro ao carregar esta tela. Tente novamente.</div>';
+      }
+    }
+
+    // SWIPE VIEW (Tinder Mode)
+    function renderSwipeView(container) {
+      // Calcular distâncias e ordenar
+      const placesWithDistance = MOCK_PLACES.map(place => {
+        let distance = 0;
+        if (userCoords) {
+          distance = getHaversineDistance(userCoords.lat, userCoords.lng, place.latitude, place.longitude);
+        }
+        return { ...place, distance };
+      });
+
+      // Re-populate and filter the cards
+      const filtered = placesWithDistance.filter(place => {
+        const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
+        const matchesRadius = (!userCoords || searchRadius === Infinity) ? true : place.distance <= searchRadius;
+        return matchesCategory && matchesRadius;
+      });
+
+      if (userCoords) {
+        filtered.sort((a, b) => a.distance - b.distance);
+      }
+
+      swipeQueue = [...filtered];
+      if (activeCardIndex >= swipeQueue.length) {
+        activeCardIndex = 0; // Reset index if out of bounds
+      }
+
+      let cardsHtml = '';
+      if (swipeQueue.length > 0) {
+        // Render 2 cards stacked (active card and next background card)
+        const activePlace = swipeQueue[activeCardIndex];
+        const nextPlace = swipeQueue[(activeCardIndex + 1) % swipeQueue.length];
+
+        cardsHtml = `
+          <div class="swiper-container select-none">
+            <!-- BACKGROUND CARD -->
+            ${swipeQueue.length > 1 ? `
+              <div class="swiper-card glass-card opacity-60 scale-[0.93] translate-y-4 -z-10 pointer-events-none flex flex-col">
+                <div class="relative flex-1 min-h-[120px] overflow-hidden bg-brand-indigo-950">
+                  <img src="${nextPlace.image_url}" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950 via-brand-indigo-950/20 to-black/25"></div>
+                </div>
+                <div class="p-4 sm:p-5 flex-initial shrink-0 bg-brand-indigo-900/90 flex flex-col justify-center border-t border-white/5">
+                  <h3 class="text-base font-outfit font-bold text-white/50">${nextPlace.name}</h3>
+                  <p class="text-xs text-slate-500">${nextPlace.address} ${nextPlace.distance !== undefined ? `• ${formatDistance(nextPlace.distance)}` : ''}</p>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- ACTIVE SWIPABLE CARD -->
+            <div id="active-card" class="swiper-card glass-card z-10 flex flex-col">
+              <div class="relative flex-1 min-h-[120px] bg-brand-indigo-950 overflow-hidden">
+                <img src="${activePlace.image_url}" class="w-full h-full object-cover" draggable="false">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950 via-brand-indigo-950/20 to-black/25"></div>
+                
+                <!-- Swipe Stamp Badges -->
+                <div id="badge-like" class="swipe-badge swipe-badge-like">Giro!</div>
+                <div id="badge-nope" class="swipe-badge swipe-badge-nope">Nem...</div>
+
+                <!-- Verified Badge & Category -->
+                <div class="absolute top-4 left-4 flex gap-1.5 items-center bg-brand-indigo-950/80 border border-white/10 px-3 py-1 rounded-full">
+                  <span class="text-[10px] font-bold text-brand-teal-400 uppercase tracking-wider">${activePlace.price_range} · ${activePlace.avg_rating} ★</span>
+                  ${activePlace.is_verified ? '<i data-lucide="check-circle" class="w-3.5 h-3.5 text-brand-teal-400"></i>' : ''}
+                </div>
+              </div>
+
+              <!-- Information Details -->
+              <div class="p-4 sm:p-5 flex-initial shrink-0 bg-brand-indigo-900/90 border-t border-white/5 flex flex-col justify-between">
+                <div>
+                  <h3 class="text-base sm:text-lg font-outfit font-extrabold text-white leading-tight tracking-tight">${activePlace.name}</h3>
+                  <p class="text-[11px] sm:text-xs text-brand-teal-400 font-semibold mt-0.5 flex items-center gap-1 flex-wrap">
+                    <span>${activePlace.address}</span>
+                    ${activePlace.distance !== undefined ? `<span class="text-brand-coral-500 font-bold ml-1.5">• ${formatDistance(activePlace.distance)}</span>` : ''}
+                  </p>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-300 leading-relaxed line-clamp-2 sm:line-clamp-3 my-2">${activePlace.description}</p>
+                
+                <!-- Quick Route Buttons on Card -->
+                <div class="grid grid-cols-3 gap-2 border-t border-white/5 pt-3">
+                  <button onclick="openRoute(event, '${activePlace.id}', 'google-maps')" class="flex items-center justify-center gap-1 py-1.5 px-1 rounded-xl bg-white/5 hover:bg-brand-coral-500 hover:text-white border border-white/5 text-[9px] sm:text-[10px] font-bold uppercase transition-all">
+                    <i data-lucide="navigation" class="w-3 h-3 text-brand-coral-400"></i> Maps
+                  </button>
+                  <button onclick="openRoute(event, '${activePlace.id}', 'uber')" class="flex items-center justify-center gap-1.5 py-1.5 px-1 rounded-xl bg-white/5 hover:bg-black hover:text-white border border-white/5 text-[9px] sm:text-[10px] font-bold uppercase transition-all">
+                    <span>U</span> Uber
+                  </button>
+                  <button onclick="openRoute(event, '${activePlace.id}', '99')" class="flex items-center justify-center gap-1.5 py-1.5 px-1 rounded-xl bg-white/5 hover:bg-yellow-500 hover:text-black border border-white/5 text-[9px] sm:text-[10px] font-bold uppercase transition-all">
+                    <span class="text-amber-500">99</span> 99App
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        cardsHtml = `
+          <div class="flex flex-col items-center justify-center py-20 px-6 text-center">
+            <div class="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500">
+              <i data-lucide="compass" class="w-8 h-8 animate-spin-slow"></i>
+            </div>
+            <h3 class="text-lg font-outfit font-bold text-white mb-2">Sem locais nesta categoria</h3>
+            <p class="text-xs text-slate-400 max-w-xs leading-relaxed">Selecione outra categoria ou limpe filtros para continuar combinando.</p>
+          </div>
+        `;
+      }
+
+      let categoriesHtml = CATEGORIES.map(cat => `
+        <button onclick="selectCategoryFilter('${cat.id}')" class="snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${selectedCategory === cat.id ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md' : 'bg-brand-indigo-900/40 border-white/5 text-slate-300 hover:border-white/10'}">
+          <i data-lucide="${cat.icon}" class="w-4 h-4 ${selectedCategory === cat.id ? 'text-white' : 'text-brand-teal-400'}"></i>
+          <span class="text-xs">${cat.name}</span>
+        </button>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="px-6 py-3 sm:py-4 flex flex-col h-full max-w-md mx-auto w-full">
+          <!-- Switch View Selectors -->
+          <div class="flex justify-between items-center mb-3 sm:mb-4">
+            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Descoberta Reativa</span>
+            <div class="bg-brand-indigo-950/80 border border-white/5 p-1 rounded-xl flex gap-1 shadow-inner">
+              <button onclick="setViewMode('swipe')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white' : 'text-slate-400 hover:text-white'}">
+                <i data-lucide="flame" class="w-3.5 h-3.5"></i> Match
+              </button>
+              <button onclick="setViewMode('list')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'list' ? 'bg-brand-coral-500 text-white' : 'text-slate-400 hover:text-white'}">
+                <i data-lucide="list" class="w-3.5 h-3.5"></i> Lista
+              </button>
+            </div>
+          </div>
+
+          <!-- Category filter header -->
+          <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none snap-x border-b border-white/5 mb-3 sm:mb-4">
+            <button onclick="selectCategoryFilter(null)" class="snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${selectedCategory === null ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md' : 'bg-brand-indigo-900/40 border-white/5 text-slate-300 hover:border-white/10'}">
+              <span class="text-xs">Todos</span>
+            </button>
+            ${categoriesHtml}
+          </div>
+
+          <!-- Tinder Swipe Cards Render Area -->
+          <div class="flex-1 flex flex-col justify-center items-center py-2 relative">
+            ${cardsHtml}
+          </div>
+
+          <!-- Swipe Control Buttons -->
+          ${swipeQueue.length > 0 ? `
+            <div class="flex items-center justify-center gap-6 mt-3 sm:mt-5">
+              <button onclick="swipeNope()" class="w-14 h-14 rounded-full bg-brand-indigo-900 border border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white active:scale-90 transition-all">
+                <i data-lucide="x" class="w-6 h-6"></i>
+              </button>
+              <button onclick="handlePinButtonClick(event)" class="w-11 h-11 rounded-full bg-brand-indigo-900 border border-white/5 flex items-center justify-center text-brand-teal-400 shadow-md hover:bg-brand-teal-500 hover:text-white active:scale-90 transition-all">
+                <i data-lucide="map-pin" class="w-5 h-5"></i>
+              </button>
+              <button onclick="swipeLike()" class="w-14 h-14 rounded-full bg-brand-indigo-900 border border-white/5 flex items-center justify-center text-brand-teal-400 shadow-lg hover:bg-brand-teal-500 hover:text-white active:scale-90 transition-all">
+                <i data-lucide="heart" class="w-6 h-6 fill-transparent hover:fill-current"></i>
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      // Setup Swipe Gesture Physics Event Listeners
+      if (swipeQueue.length > 0) {
+        setTimeout(() => {
+          setupSwipePhysics();
+        }, 50);
+      }
+    }
+
+    // TINDER SWIPE PHYSICS GESTURES AND PHYSICS (NATIVE 60FPS)
+    function setupSwipePhysics() {
+      const card = document.getElementById('active-card');
+      const badgeLike = document.getElementById('badge-like');
+      const badgeNope = document.getElementById('badge-nope');
+      if (!card) return;
+
+      let startX = 0;
+      let currentX = 0;
+      let isDragging = false;
+
+      // Event helper para obter coordenada X de Touch e Mouse
+      const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
+
+      const onStart = (e) => {
+        startX = getX(e);
+        isDragging = true;
+        card.style.transition = 'none'; // Desativa transições durante drag
+      };
+
+      const onMove = (e) => {
+        if (!isDragging) return;
+        currentX = getX(e);
+        const deltaX = currentX - startX;
+        
+        // Aplica translação e rotação em torno do fundo do card
+        const rotation = deltaX * 0.08;
+        card.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+
+        // Controla opacidade dos carimbos (Bora! / Nem...)
+        if (deltaX > 20) {
+          badgeLike.style.opacity = Math.min(deltaX / 100, 1);
+          badgeNope.style.opacity = 0;
+        } else if (deltaX < -20) {
+          badgeNope.style.opacity = Math.min(Math.abs(deltaX) / 100, 1);
+          badgeLike.style.opacity = 0;
+        } else {
+          badgeLike.style.opacity = 0;
+          badgeNope.style.opacity = 0;
+        }
+      };
+
+      const onEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        const deltaX = currentX - startX;
+        const threshold = 120; // limite de distância para registrar swipe
+
+        card.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease';
+
+        if (deltaX > threshold) {
+          // Swipe para a Direita -> LIKE (Bora!)
+          card.style.transform = 'translateX(400px) rotate(45deg)';
+          card.style.opacity = '0';
+          setTimeout(() => {
+            handleCardSwiped(true);
+          }, 300);
+        } else if (deltaX < -threshold) {
+          // Swipe para a Esquerda -> NOPE
+          card.style.transform = 'translateX(-400px) rotate(-45deg)';
+          card.style.opacity = '0';
+          setTimeout(() => {
+            handleCardSwiped(false);
+          }, 300);
+        } else {
+          // Retorna ao centro se não atingir limite
+          card.style.transform = 'translateX(0) rotate(0)';
+          badgeLike.style.opacity = 0;
+          badgeNope.style.opacity = 0;
+        }
+      };
+
+      // Adiciona eventos Touch
+      card.addEventListener('touchstart', onStart);
+      card.addEventListener('touchmove', onMove);
+      card.addEventListener('touchend', onEnd);
+
+      // Adiciona eventos Mouse
+      card.addEventListener('mousedown', onStart);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onEnd);
+    }
+
+    // AUTOMATIC BUTTON CLICKS SWIPING
+    function swipeLike() {
+      const card = document.getElementById('active-card');
+      const badge = document.getElementById('badge-like');
+      if (!card) return;
+      
+      card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+      badge.style.opacity = 1;
+      card.style.transform = 'translateX(400px) rotate(45deg)';
+      card.style.opacity = 0;
+      setTimeout(() => {
+        handleCardSwiped(true);
+      }, 350);
+    }
+
+    function swipeNope() {
+      const card = document.getElementById('active-card');
+      const badge = document.getElementById('badge-nope');
+      if (!card) return;
+      
+      card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+      badge.style.opacity = 1;
+      card.style.transform = 'translateX(-400px) rotate(-45deg)';
+      card.style.opacity = 0;
+      setTimeout(() => {
+        handleCardSwiped(false);
+      }, 350);
+    }
+
+    function handleCardSwiped(liked) {
+      if (liked) {
+        const place = swipeQueue[activeCardIndex];
+        
+        if (!isLoggedIn) {
+          promptLogin({ type: 'swipe', data: place.id });
+          return;
+        }
+
+        // Adiciona aos favoritos se já não estiver
+        if (!favorites.includes(place.id)) {
+          favorites.push(place.id);
+          localStorage.setItem('giro_favorites', JSON.stringify(favorites));
+        }
+      }
+
+      // Avança para o próximo card da fila
+      activeCardIndex = (activeCardIndex + 1) % swipeQueue.length;
+      renderCurrentTab();
+      lucide.createIcons();
+      updateDesktopMapHighlight();
+    }
+
+    // LIST VIEW (iFood Card-Based layout)
+    function renderListView(container) {
+      const placesWithDistance = MOCK_PLACES.map(place => {
+        let distance = 0;
+        if (userCoords) {
+          distance = getHaversineDistance(userCoords.lat, userCoords.lng, place.latitude, place.longitude);
+        }
+        return { ...place, distance };
+      });
+
+      const filtered = placesWithDistance.filter(place => {
+        const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              place.description.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
+        const matchesRadius = (!userCoords || searchRadius === Infinity) ? true : place.distance <= searchRadius;
+        return matchesSearch && matchesCategory && matchesRadius;
+      });
+
+      if (userCoords) {
+        filtered.sort((a, b) => a.distance - b.distance);
+      }
+
+      let categorySliderHtml = CATEGORIES.map(cat => `
+        <button onclick="selectCategoryFilter('${cat.id}')" class="snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${selectedCategory === cat.id ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md' : 'bg-brand-indigo-900/40 border-white/5 text-slate-300 hover:border-white/10'}">
+          <i data-lucide="${cat.icon}" class="w-4 h-4 ${selectedCategory === cat.id ? 'text-white' : 'text-brand-teal-400'}"></i>
+          <span class="text-xs">${cat.name}</span>
+        </button>
+      `).join('');
+
+      let listHtml = filtered.map(place => renderPlaceCardTemplate(place)).join('');
+
+      container.innerHTML = `
+        <div class="pb-8 w-full">
+          <!-- Switch View Selectors -->
+          <div class="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Visualização de iFood</span>
+            <div class="bg-brand-indigo-950/80 border border-white/5 p-1 rounded-xl flex gap-1 shadow-inner">
+              <button onclick="setViewMode('swipe')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white' : 'text-slate-400 hover:text-white'}">
+                <i data-lucide="flame" class="w-3.5 h-3.5"></i> Match
+              </button>
+              <button onclick="setViewMode('list')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'list' ? 'bg-brand-coral-500 text-white' : 'text-slate-400 hover:text-white'}">
+                <i data-lucide="list" class="w-3.5 h-3.5"></i> Lista
+              </button>
+            </div>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="max-w-6xl mx-auto px-6 mb-4">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <i data-lucide="search" class="w-5 h-5 text-slate-400"></i>
+              </span>
+              <input type="text" oninput="updateSearch(this.value)" value="${searchQuery}" class="w-full h-11 pl-10 pr-4 rounded-2xl bg-brand-indigo-900/50 border border-white/5 text-slate-100 placeholder:text-slate-400 text-sm outline-none" placeholder="Buscar parques, gastronomia, rolês...">
+            </div>
+          </div>
+
+          <!-- Categories Slider -->
+          <div class="max-w-6xl mx-auto py-2">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Categorias</h3>
+            <div class="flex gap-3 overflow-x-auto px-6 pb-2 scrollbar-none snap-x">
+              <button onclick="selectCategoryFilter(null)" class="snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${selectedCategory === null ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md' : 'bg-brand-indigo-900/40 border-white/5 text-slate-300 hover:border-white/10'}">
+                <span class="text-xs">Todos</span>
+              </button>
+              ${categorySliderHtml}
+            </div>
+          </div>
+
+          <!-- Grid Principal -->
+          <div class="py-4 px-6 max-w-6xl mx-auto w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              ${listHtml || '<p class="text-xs text-slate-400 text-center py-8">Nenhum local correspondente.</p>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // EXPLORE MAP SCREEN
+    function renderExplore(container) {
+      container.innerHTML = `
+        <div class="relative w-full h-[calc(100dvh-64px)] md:h-[680px] overflow-hidden">
+          <!-- Search input overlay -->
+          <div class="absolute top-4 left-0 right-0 z-[1000] px-4 max-w-md mx-auto">
+            <div class="glass-card rounded-2xl border border-white/10 shadow-premium flex items-center px-3 py-1">
+              <i data-lucide="search" class="w-5 h-5 text-slate-400 mr-2"></i>
+              <input type="text" oninput="updateMapSearch(this.value)" value="${searchQuery}" class="flex-1 h-10 bg-transparent text-slate-100 text-sm outline-none" placeholder="Buscar no mapa...">
+            </div>
+          </div>
+
+          <!-- Map Container -->
+          <div id="map-element" class="w-full h-full"></div>
+
+          <!-- Selected place overlay drawer -->
+          <div id="map-drawer" class="absolute bottom-20 left-0 right-0 z-[1000] px-4 pb-2 max-w-md mx-auto transition-all duration-300 transform translate-y-full">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      `;
+
+      // Inicializa o mapa com delay sutil
+      setTimeout(() => {
+        initLeafletMap();
+      }, 50);
+    }
+
+    // FAVORITES SCREEN
+    function renderFavorites(container) {
+      const placesWithDistance = MOCK_PLACES.map(place => {
+        let distance = 0;
+        if (userCoords) {
+          distance = getHaversineDistance(userCoords.lat, userCoords.lng, place.latitude, place.longitude);
+        }
+        return { ...place, distance };
+      });
+      const favList = placesWithDistance.filter(p => favorites.includes(p.id));
+      let cardsHtml = favList.map(place => renderPlaceCardTemplate(place)).join('');
+
+      container.innerHTML = `
+        <div class="py-4 px-6 max-w-6xl mx-auto w-full">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Meus Matches & Favoritos</h3>
+          ${favList.length > 0 ? `
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              ${cardsHtml}
+            </div>
+          ` : `
+            <div class="flex flex-col items-center justify-center py-20 text-center">
+              <div class="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500">
+                <i data-lucide="heart" class="w-8 h-8 fill-brand-coral-500"></i>
+              </div>
+              <h3 class="text-lg font-outfit font-bold text-white mb-2">Sem favoritos salvos</h3>
+              <p class="text-xs text-slate-400 max-w-xs leading-relaxed mb-6">Comece a dar 'Giro!' nos locais na aba Match para salvá-los aqui e iniciar o rolê.</p>
+              <button onclick="switchTab('home')" class="bg-brand-coral-500 text-white font-semibold text-xs px-6 h-11 rounded-2xl btn-premium">Iniciar Matches</button>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    // PROFILE SCREEN
+    function renderProfile(container) {
+      console.log('[renderProfile] Início. isLoggedIn:', isLoggedIn, 'profileSubTab:', profileSubTab);
+      let subTabContentHtml = '';
+      try {
+      if (!isLoggedIn) {
+        subTabContentHtml = `
+          <div class="glass-card rounded-[32px] p-8 text-center border border-white/5 flex flex-col items-center">
+            <div class="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500">
+              <i data-lucide="user" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-outfit font-bold text-white mb-2">Acesse sua Conta</h3>
+            <p class="text-xs text-slate-400 max-w-xs leading-relaxed mb-6">Entre no Giro para calibrar seu Swipe, salvar seus locais favoritos e ganhar selos de atividade.</p>
+            <button onclick="promptLogin()" class="bg-brand-coral-500 text-white font-semibold text-xs px-6 h-11 rounded-2xl btn-premium w-full max-w-[240px]">
+              Entrar com o Google
+            </button>
+          </div>
+        `;
+      } else if (profileSubTab === 'personal') {
+        const userObj = currentUser || {
+          name: "Usuário",
+          nickname: "@usuario",
+          photoUrl: null
+        };
+        const userName = (userObj.name && typeof userObj.name === 'string') ? userObj.name : 'Usuário';
+        const userNickname = (userObj.nickname && typeof userObj.nickname === 'string') ? userObj.nickname : '@usuario';
+        const firstLetter = userName.charAt(0).toUpperCase();
+
+        const prefs = [
+          { id: 'pet', label: '🐶 Pet Friendly' },
+          { id: 'vegan', label: '🌿 Vegano' },
+          { id: 'work', label: '💻 Trabalhar' },
+          { id: 'outdoor', label: '☀️ Ar Livre' },
+          { id: 'live-music', label: '🎶 Música ao Vivo' },
+          { id: 'date', label: '🍷 Encontro' },
+          { id: 'specialty-coffee', label: '☕ Café Especial' },
+          { id: 'craft-beer', label: '🍺 Cerveja Artesanal' },
+          { id: 'street-food', label: '🍕 Comida de Rua' },
+          { id: 'cultural', label: '🎨 Cultural' },
+          { id: 'kids', label: '🧒 Espaço Kids' },
+          { id: 'accessible', label: '♿ Acessível' }
+        ];
+        
+        const activePrefs = prefs.filter(pref => userPreferences.includes(pref.id));
+        let chipsHtml = '';
+        if (activePrefs.length > 0) {
+          chipsHtml = activePrefs.map(pref => {
+            return `
+              <span class="px-3 py-1.5 rounded-full text-xs font-semibold border border-brand-coral-500 bg-brand-coral-500 text-white shadow-md shadow-brand-coral-500/20">
+                ${pref.label}
+              </span>
+            `;
+          }).join('');
+        }
+
+        const prefHeaderHtml = `
+          <div class="flex items-center justify-between w-full">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Minhas Preferências</h3>
+            ${userPreferences.length > 0 ? `
+              <button onclick="openPreferencesSheet()" class="text-xs text-brand-coral-500 hover:text-brand-coral-600 flex items-center gap-1 font-semibold transition-colors bg-transparent border-0 cursor-pointer">
+                <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                Editar
+              </button>
+            ` : ''}
+          </div>
+        `;
+        
+        const prefBodyHtml = userPreferences.length > 0 ? `
+          <div class="flex flex-wrap gap-2 mt-3 justify-start w-full">
+            ${chipsHtml}
+          </div>
+        ` : `
+          <div class="text-center py-4 w-full">
+            <button onclick="openPreferencesSheet()" class="text-xs text-slate-400 hover:text-white font-semibold transition-colors flex items-center justify-center gap-1 w-full bg-transparent border-0 cursor-pointer">
+              Nenhuma preferência selecionada. <span class="text-brand-coral-500 font-bold">[+ Adicionar]</span>
+            </button>
+          </div>
+        `;
+
+        subTabContentHtml = `
+          <div class="flex flex-col items-center">
+            <!-- Avatar Section -->
+            <div class="relative group avatar-container mb-4">
+              <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-brand-coral-500/30 bg-brand-indigo-900/50 flex items-center justify-center relative transition-all duration-300 avatar-pulse">
+                ${userAvatar || userObj.photoUrl ? `
+                  <img src="${userAvatar || userObj.photoUrl}" class="w-full h-full object-cover" />
+                ` : `
+                  <!-- Letter Initial Fallback Avatar -->
+                  <div class="w-full h-full bg-gradient-to-tr from-brand-coral-500 to-amber-500 flex items-center justify-center">
+                    <span class="text-3xl font-outfit font-extrabold text-white">${firstLetter}</span>
+                  </div>
+                `}
+              </div>
+              <!-- Upload Button -->
+              <label class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-brand-coral-500 border-2 border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 transition-all hover:scale-110 active:scale-95 shadow-lg">
+                <i data-lucide="edit-2" class="w-3.5 h-3.5 text-white"></i>
+                <input type="file" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)" />
+              </label>
+            </div>
+
+            <!-- Name and Username -->
+            <h2 class="text-xl font-outfit font-extrabold text-slate-900 dark:text-white">${userName}</h2>
+            <p class="text-xs text-slate-400 mt-0.5">${userNickname}</p>
+
+            <!-- Selo Giro Visual Card -->
+            <div onclick="cycleBadgeLevel()" class="glass-card rounded-3xl p-4 w-full border border-white/5 flex items-center gap-4 mt-5 cursor-pointer select-none hover:border-brand-coral-500/30 transition-all">
+              <div class="relative shrink-0 overflow-hidden rounded-xl">
+                <!-- SVG Stamp Badge -->
+                <svg class="w-14 h-14 drop-shadow-md" viewBox="0 0 100 100">
+                  <!-- Stamp Path with Scalloped Edge -->
+                  <path fill="${badgeLevel === 'gold' ? 'url(#goldGrad)' : badgeLevel === 'silver' ? 'url(#silverGrad)' : 'url(#bronzeGrad)'}" d="M 10 10 Q 18 18 26 10 Q 34 18 42 10 Q 50 18 58 10 Q 66 18 74 10 Q 82 18 90 10 Q 82 18 90 26 Q 82 34 90 42 Q 82 50 90 58 Q 82 66 90 74 Q 82 82 90 90 Q 82 82 74 90 Q 66 82 58 90 Q 50 82 42 90 Q 34 82 26 90 Q 18 82 10 90 Q 18 82 10 74 Q 18 66 10 58 Q 18 50 10 42 Q 18 34 10 26 Q 18 18 10 10 Z" />
+                  <!-- Letter G in debossed 3D styling -->
+                  <text x="50" y="61" font-family="'Outfit', 'Inter', sans-serif" font-size="34" font-weight="900" text-anchor="middle" fill="rgba(255,255,255,0.22)">G</text>
+                  <text x="50" y="60" font-family="'Outfit', 'Inter', sans-serif" font-size="34" font-weight="900" text-anchor="middle" fill="rgba(0,0,0,0.55)">G</text>
+                </svg>
+                <div class="shimmer-badge-overlay"></div>
+              </div>
+              <div class="flex-1 text-left min-w-0">
+                <div class="flex justify-between items-center">
+                  <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">
+                    Selo ${badgeLevel === 'gold' ? 'Ouro' : badgeLevel === 'silver' ? 'Prata' : 'Bronze'}
+                  </h3>
+                  <span class="text-[10px] font-semibold text-slate-400">
+                    ${badgeLevel === 'gold' ? '85%' : badgeLevel === 'silver' ? '60%' : '30%'} ativo
+                  </span>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-0.5 leading-relaxed">Clique para ciclar selos • Nível de atividade para manter o selo atual.</p>
+                <!-- Progress Bar -->
+                <div class="w-full h-1.5 bg-brand-indigo-950 rounded-full overflow-hidden mt-2">
+                  <div class="h-full rounded-full transition-all duration-500 ${badgeLevel === 'gold' ? 'bg-amber-500 w-[85%]' : badgeLevel === 'silver' ? 'bg-slate-300 w-[60%]' : 'bg-amber-700 w-[30%]' }"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estatísticas Rápidas (Cards de Métrica) -->
+            <div class="grid grid-cols-3 gap-3 w-full mt-4">
+              <div class="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                <i data-lucide="bookmark" class="w-4 h-4 text-brand-teal-400 mb-1.5"></i>
+                <span class="text-base font-outfit font-extrabold text-slate-900 dark:text-white">${favorites.length}</span>
+                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Salvos</span>
+              </div>
+              <div class="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                <i data-lucide="edit-3" class="w-4 h-4 text-brand-gold-400 mb-1.5"></i>
+                <span class="text-base font-outfit font-extrabold text-slate-900 dark:text-white">12</span>
+                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Reviews</span>
+              </div>
+              <div class="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                <i data-lucide="heart" class="w-4 h-4 text-brand-coral-500 mb-1.5"></i>
+                <span class="text-base font-outfit font-extrabold text-slate-900 dark:text-white">142</span>
+                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Ajudou</span>
+              </div>
+            </div>
+
+            <!-- Seleção de Preferências (Exibição Limpa) -->
+            <div class="glass-card rounded-3xl p-5 w-full border border-white/5 mt-4 text-left flex flex-col">
+              ${prefHeaderHtml}
+              ${prefBodyHtml}
+            </div>
+
+            <!-- Configurações e Menu da Conta -->
+            <div class="glass-card rounded-3xl w-full border border-white/5 mt-4 overflow-hidden">
+              <button onclick="openCadastraisSheet()" class="w-full flex items-center justify-between px-5 py-4 border-b border-white/5 hover:bg-white/5 transition-all text-left group">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="user" class="w-4 h-4 text-slate-400 group-hover:text-white transition-colors"></i>
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-300 group-hover:text-white transition-colors">Dados Cadastrais</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-white transition-colors"></i>
+              </button>
+              <button onclick="showToast('Configurações de Notificação (Em breve!)', 2500)" class="w-full flex items-center justify-between px-5 py-4 border-b border-white/5 hover:bg-white/5 transition-all text-left group">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="bell" class="w-4 h-4 text-slate-400 group-hover:text-white transition-colors"></i>
+                  <span class="text-xs font-bold text-slate-500 dark:text-slate-300 group-hover:text-white transition-colors">Gerenciar Notificações</span>
+                </div>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:text-white transition-colors"></i>
+              </button>
+              <button onclick="handleLogout()" class="w-full flex items-center justify-between px-5 py-4 hover:bg-rose-500/10 transition-all text-left group">
+                <div class="flex items-center gap-3">
+                  <i data-lucide="log-out" class="w-4 h-4 text-rose-500 dark:text-rose-400"></i>
+                  <span class="text-xs font-bold text-rose-500 dark:text-rose-400">Sair da Conta</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        subTabContentHtml = `
+          <div class="glass-card rounded-[32px] p-8 text-center border border-white/5">
+            <p class="text-sm font-semibold text-slate-300">Painel do Estabelecimento e Cadastro (Em breve)</p>
+          </div>
+        `;
+      }
+      } catch(profileErr) {
+        console.error('[renderProfile] Erro ao montar HTML do perfil:', profileErr);
+        subTabContentHtml = '<div class="p-6 text-center text-rose-400 text-sm">Erro ao carregar perfil. Tente novamente.</div>';
+      }
+
+      container.innerHTML = `
+        <div class="py-6 px-6 max-w-md mx-auto w-full flex flex-col min-h-0">
+          <!-- Segmented Control -->
+          <div class="bg-brand-indigo-950/80 border border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6">
+            <button onclick="setProfileSubTab('personal')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${profileSubTab === 'personal' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-400 hover:text-white'}">
+              Meu Perfil
+            </button>
+            <button onclick="setProfileSubTab('business')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${profileSubTab === 'business' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-400 hover:text-white'}">
+              Meu Negócio
+            </button>
+          </div>
+
+          <!-- Subtab Content -->
+          <div class="w-full">
+            ${subTabContentHtml}
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+      console.log('[renderProfile] Concluído com sucesso.');
+    }
+
+    // DESKTOP REGION MAP INITIALIZATION (Airbnb layout)
+    function initDesktopMap() {
+      const container = document.getElementById('desktop-map-element');
+      const column = document.getElementById('desktop-map-column');
+      const isVisible = column && window.getComputedStyle(column).display !== 'none';
+      
+      if (!container || !isVisible) return;
+      if (desktopMap) {
+        desktopMap.invalidateSize();
+        return;
+      }
+
+      const defaultCenter = [-25.4290, -49.2671];
+      const center = userCoords ? [userCoords.lat, userCoords.lng] : defaultCenter;
+      const zoom = userCoords ? 15 : 13;
+      desktopMap = L.map(container, {
+        zoomControl: true,
+        attributionControl: false
+      }).setView(center, zoom);
+
+      const tileUrl = theme === 'dark' 
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' 
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+      desktopTileLayer = L.tileLayer(tileUrl, {
+        maxZoom: 20
+      }).addTo(desktopMap);
+
+      // Add user marker if available
+      if (userCoords) {
+        addUserLocationMarker(userCoords.lat, userCoords.lng);
+      }
+
+      // Add pins
+      renderDesktopMapPins();
+    }
+
+    function renderDesktopMapPins() {
+      if (!desktopMap) return;
+
+      // Limpar marcadores anteriores do mapa desktop
+      Object.keys(desktopMarkers).forEach(id => {
+        desktopMap.removeLayer(desktopMarkers[id]);
+      });
+      desktopMarkers = {};
+
+      const placesToRender = mapFilterFavoritesOnly 
+        ? MOCK_PLACES.filter(place => favorites.includes(place.id))
+        : MOCK_PLACES.filter(place => {
+            if (!userCoords || searchRadius === Infinity) return true;
+            const distance = getHaversineDistance(userCoords.lat, userCoords.lng, place.latitude, place.longitude);
+            return distance <= searchRadius;
+          });
+
+      placesToRender.forEach(place => {
+        const isFav = favorites.includes(place.id);
+        const iconHtml = `
+          <div class="place-marker-custom" style="
+            background-color: ${isFav ? '#ff5422' : '#7e5fd6'};
+            border: 2px solid white;
+          ">G!</div>
+        `;
+
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: 'custom-leaflet-marker',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+
+        const marker = L.marker([place.latitude, place.longitude], { icon: customIcon })
+          .addTo(desktopMap)
+          .on('click', () => {
+            // Se clicar no mapa no desktop, pode abrir o detalhe ou deslizar pra ele
+            const idx = swipeQueue.findIndex(p => p.id === place.id);
+            if (idx > -1) {
+              activeCardIndex = idx;
+              renderCurrentTab();
+              lucide.createIcons();
+              updateDesktopMapHighlight();
+            }
+          });
+
+        desktopMarkers[place.id] = marker;
+      });
+
+      if (mapFilterFavoritesOnly && placesToRender.length > 0) {
+        setTimeout(() => {
+          const group = new L.featureGroup(placesToRender.map(p => L.marker([p.latitude, p.longitude])));
+          desktopMap.fitBounds(group.getBounds().pad(0.15));
+        }, 100);
+      }
+    }
+
+    // UPDATE DESKTOP MAP HIGHLIGHT ON FAVORITES OR SWIPES
+    function updateDesktopMapHighlight() {
+      if (!desktopMap) return;
+
+      MOCK_PLACES.forEach(place => {
+        const marker = desktopMarkers[place.id];
+        if (!marker) return;
+
+        const isFav = favorites.includes(place.id);
+        const isCurrent = currentTab === 'home' && viewMode === 'swipe' && swipeQueue.length > 0 && swipeQueue[activeCardIndex].id === place.id;
+        
+        const color = isCurrent ? '#ff5422' : (isFav ? '#f59e0b' : '#7e5fd6');
+        const scale = isCurrent ? 'scale(1.2)' : 'scale(1)';
+
+        const iconHtml = `
+          <div class="place-marker-custom" style="
+            background-color: ${color};
+            transform: ${scale};
+            z-index: ${isCurrent ? 9999 : 100};
+          ">G!</div>
+        `;
+
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: 'custom-leaflet-marker',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+
+        marker.setIcon(customIcon);
+
+        if (isCurrent) {
+          desktopMap.setView([place.latitude, place.longitude], 14, { animate: true });
+        }
+      });
+    }
+
+    // MOBILE MAP INITIALIZATION
+    function initLeafletMap() {
+      const container = document.getElementById('map-element');
+      if (!container) return;
+
+      const defaultCenter = [-25.4290, -49.2671];
+      const center = userCoords ? [userCoords.lat, userCoords.lng] : defaultCenter;
+      const zoom = (selectedPlace || !userCoords) ? (selectedPlace ? 15 : 13) : 15;
+      
+      mainMap = L.map(container, {
+        zoomControl: false,
+        attributionControl: true
+      }).setView(selectedPlace ? [selectedPlace.latitude, selectedPlace.longitude] : center, zoom);
+
+      const tileUrl = theme === 'dark' 
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' 
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+      mainTileLayer = L.tileLayer(tileUrl, {
+        attribution: '&copy; CARTO',
+        maxZoom: 20
+      }).addTo(mainMap);
+
+      // Add user location marker if available
+      if (userCoords) {
+        addUserLocationMarker(userCoords.lat, userCoords.lng);
+      }
+
+      // Limpar marcadores anteriores do mapa
+      Object.keys(mapMarkers).forEach(id => {
+        mainMap.removeLayer(mapMarkers[id]);
+      });
+      mapMarkers = {};
+
+      const placesToRender = mapFilterFavoritesOnly 
+        ? MOCK_PLACES.filter(place => favorites.includes(place.id))
+        : MOCK_PLACES.filter(place => {
+            const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                   place.description.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesRadius = (!userCoords || searchRadius === Infinity) ? true : getHaversineDistance(userCoords.lat, userCoords.lng, place.latitude, place.longitude) <= searchRadius;
+            return matchesSearch && matchesRadius;
+          });
+
+      placesToRender.forEach(place => {
+        const isSelected = selectedPlace && selectedPlace.id === place.id;
+        
+        const iconHtml = `
+          <div class="place-marker-custom" style="
+            background-color: ${isSelected ? '#ff5422' : '#7e5fd6'};
+            transform: ${isSelected ? 'scale(1.2) translateY(-4px)' : 'scale(1)'};
+            z-index: ${isSelected ? 9999 : 100};
+          ">G!</div>
+        `;
+
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: 'custom-leaflet-marker',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+
+        const marker = L.marker([place.latitude, place.longitude], { icon: customIcon })
+          .addTo(mainMap)
+          .on('click', () => selectPlaceFromMap(place));
+
+        mapMarkers[place.id] = marker;
+      });
+
+      if (mapFilterFavoritesOnly && placesToRender.length > 0) {
+        setTimeout(() => {
+          const group = new L.featureGroup(placesToRender.map(p => L.marker([p.latitude, p.longitude])));
+          mainMap.fitBounds(group.getBounds().pad(0.15));
+        }, 100);
+      }
+
+      if (selectedPlace) {
+        selectPlaceFromMap(selectedPlace);
+      }
+    }
+
+    // MAP INTERACTION
+    function selectPlaceFromMap(place) {
+      selectedPlace = place;
+      
+      Object.keys(mapMarkers).forEach(id => {
+        const marker = mapMarkers[id];
+        const isSelected = id === place.id;
+        const iconHtml = `
+          <div class="place-marker-custom" style="
+            background-color: ${isSelected ? '#ff5422' : '#7e5fd6'};
+            transform: ${isSelected ? 'scale(1.2) translateY(-4px)' : 'scale(1)'};
+            z-index: ${isSelected ? 9999 : 100};
+          ">G!</div>
+        `;
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: 'custom-leaflet-marker',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+        marker.setIcon(customIcon);
+      });
+
+      mainMap.setView([place.latitude, place.longitude], 15, { animate: true, duration: 0.6 });
+
+      const drawer = document.getElementById('map-drawer');
+      drawer.innerHTML = `
+        <div class="relative">
+          <button onclick="closeMapDrawer(event)" class="absolute top-[-10px] right-3 z-[1100] flex items-center justify-center w-8 h-8 rounded-full bg-brand-indigo-900 border border-white/10 text-slate-300 hover:bg-brand-coral-500 hover:text-white transition-all btn-premium shadow-md">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+          ${renderPlaceCardTemplate(place)}
+        </div>
+      `;
+      
+      lucide.createIcons();
+      drawer.classList.remove('translate-y-full');
+    }
+
+    function closeMapDrawer(e) {
+      if (e) e.stopPropagation();
+      const drawer = document.getElementById('map-drawer');
+      drawer.classList.add('translate-y-full');
+      selectedPlace = null;
+      
+      Object.keys(mapMarkers).forEach(id => {
+        const marker = mapMarkers[id];
+        const iconHtml = `
+          <div class="place-marker-custom" style="background-color: #7e5fd6;">G!</div>
+        `;
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: 'custom-leaflet-marker',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        });
+        marker.setIcon(customIcon);
+      });
+    }
+
+    // STATE UPDATES HANDLERS
+    function updateSearch(value) {
+      searchQuery = value;
+      renderCurrentTab();
+      lucide.createIcons();
+    }
+
+    function updateMapSearch(value) {
+      searchQuery = value;
+      if (mainMap) {
+        Object.keys(mapMarkers).forEach(id => mapMarkers[id].remove());
+        mapMarkers = {};
+        
+        const filtered = MOCK_PLACES.filter(place => {
+          return place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                 place.description.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+
+        filtered.forEach(place => {
+          const isSelected = selectedPlace && selectedPlace.id === place.id;
+          const iconHtml = `
+            <div class="place-marker-custom" style="
+              background-color: ${isSelected ? '#ff5422' : '#7e5fd6'};
+              transform: ${isSelected ? 'scale(1.2) translateY(-4px)' : 'scale(1)'};
+            ">G!</div>
+          `;
+          const customIcon = L.divIcon({
+            html: iconHtml,
+            className: 'custom-leaflet-marker',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+          });
+          const marker = L.marker([place.latitude, place.longitude], { icon: customIcon })
+            .addTo(mainMap)
+            .on('click', () => selectPlaceFromMap(place));
+          mapMarkers[place.id] = marker;
+        });
+      }
+    }
+
+    function selectCategoryFilter(catId) {
+      selectedCategory = catId === selectedCategory ? null : catId;
+      activeCardIndex = 0; // Reset active tinder card index on category change
+      renderCurrentTab();
+      lucide.createIcons();
+      updateDesktopMapHighlight();
+    }
+
+    function setProfileSubTab(tab) {
+      profileSubTab = tab;
+      renderCurrentTab();
+      lucide.createIcons();
+    }
+
+    // PLACE CARD TEMPLATE GENERATOR
+    function renderPlaceCardTemplate(place) {
+      const isFav = favorites.includes(place.id);
+      return `
+        <div onclick="viewPlaceOnMap('${place.id}')" class="glass-card rounded-3xl overflow-hidden hover:border-brand-coral-500/20 active:scale-[0.99] transition-all duration-300 cursor-pointer flex flex-col h-full group">
+          <div class="relative aspect-video max-h-[30dvh] overflow-hidden bg-brand-indigo-950">
+            <img src="${place.image_url}" alt="${place.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" draggable="false">
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950/70 to-transparent"></div>
+            
+            <div class="absolute top-3 left-3 bg-brand-indigo-950/80 border border-white/10 text-[10px] font-semibold text-brand-teal-400 px-2.5 py-1 rounded-full uppercase tracking-wider">
+              ${place.price_range} · ${place.avg_rating} ★
+            </div>
+            
+            <button onclick="toggleFavorite(event, '${place.id}')" class="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-brand-indigo-950/70 border border-white/10 text-white hover:bg-brand-coral-500/20 transition-all btn-premium">
+              <i data-lucide="heart" class="w-4 h-4 ${isFav ? 'fill-brand-coral-500 text-brand-coral-500 scale-110' : 'text-slate-300'}"></i>
+            </button>
+          </div>
+          
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-start justify-between gap-1.5 mb-1.5">
+                <h3 class="text-base font-outfit font-bold tracking-tight text-white group-hover:text-brand-coral-300 transition-colors line-clamp-1">${place.name}</h3>
+                ${place.is_verified ? `<i data-lucide="check-circle" class="w-4 h-4 text-brand-teal-400 shrink-0 mt-0.5"></i>` : ''}
+              </div>
+              <p class="text-xs text-slate-300 line-clamp-2 leading-relaxed mb-3">${place.description}</p>
+              <p class="text-[10px] text-slate-400 line-clamp-1 mb-4 flex items-center gap-1 flex-wrap">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-slate-500"></span> ${place.address}
+                ${place.distance !== undefined ? `<span class="text-brand-coral-500 font-bold ml-1.5">• ${formatDistance(place.distance)}</span>` : ''}
+              </p>
+            </div>
+            
+            <div class="border-t border-white/5 pt-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Giro de chegada:</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <button onclick="openRoute(event, '${place.id}', 'google-maps')" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/5 hover:bg-brand-coral-500 hover:text-white border border-white/5 text-slate-200 transition-all">
+                  <i data-lucide="navigation" class="w-4 h-4 text-brand-coral-400 mb-1"></i>
+                  <span class="text-[9px] font-bold tracking-wide uppercase">Maps</span>
+                </button>
+                <button onclick="openRoute(event, '${place.id}', 'uber')" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/5 hover:bg-black hover:text-white border border-white/5 text-slate-200 transition-all">
+                  <span class="text-xs font-black text-slate-300 mb-1">U</span>
+                  <span class="text-[9px] font-bold tracking-wide uppercase">Uber</span>
+                </button>
+                <button onclick="openRoute(event, '${place.id}', '99')" class="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-white/5 hover:bg-yellow-500 hover:text-black border border-white/5 text-slate-200 transition-all">
+                  <span class="text-xs font-black text-amber-500 mb-1">99</span>
+                  <span class="text-[9px] font-bold tracking-wide uppercase">99App</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

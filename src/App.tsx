@@ -8,6 +8,7 @@ import { Place } from './types';
 import LeafletMap from './components/maps/LeafletMap';
 import { MOCK_PLACES } from './utils/constants';
 import { ArrowLeft } from 'lucide-react';
+import { supabase } from './integrations/supabase/client';
 
 type Tab = 'home' | 'explore' | 'favorites' | 'profile';
 
@@ -23,6 +24,79 @@ export default function App() {
   const [mapFilterFavoritesOnly, setMapFilterFavoritesOnly] = useState(false);
   const [isDesktopMapOpen, setIsDesktopMapOpen] = useState(true);
   const [searchRadius, setSearchRadius] = useState<number>(10.0);
+  const [session, setSession] = useState<any>(null);
+
+  // Escutar auth do Supabase para gerenciar sessão real no App
+  useEffect(() => {
+    if (!supabase) return;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Carregar favoritos e preferências do Supabase ao logar
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!supabase || !session?.user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('favorites, preferences')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Erro ao buscar perfil do Supabase:', error);
+          return;
+        }
+
+        if (data) {
+          if (Array.isArray(data.favorites)) {
+            setFavorites(data.favorites);
+            localStorage.setItem('giro_favorites', JSON.stringify(data.favorites));
+          }
+          if (data.preferences) {
+            window.dispatchEvent(new CustomEvent('giro-preferences-sync', { detail: data.preferences }));
+          }
+        } else {
+          // Se o perfil ainda não existe, cria um registro inicial
+          const localFavs = localStorage.getItem('giro_favorites') || '[]';
+          const localPrefs = localStorage.getItem('giro_preferences') || '["pet", "outdoor", "live-music"]';
+          let parsedFavs = [];
+          let parsedPrefs = [];
+          try { parsedFavs = JSON.parse(localFavs); } catch (e) {}
+          try { parsedPrefs = JSON.parse(localPrefs); } catch (e) {}
+
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: session.user.id,
+              full_name: session.user.user_metadata?.full_name || session.user.email || 'Usuário Giro',
+              favorites: Array.isArray(parsedFavs) ? parsedFavs : [],
+              preferences: Array.isArray(parsedPrefs) ? parsedPrefs : ['pet', 'outdoor', 'live-music']
+            });
+
+          if (insertError) {
+            console.error('Erro ao criar perfil inicial no Supabase:', insertError);
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao sincronizar dados com Supabase:', e);
+      }
+    };
+
+    fetchUserData();
+  }, [session]);
 
   // Early theme initialization
   useEffect(() => {
@@ -150,14 +224,29 @@ export default function App() {
   }, []);
 
   // Alternar favoritos
-  const handleFavoriteToggle = (id: string) => {
+  const handleFavoriteToggle = async (id: string) => {
+    let updated: string[] = [];
     setFavorites((prev) => {
-      const updated = prev.includes(id) 
+      updated = prev.includes(id) 
         ? prev.filter((favId) => favId !== id) 
         : [...prev, id];
       localStorage.setItem('giro_favorites', JSON.stringify(updated));
       return updated;
     });
+
+    if (supabase && session?.user) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ favorites: updated })
+          .eq('id', session.user.id);
+        if (error) {
+          console.error('Erro ao salvar favoritos no Supabase:', error);
+        }
+      } catch (e) {
+        console.error('Erro ao salvar favoritos no Supabase:', e);
+      }
+    }
   };
 
   // Função para transição direta da Home para o Mapa (Explorar) ao clicar no card
