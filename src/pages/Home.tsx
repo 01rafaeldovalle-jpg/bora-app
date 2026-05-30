@@ -142,30 +142,8 @@ export default function Home({
     <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
       <Header searchRadius={searchRadius} setSearchRadius={setSearchRadius} />
 
-      {/* Hero Header Banner */}
-      <div className="px-6 py-4 max-w-6xl mx-auto w-full">
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-tr from-brand-indigo-900 to-brand-indigo-950 border border-white/5 p-6 shadow-premium">
-          {/* Background overlay shapes */}
-          <div className="absolute top-[-30px] right-[-30px] w-48 h-48 rounded-full bg-brand-coral-500/10 blur-2xl" />
-          <div className="absolute bottom-[-20px] left-[-20px] w-36 h-36 rounded-full bg-brand-teal-500/10 blur-2xl" />
-
-          <div className="relative z-10">
-            <span className="inline-flex items-center gap-1 bg-brand-coral-500/20 text-brand-coral-400 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border border-brand-coral-500/30 mb-3">
-              <Flame className="w-3.5 h-3.5 animate-pulse" /> Novidades de Curitiba
-            </span>
-            
-            <h2 className="text-2xl font-outfit font-extrabold leading-tight text-white mb-2">
-              Giro para encontrar o próximo rolê?
-            </h2>
-            <p className="text-xs text-slate-300 leading-relaxed max-w-xs">
-              Locais, parques, cafés e experiências a um clique de distância, com rotas rápidas no celular.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Barra de Busca */}
-      <div className="px-6 max-w-6xl mx-auto w-full">
+      <div className="px-6 pt-4 max-w-6xl mx-auto w-full">
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
@@ -269,24 +247,24 @@ export default function Home({
               </div>
 
               {/* Swipe Control Buttons */}
-              <div className="flex items-center justify-center gap-6 mt-4 sm:mt-8">
+              <div className="flex items-center justify-center gap-6 mt-4 sm:mt-6 shrink-0 select-none">
                 <button 
                   onClick={handleSwipeNope}
-                  className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all"
+                  className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all shrink-0"
                 >
                   <Icons.X className="w-6 h-6" />
                 </button>
                 <button 
                   onClick={handlePinClick}
-                  className="w-11 h-11 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-teal-400 shadow-md hover:bg-brand-teal-500 hover:text-white hover:border-brand-teal-500 active:scale-90 transition-all"
+                  className="w-11 h-11 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-teal-500 dark:text-brand-teal-400 shadow-md hover:bg-brand-teal-500 hover:text-white hover:border-brand-teal-500 active:scale-90 transition-all shrink-0"
                 >
                   <Icons.MapPin className="w-5 h-5" />
                 </button>
                 <button 
                   onClick={handleSwipeLike}
-                  className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-teal-400 shadow-lg hover:bg-brand-teal-500 hover:text-white hover:border-brand-teal-500 active:scale-90 transition-all"
+                  className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all shrink-0"
                 >
-                  <Icons.Heart className={`w-6 h-6 ${favorites.includes(activePlace.id) ? 'fill-brand-coral-500 text-brand-coral-500' : 'fill-transparent'}`} />
+                  <Icons.Heart className={`w-6 h-6 ${favorites.includes(activePlace.id) ? 'fill-brand-coral-500 text-brand-coral-500' : 'fill-transparent text-brand-coral-500'}`} />
                 </button>
               </div>
             </div>
@@ -311,65 +289,6 @@ export default function Home({
         </div>
       ) : (
         <div className="w-full flex flex-col">
-          {/* Seção Destaques (Apenas se nenhuma busca/filtro ativo) */}
-          {!searchQuery && !selectedCategory && (
-            <div className="py-2 max-w-6xl mx-auto w-full">
-              <div className="flex items-center justify-between px-6 mb-3">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-brand-gold-400" /> Destaques em Destaque
-                </h3>
-              </div>
-              
-              <div className="flex gap-4 overflow-x-auto px-6 pb-4 scrollbar-none snap-x">
-                {featuredPlaces.map((place) => (
-                  <div key={place.id} className="snap-start shrink-0 w-[280px]">
-                    <PlaceCard
-                      place={place}
-                      isFavorited={favorites.includes(place.id)}
-                      onFavoriteToggle={onFavoriteToggle}
-                      onSelect={onSelectPlace}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Seção Eventos Próximos de Curitiba */}
-          {!searchQuery && !selectedCategory && (
-            <div className="py-4 max-w-6xl mx-auto w-full">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Próximos Eventos</h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-6">
-                {MOCK_EVENTS.map((event) => (
-                  <div 
-                    key={event.id}
-                    className="glass-card rounded-2xl p-4 flex gap-4 border border-white/5 items-center hover:border-brand-coral-500/20 active:scale-[0.99] transition-all cursor-pointer"
-                  >
-                    <img 
-                      src={event.image_url} 
-                      alt={event.name} 
-                      className="w-16 h-16 rounded-xl object-cover shrink-0 bg-brand-indigo-950" 
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-outfit font-bold text-white tracking-tight line-clamp-1">{event.name}</h4>
-                      <p className="text-[11px] text-slate-300 line-clamp-1 mt-0.5">{event.description}</p>
-                      
-                      <div className="flex items-center gap-3 mt-2 text-[10px] text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-brand-coral-500" /> Dom, 09h - 14h
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-brand-teal-400" /> Largo da Ordem
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Lista Principal de Locais */}
           <div className="py-4 px-6 max-w-6xl mx-auto w-full">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
