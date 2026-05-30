@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/common/Header';
-import { Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut, ChevronRight, Mail, Lock, Eye, EyeOff, Save, X } from 'lucide-react';
+import { Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut, ChevronRight, Mail, Lock, Eye, EyeOff, Save, X, Trash2 } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../utils/cropImage';
@@ -42,6 +42,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // Dados Cadastrais bottom sheet states
   const [isCadastraisOpen, setIsCadastraisOpen] = useState(false);
@@ -273,6 +276,35 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     window.dispatchEvent(new CustomEvent('giro-logout'));
   };
 
+  const handleDeleteAccount = async () => {
+    const activeSession = session || mockSession;
+    if (!activeSession?.user) return;
+
+    try {
+      if (supabase && !mockSession) {
+        const { error } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', activeSession.user.id);
+        
+        if (error) {
+          console.error("Erro ao deletar perfil do Supabase:", error);
+          alert("Não foi possível excluir os dados do servidor. Tente novamente.");
+          return;
+        }
+      }
+      
+      localStorage.removeItem('giro_preferences');
+      localStorage.removeItem('giro_favorites');
+      
+      await handleLogout();
+      setIsDeleteConfirmOpen(false);
+      alert("Sua conta e todos os seus dados foram permanentemente excluídos do Giro.");
+    } catch (e) {
+      console.error("Erro ao processar exclusão de conta:", e);
+    }
+  };
+
   const prefs = [
     { id: 'pet', label: '🐶 Pet Friendly' },
     { id: 'vegan', label: '🌿 Vegano' },
@@ -426,13 +458,36 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       </button>
                     </div>
 
+                    {authView === 'email-signup' && (
+                      <div className="flex items-start gap-2 px-1 py-1 text-left">
+                        <input
+                          id="terms-checkbox"
+                          type="checkbox"
+                          checked={acceptTerms}
+                          onChange={(e) => setAcceptTerms(e.target.checked)}
+                          className="mt-1 rounded border-slate-300 text-brand-coral-500 focus:ring-brand-coral-500 cursor-pointer w-4 h-4"
+                        />
+                        <label htmlFor="terms-checkbox" className="text-[11px] leading-snug text-slate-500 dark:text-slate-400 select-none">
+                          Li e aceito os{' '}
+                          <button
+                            type="button"
+                            onClick={() => setIsTermsModalOpen(true)}
+                            className="text-brand-coral-500 font-bold hover:underline bg-transparent border-0 p-0 cursor-pointer inline"
+                          >
+                            Termos de Uso e a Política de Privacidade
+                          </button>
+                          .
+                        </label>
+                      </div>
+                    )}
+
                     {authError && (
                       <p className="text-xs text-rose-500 font-semibold text-center">{authError}</p>
                     )}
 
                     <button
                       onClick={authView === 'email-login' ? handleEmailLogin : handleEmailSignup}
-                      disabled={authLoading}
+                      disabled={authLoading || (authView === 'email-signup' && !acceptTerms)}
                       className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm transition-all btn-premium shadow-md shadow-brand-coral-500/20 disabled:opacity-50"
                     >
                       {authLoading ? 'Carregando...' : authView === 'email-login' ? 'Entrar' : 'Criar Conta'}
@@ -632,6 +687,18 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       </span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-950 dark:group-hover:text-white transition-colors" />
+                  </button>
+                  <button
+                    onClick={() => setIsDeleteConfirmOpen(true)}
+                    className="w-full flex items-center justify-between px-5 py-4 border-b border-white/5 hover:bg-rose-500/10 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Trash2 className="w-4 h-4 text-rose-500 dark:text-rose-400" />
+                      <span className="text-xs font-bold text-rose-500 dark:text-rose-400">
+                        Excluir Conta Definitivamente
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-rose-500 dark:text-rose-400" />
                   </button>
                   <button
                     onClick={handleLogout}
@@ -860,6 +927,87 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               <Save className="w-4 h-4" />
               Salvar Alterações
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* LGPD Terms Modal */}
+      {isTermsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[4px] p-6">
+          <div className="absolute inset-0" onClick={() => setIsTermsModalOpen(false)} />
+          <div className="relative w-full max-w-md bg-white dark:bg-brand-indigo-950 border border-slate-100 dark:border-white/10 rounded-[32px] p-6 shadow-2xl z-10 flex flex-col" style={{ maxHeight: '80vh' }}>
+            <button 
+              onClick={() => setIsTermsModalOpen(false)} 
+              className="absolute right-6 top-6 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center mb-4 shrink-0">
+              <h3 className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">Termos e Privacidade</h3>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Sua privacidade e conformidade com a LGPD ⚖️</p>
+            </div>
+
+            <div className="flex-1 overflow-y-auto text-slate-600 dark:text-slate-300 text-xs space-y-4 pr-1 leading-relaxed mb-6">
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Coleta de Dados Pessoais</h4>
+                <p>O Giro coleta seu nome completo, e-mail e foto de perfil no momento do cadastro para criar sua conta única e permitir a identificação. Coletamos também as preferências que você seleciona para calibrar as recomendações.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Geolocalização por GPS</h4>
+                <p>Nossa plataforma solicita permissão de geolocalização do seu dispositivo para mostrar os locais, cafés, bares e atrações mais próximos de você. Caso decida não compartilhar seu GPS, você poderá selecionar manualmente qualquer bairro de Curitiba na tela inicial para ver as recomendações daquela região.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Favoritos e Sincronização</h4>
+                <p>Os estabelecimentos que você curte ou adiciona aos favoritos e as configurações do seu perfil são armazenados na nuvem através do nosso banco de dados seguro do Supabase. Isso garante que sua experiência seja salva e sincronizada entre diferentes dispositivos.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Direito ao Esquecimento e Exclusão</h4>
+                <p>Respeitamos a LGPD integralmente. A qualquer momento, você pode excluir permanentemente seu perfil e todos os dados associados através da opção "Excluir conta definitivamente" disponível nas configurações do seu perfil. Essa ação deleta seus favoritos, preferências e informações cadastrais do nosso servidor de forma definitiva e irreversível.</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsTermsModalOpen(false)}
+              className="w-full py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/20 shrink-0"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Account Confirmation Modal */}
+      {isDeleteConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-[4px] p-6">
+          <div className="absolute inset-0" onClick={() => setIsDeleteConfirmOpen(false)} />
+          <div className="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-100 dark:border-rose-500/20 rounded-[32px] p-6 shadow-2xl z-10 text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4 text-rose-500">
+              <Trash2 className="w-6 h-6" />
+            </div>
+
+            <h3 className="text-base font-outfit font-extrabold text-slate-900 dark:text-white mb-2">Excluir Conta Permanentemente?</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+              Esta ação é **irreversível**. Todos os seus dados pessoais, preferências personalizadas e locais favoritos serão excluídos do nosso banco de dados do Supabase em conformidade com a LGPD.
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleDeleteAccount}
+                className="w-full py-3.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-xs font-bold transition-all text-white active:scale-95 shadow-md shadow-rose-500/20"
+              >
+                Sim, excluir minha conta
+              </button>
+              <button
+                onClick={() => setIsDeleteConfirmOpen(false)}
+                className="w-full py-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-bold transition-all text-slate-700 dark:text-slate-300 active:scale-95"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
