@@ -24,7 +24,7 @@ export default function SearchBar({
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-11 pl-10 pr-4 rounded-2xl bg-brand-indigo-900/50 border border-white/5 focus:border-brand-coral-500/50 focus:ring-1 focus:ring-brand-coral-500/30 text-slate-100 placeholder:text-slate-400 text-sm outline-none transition-all"
+          className="w-full h-11 pl-10 pr-4 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-brand-coral-500/50 text-sm outline-none transition-all duration-300"
           placeholder={placeholder}
         />
       </div>
@@ -32,7 +32,7 @@ export default function SearchBar({
       {onFilterClick && (
         <button
           onClick={onFilterClick}
-          className="flex items-center justify-center w-11 h-11 rounded-2xl bg-brand-indigo-900/50 border border-white/5 hover:border-brand-coral-500/30 active:bg-brand-coral-500/10 text-slate-300 hover:text-brand-coral-500 transition-all btn-premium"
+          className="flex items-center justify-center w-11 h-11 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-300 hover:text-brand-coral-500 active:bg-brand-coral-500/10 transition-all duration-300 btn-premium"
         >
           <SlidersHorizontal className="w-5 h-5" />
         </button>

@@ -295,7 +295,7 @@ export default function Home({
       {/* Switch View Selectors */}
       <div className="px-6 py-2 flex justify-between items-center mt-2 max-w-6xl mx-auto w-full">
         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Descoberta Reativa</span>
-        <div className="bg-brand-indigo-950/80 dark:bg-brand-indigo-950/40 border border-slate-200/50 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
+        <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
           <button 
             onClick={() => setViewMode('swipe')} 
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'}`}
@@ -321,7 +321,7 @@ export default function Home({
             className={`snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${
               selectedCategory === null
                 ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md'
-                : 'bg-brand-indigo-900/40 border-white/5 text-slate-300 hover:border-white/10'
+                : 'bg-slate-100 dark:bg-brand-indigo-900/40 border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/10'
             }`}
           >
             <span className="text-xs">Todos</span>
@@ -334,7 +334,7 @@ export default function Home({
               className={`snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${
                 selectedCategory === cat.id
                   ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md'
-                  : 'bg-brand-indigo-900/40 border-white/5 text-slate-300 hover:border-white/10'
+                  : 'bg-slate-100 dark:bg-brand-indigo-900/40 border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/10'
               }`}
             >
               <IconRenderer name={cat.icon} className={`w-4 h-4 ${selectedCategory === cat.id ? 'text-white' : 'text-brand-teal-400'}`} />
