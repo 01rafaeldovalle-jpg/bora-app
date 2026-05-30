@@ -15,7 +15,7 @@ export default function BottomNavigation({ currentTab, setTab }: BottomNavigatio
   ] as const;
 
   return (
-    <nav className="glass-panel fixed bottom-0 left-0 right-0 z-[1000] pb-safe-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-[1000] pb-safe-bottom bg-white/80 dark:bg-brand-indigo-950/80 backdrop-blur-md border-t border-slate-100 dark:border-white/5 transition-colors duration-300">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-4">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -40,7 +40,7 @@ export default function BottomNavigation({ currentTab, setTab }: BottomNavigatio
                 className={`w-5 h-5 transition-all duration-300 ${
                   isActive 
                     ? 'text-brand-coral-500 scale-110' 
-                    : 'text-slate-400 group-hover:text-slate-200'
+                    : 'text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
                 }`} 
               />
               
@@ -48,7 +48,7 @@ export default function BottomNavigation({ currentTab, setTab }: BottomNavigatio
                 className={`text-[10px] font-medium mt-1 tracking-wide transition-colors duration-300 ${
                   isActive 
                     ? 'text-brand-coral-500 font-semibold' 
-                    : 'text-slate-400 group-hover:text-slate-200'
+                    : 'text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
                 }`}
               >
                 {item.label}
