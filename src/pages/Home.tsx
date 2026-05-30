@@ -53,6 +53,153 @@ export default function Home({
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
+  // Refs de Swipe Físico
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const badgeLikeRef = React.useRef<HTMLDivElement>(null);
+  const badgeNopeRef = React.useRef<HTMLDivElement>(null);
+  const startXRef = React.useRef(0);
+  const currentXRef = React.useRef(0);
+  const isDraggingRef = React.useRef(false);
+
+  const getX = (e: any) => {
+    return e.touches ? e.touches[0].clientX : e.clientX;
+  };
+
+  const handleDragStart = (e: any) => {
+    if (e.target.closest('button') || e.target.closest('a')) return;
+    startXRef.current = getX(e);
+    currentXRef.current = startXRef.current;
+    isDraggingRef.current = true;
+    if (cardRef.current) {
+      cardRef.current.style.transition = 'none';
+    }
+  };
+
+  const handleDragMove = (e: any) => {
+    if (!isDraggingRef.current) return;
+    const card = cardRef.current;
+    const badgeLike = badgeLikeRef.current;
+    const badgeNope = badgeNopeRef.current;
+    if (!card) return;
+
+    currentXRef.current = getX(e);
+    const deltaX = currentXRef.current - startXRef.current;
+    const rotation = deltaX * 0.08;
+
+    card.style.transform = `translateX(${deltaX}px) rotate(${rotation}deg)`;
+
+    if (badgeLike && badgeNope) {
+      if (deltaX > 20) {
+        badgeLike.style.opacity = String(Math.min(deltaX / 100, 1));
+        badgeNope.style.opacity = '0';
+      } else if (deltaX < -20) {
+        badgeNope.style.opacity = String(Math.min(Math.abs(deltaX) / 100, 1));
+        badgeLike.style.opacity = '0';
+      } else {
+        badgeLike.style.opacity = '0';
+        badgeNope.style.opacity = '0';
+      }
+    }
+  };
+
+  const handleDragEnd = () => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    const card = cardRef.current;
+    const badgeLike = badgeLikeRef.current;
+    const badgeNope = badgeNopeRef.current;
+    if (!card) return;
+
+    const deltaX = currentXRef.current - startXRef.current;
+    const threshold = 120;
+
+    card.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease';
+
+    if (deltaX > threshold) {
+      card.style.transform = 'translateX(400px) rotate(45deg)';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        if (activePlace) {
+          onFavoriteToggle(activePlace.id);
+        }
+        setActiveCardIndex((prev) => (prev + 1) % swipeQueue.length);
+        resetCardStyles();
+      }, 300);
+    } else if (deltaX < -threshold) {
+      card.style.transform = 'translateX(-400px) rotate(-45deg)';
+      card.style.opacity = '0';
+      setTimeout(() => {
+        setActiveCardIndex((prev) => (prev + 1) % swipeQueue.length);
+        resetCardStyles();
+      }, 300);
+    } else {
+      card.style.transform = 'translateX(0) rotate(0)';
+      if (badgeLike) badgeLike.style.opacity = '0';
+      if (badgeNope) badgeNope.style.opacity = '0';
+    }
+  };
+
+  const resetCardStyles = () => {
+    const card = cardRef.current;
+    const badgeLike = badgeLikeRef.current;
+    const badgeNope = badgeNopeRef.current;
+    if (card) {
+      card.style.transform = 'translateX(0) rotate(0)';
+      card.style.opacity = '1';
+      card.style.transition = 'none';
+    }
+    if (badgeLike) badgeLike.style.opacity = '0';
+    if (badgeNope) badgeNope.style.opacity = '0';
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    handleDragStart(e);
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      handleDragMove(moveEvent);
+    };
+
+    const onMouseUp = () => {
+      handleDragEnd();
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const animateSwipe = (liked: boolean) => {
+    if (!activePlace) return;
+    const card = cardRef.current;
+    const badgeLike = badgeLikeRef.current;
+    const badgeNope = badgeNopeRef.current;
+    if (!card) {
+      if (liked) handleSwipeLike();
+      else handleSwipeNope();
+      return;
+    }
+
+    card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+    if (liked) {
+      if (badgeLike) badgeLike.style.opacity = '1';
+      card.style.transform = 'translateX(400px) rotate(45deg)';
+    } else {
+      if (badgeNope) badgeNope.style.opacity = '1';
+      card.style.transform = 'translateX(-400px) rotate(-45deg)';
+    }
+    card.style.opacity = '0';
+
+    setTimeout(() => {
+      if (liked) {
+        onFavoriteToggle(activePlace.id);
+      }
+      setActiveCardIndex((prev) => (prev + 1) % swipeQueue.length);
+      resetCardStyles();
+    }, 350);
+  };
+
   // Injetar distâncias nos locais em tempo real
   const placesWithDistance = React.useMemo(() => {
     return MOCK_PLACES.map(place => {
@@ -212,19 +359,43 @@ export default function Home({
 
                 {/* Active Card */}
                 <div 
-                  onClick={() => onSelectPlace(activePlace)}
-                  className="w-full h-full rounded-[32px] overflow-hidden border border-slate-200 dark:border-white/5 bg-white dark:bg-brand-indigo-950 flex flex-col shadow-2xl relative cursor-pointer group active:scale-[0.99] transition-all duration-300"
+                  ref={cardRef}
+                  onMouseDown={handleMouseDown}
+                  onTouchStart={handleDragStart}
+                  onTouchMove={handleDragMove}
+                  onTouchEnd={handleDragEnd}
+                  onClick={() => {
+                    const deltaX = Math.abs(currentXRef.current - startXRef.current);
+                    if (deltaX < 10) {
+                      onSelectPlace(activePlace);
+                    }
+                  }}
+                  className="w-full h-full rounded-[32px] overflow-hidden border border-slate-200 dark:border-white/5 bg-white dark:bg-brand-indigo-950 flex flex-col shadow-2xl relative cursor-grab active:cursor-grabbing select-none group active:scale-[0.99] transition-all duration-300"
                 >
-                  <img src={activePlace.image_url} alt={activePlace.name} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-indigo-950/90 via-brand-indigo-950/20 to-black/20" />
+                  {/* Swipe overlays */}
+                  <div 
+                    ref={badgeLikeRef}
+                    className="absolute top-8 left-8 border-4 border-brand-teal-500 text-brand-teal-500 dark:border-brand-teal-400 dark:text-brand-teal-400 px-4 py-2 rounded-xl text-xl font-black uppercase tracking-wider -rotate-12 opacity-0 z-20 pointer-events-none transition-opacity duration-100"
+                  >
+                    Giro!
+                  </div>
+                  <div 
+                    ref={badgeNopeRef}
+                    className="absolute top-8 right-8 border-4 border-brand-coral-500 text-brand-coral-500 px-4 py-2 rounded-xl text-xl font-black uppercase tracking-wider rotate-12 opacity-0 z-20 pointer-events-none transition-opacity duration-100"
+                  >
+                    Nem...
+                  </div>
+
+                  <img src={activePlace.image_url} alt={activePlace.name} className="w-full h-full object-cover pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-indigo-950/90 via-brand-indigo-950/20 to-black/20 pointer-events-none" />
 
                   {/* Badges/Category */}
-                  <div className="absolute top-4 left-4 bg-white/90 dark:bg-brand-indigo-950/80 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 px-3 py-1 rounded-full uppercase tracking-wider">
+                  <div className="absolute top-4 left-4 bg-white/90 dark:bg-brand-indigo-950/80 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 px-3 py-1 rounded-full uppercase tracking-wider pointer-events-none">
                     {activePlace.price_range} · {activePlace.avg_rating.toFixed(1)} ★
                   </div>
 
                   {/* Place Info */}
-                  <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 text-left">
+                  <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 text-left pointer-events-none">
                     <h3 className="text-lg sm:text-xl font-outfit font-extrabold text-white mb-1 flex items-center gap-1.5 leading-tight">
                       {activePlace.name}
                     </h3>
@@ -247,7 +418,7 @@ export default function Home({
               {/* Swipe Control Buttons */}
               <div className="flex items-center justify-center gap-6 mt-4 sm:mt-6 shrink-0 select-none">
                 <button 
-                  onClick={handleSwipeNope}
+                  onClick={() => animateSwipe(false)}
                   className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all shrink-0"
                 >
                   <Icons.X className="w-6 h-6" />
@@ -259,7 +430,7 @@ export default function Home({
                   <Icons.MapPin className="w-5 h-5" />
                 </button>
                 <button 
-                  onClick={handleSwipeLike}
+                  onClick={() => animateSwipe(true)}
                   className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all shrink-0"
                 >
                   <Icons.Heart className={`w-6 h-6 ${favorites.includes(activePlace.id) ? 'fill-brand-coral-500 text-brand-coral-500' : 'fill-transparent text-brand-coral-500'}`} />
