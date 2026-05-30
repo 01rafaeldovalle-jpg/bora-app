@@ -300,37 +300,40 @@ export default function Header({
   return (
     <>
       <header className="sticky top-0 z-50 px-6 py-4 bg-white/80 dark:bg-brand-indigo-950/85 backdrop-blur-md border-b border-slate-100 dark:border-white/5 text-slate-900 dark:text-white transition-colors duration-300 w-full">
-        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex flex-col">
-            <div 
-              onClick={handleLogoClick}
-              className="flex items-center gap-2 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 self-start"
-            >
-              {/* LOGO DO GIRO */}
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
-                <Compass className="w-5 h-5 text-white animate-pulse" />
-              </div>
-              <h1 className="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-500 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent leading-tight">
-                {title}
-              </h1>
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between gap-2">
+          {/* LOGO (Esquerda) */}
+          <div 
+            onClick={handleLogoClick}
+            className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shrink-0"
+          >
+            <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
+              <Compass className="w-4 h-4 text-white animate-pulse" />
             </div>
-            {showLocationSelector && (
-              <div className="pl-[44px] mt-[-2px]">
-                <div 
-                  onClick={() => setIsModalOpen(true)}
-                  className="flex items-center gap-1 text-[10px] text-brand-teal-500 dark:text-brand-teal-400 font-semibold tracking-wider uppercase cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95 inline-flex"
-                >
-                  <MapPin className="w-3 h-3" />
-                  <span>{locationLabel}</span>
-                  <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                </div>
-              </div>
-            )}
+            <h1 className="text-base sm:text-lg font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-500 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent leading-tight">
+              {title}
+            </h1>
           </div>
 
+          {/* ENDEREÇO (Centro) */}
+          {showLocationSelector ? (
+            <div className="flex-1 flex justify-center min-w-0 px-2">
+              <div 
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center gap-1 bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-100 dark:border-white/5 px-2.5 py-1.5 rounded-full text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 tracking-wider uppercase cursor-pointer hover:bg-slate-200/50 dark:hover:bg-brand-indigo-900/60 transition-all active:scale-95 max-w-[150px] sm:max-w-[45%] w-auto select-none"
+              >
+                <MapPin className="w-3 h-3 shrink-0" />
+                <span className="truncate flex-1 text-center">{locationLabel}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1" />
+          )}
+
+          {/* TEMA (Direita) */}
           <button 
             onClick={handleToggleTheme} 
-            className="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full relative focus:outline-none" 
+            className="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full relative focus:outline-none shrink-0" 
             aria-label="Alterar Tema"
           >
             <div className="coin-container w-8 h-8 relative transition-transform duration-500 transform-style-3d pointer-events-none">
