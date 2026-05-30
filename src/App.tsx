@@ -9,6 +9,7 @@ import LeafletMap from './components/maps/LeafletMap';
 import { MOCK_PLACES } from './utils/constants';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from './integrations/supabase/client';
+import Header from './components/common/Header';
 
 type Tab = 'home' | 'explore' | 'favorites' | 'profile';
 
@@ -319,6 +320,18 @@ export default function App() {
   return (
     <div className="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 font-sans overflow-hidden transition-colors duration-300">
       <main id="main-app-container" className="w-full h-full flex flex-col relative overflow-hidden bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
+        <Header 
+          title={
+            currentTab === 'profile' 
+              ? 'Meu Perfil' 
+              : currentTab === 'favorites' 
+                ? 'Meus Favoritos' 
+                : 'Giro'
+          }
+          showLocationSelector={currentTab === 'home' || currentTab === 'explore'}
+          searchRadius={searchRadius}
+          setSearchRadius={setSearchRadius}
+        />
         <div className={`flex-1 w-full relative bg-transparent pb-16 h-full flex flex-col min-h-0 ${
           (currentTab === 'home' && viewMode === 'swipe') || currentTab === 'explore'
             ? 'overflow-hidden'

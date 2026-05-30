@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/common/Header';
 import { Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut, ChevronRight, Mail, Lock, Eye, EyeOff, Save, X, Trash2 } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import Cropper from 'react-easy-crop';
@@ -335,8 +334,6 @@ export default function Profile({ favoritesCount }: ProfileProps) {
 
   return (
     <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
-      <Header title="Meu Perfil" showLocationSelector={false} />
-
       <div className="px-6 py-6 max-w-md mx-auto w-full flex flex-col">
         {/* Segmented Control */}
         <div className="bg-brand-indigo-950/80 border border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6">

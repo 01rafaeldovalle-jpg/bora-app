@@ -2,7 +2,6 @@ import React from 'react';
 import { Place } from '../types';
 import { MOCK_PLACES } from '../utils/constants';
 import PlaceCard from '../components/places/PlaceCard';
-import Header from '../components/common/Header';
 import { Heart, Compass } from 'lucide-react';
 
 interface FavoritesProps {
@@ -52,8 +51,6 @@ export default function Favorites({
 
   return (
     <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
-      <Header title="Meus Favoritos" showLocationSelector={false} />
-
       <div className="px-6 py-4 max-w-6xl mx-auto w-full">
         {favoritedPlaces.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

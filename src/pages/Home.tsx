@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Place, Category } from '../types';
 import { CATEGORIES, MOCK_PLACES, MOCK_EVENTS } from '../utils/constants';
 import PlaceCard from '../components/places/PlaceCard';
-import Header from '../components/common/Header';
 import SearchBar from '../components/common/SearchBar';
 import * as Icons from 'lucide-react';
 import { Calendar, Clock, MapPin, Sparkles, Flame, Check } from 'lucide-react';
@@ -140,7 +139,6 @@ export default function Home({
 
   return (
     <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
-      <Header searchRadius={searchRadius} setSearchRadius={setSearchRadius} />
 
       {/* Barra de Busca */}
       <div className="px-6 pt-4 max-w-6xl mx-auto w-full">

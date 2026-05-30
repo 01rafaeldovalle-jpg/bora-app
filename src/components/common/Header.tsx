@@ -299,7 +299,7 @@ export default function Header({
 
   return (
     <>
-      <header className="glass-panel sticky top-0 z-50 px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
+      <header className="sticky top-0 z-50 px-6 py-4 bg-white/80 dark:bg-brand-indigo-950/85 backdrop-blur-md border-b border-slate-100 dark:border-white/5 text-slate-900 dark:text-white transition-colors duration-300 w-full">
         <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex flex-col">
             <div 
