@@ -24,6 +24,7 @@ const formatAddressLabel = (address: any) => {
   
   let road = address.road || '';
   let suburb = address.suburb || address.neighbourhood || address.city_district || '';
+  const houseNumber = address.house_number || '';
   
   if (road) {
     road = road.replace(/^Rua\s+/i, 'R. ')
@@ -33,19 +34,26 @@ const formatAddressLabel = (address: any) => {
                .replace(/^Praça\s+/i, 'Pça. ');
   }
   
+  const roadWithNumber = road && houseNumber ? `${road}, ${houseNumber}` : road;
+  
   if (road && suburb) {
-    const fullLabel = `${road}, ${suburb}`;
+    const fullLabel = roadWithNumber ? `${roadWithNumber}, ${suburb}` : suburb;
     if (fullLabel.length <= 30) {
       return fullLabel;
     } else {
       const parts = road.split(' ');
       const shortenedRoad = parts[0] + ' ' + (parts.slice(-1)[0] || '');
-      const shortLabel = `${shortenedRoad}, ${suburb}`;
+      const shortenedRoadWithNumber = shortenedRoad && houseNumber ? `${shortenedRoad}, ${houseNumber}` : shortenedRoad;
+      const shortLabel = `${shortenedRoadWithNumber}, ${suburb}`;
       if (shortLabel.length <= 30) {
         return shortLabel;
       }
       return `${suburb}, Curitiba`;
     }
+  }
+  
+  if (roadWithNumber) {
+    return roadWithNumber;
   }
   
   return suburb ? `${suburb}, Curitiba` : (address.city || 'Curitiba - PR');
@@ -167,7 +175,7 @@ export default function Header({
     setIsLoading(true);
 
     debounceRef.current = setTimeout(() => {
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&addressdetails=1&limit=5`;
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&addressdetails=1&limit=5&viewbox=-49.40,-25.65,-49.15,-25.30&bounded=1`;
       fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
         .then((res) => res.json())
         .then((data) => {
@@ -319,7 +327,7 @@ export default function Header({
             <div className="flex-1 flex justify-center min-w-0 px-2">
               <div 
                 onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-1 bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-100 dark:border-white/5 px-2.5 py-1.5 rounded-full text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 tracking-wider uppercase cursor-pointer hover:bg-slate-200/50 dark:hover:bg-brand-indigo-900/60 transition-all active:scale-95 max-w-[150px] sm:max-w-[45%] w-auto select-none"
+                className="flex items-center gap-1 bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-100 dark:border-white/5 px-2.5 py-1.5 rounded-full text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 tracking-wider uppercase cursor-pointer hover:bg-slate-200/50 dark:hover:bg-brand-indigo-900/60 transition-all active:scale-95 max-w-[200px] sm:max-w-[55%] mx-3 w-auto select-none"
               >
                 <MapPin className="w-3 h-3 shrink-0" />
                 <span className="truncate flex-1 text-center">{locationLabel}</span>
