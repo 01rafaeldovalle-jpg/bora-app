@@ -1,188 +1,826 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/common/Header';
-import { User, LogIn, Settings, Bell, HelpCircle, Shield, Languages, Moon, Trash2, Heart, Award, MapPin } from 'lucide-react';
+import { Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut, ChevronRight, Mail, Lock, Eye, EyeOff, Save, X } from 'lucide-react';
+import { supabase } from '../integrations/supabase/client';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '../utils/cropImage';
 
 interface ProfileProps {
   favoritesCount: number;
 }
 
 export default function Profile({ favoritesCount }: ProfileProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState({
-    name: 'Rafael do Valle',
-    email: '01rafaeldovalle@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80',
-    checkins: 4,
-    reviews: 2
+  const [profileSubTab, setProfileSubTab] = useState<'personal' | 'business'>('personal');
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [badgeLevel, setBadgeLevel] = useState<'gold' | 'silver' | 'bronze'>('gold');
+  const [userPreferences, setUserPreferences] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('giro_preferences');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Erro ao ler giro_preferences:', e);
+    }
+    return ['pet', 'outdoor', 'live-music'];
   });
+  const [isPrefsSheetOpen, setIsPrefsSheetOpen] = useState(false);
+  
+  // Real session and mock session state for offline dogfooding
+  const [session, setSession] = useState<any>(null);
+  const [mockSession, setMockSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleLogin = (provider: 'google' | 'apple') => {
-    // Simulação do login social Supabase
-    setIsLoggedIn(true);
+  // Auth flow states
+  const [authView, setAuthView] = useState<'options' | 'email-login' | 'email-signup'>('options');
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [nameInput, setNameInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Dados Cadastrais bottom sheet states
+  const [isCadastraisOpen, setIsCadastraisOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editNickname, setEditNickname] = useState('');
+
+  // Profile Image crop states
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+
+  useEffect(() => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    }).catch((err) => {
+      console.error("Erro ao carregar sessão:", err);
+      setLoading(false);
+    });
+
+    // Listen to changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    if (supabase) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+          queryParams: {
+            prompt: 'select_account',
+          },
+        },
+      });
+      if (error) {
+        console.error('Erro ao fazer login com o Google:', error.message);
+        // Fallback to mock session if Supabase throws error (e.g. invalid keys / offline)
+        setMockSession({
+          user: {
+            email: 'rafael@giro.app',
+            user_metadata: {
+              full_name: 'Rafael do Valle',
+            }
+          }
+        });
+      }
+    } else {
+      // Offline fallback
+      setMockSession({
+        user: {
+          email: 'rafael@giro.app',
+          user_metadata: {
+            full_name: 'Rafael do Valle',
+          }
+        }
+      });
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  const handleEmailLogin = async () => {
+    setAuthError('');
+    setAuthLoading(true);
+    if (supabase) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: emailInput,
+        password: passwordInput,
+      });
+      if (error) {
+        setAuthError(error.message === 'Invalid login credentials' ? 'E-mail ou senha inválidos.' : error.message);
+      }
+    } else {
+      const savedUser = localStorage.getItem('giro_mock_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed.email === emailInput && parsed.password === passwordInput) {
+          setMockSession({ user: { email: parsed.email, user_metadata: { full_name: parsed.name } } });
+        } else {
+          setAuthError('E-mail ou senha inválidos.');
+        }
+      } else {
+        setAuthError('Nenhuma conta encontrada. Crie uma conta primeiro.');
+      }
+    }
+    setAuthLoading(false);
   };
+
+  const handleEmailSignup = async () => {
+    setAuthError('');
+    if (!nameInput.trim()) { setAuthError('Preencha seu nome completo.'); return; }
+    if (!emailInput.trim()) { setAuthError('Preencha o e-mail.'); return; }
+    if (passwordInput.length < 6) { setAuthError('A senha deve ter pelo menos 6 caracteres.'); return; }
+    setAuthLoading(true);
+    if (supabase) {
+      const { error } = await supabase.auth.signUp({
+        email: emailInput,
+        password: passwordInput,
+        options: { data: { full_name: nameInput } },
+      });
+      if (error) {
+        setAuthError(error.message);
+      } else {
+        setAuthError('');
+        setAuthView('email-login');
+        setAuthLoading(false);
+        return;
+      }
+    } else {
+      localStorage.setItem('giro_mock_user', JSON.stringify({ email: emailInput, password: passwordInput, name: nameInput }));
+      setMockSession({ user: { email: emailInput, user_metadata: { full_name: nameInput } } });
+    }
+    setAuthLoading(false);
+  };
+
+  const openCadastrais = () => {
+    setEditName(userName);
+    setEditNickname(userNickname);
+    setIsCadastraisOpen(true);
+  };
+
+  const saveCadastrais = async () => {
+    if (supabase && session) {
+      await supabase.auth.updateUser({ data: { full_name: editName } });
+    }
+    const savedUser = localStorage.getItem('giro_mock_user');
+    if (savedUser) {
+      const parsed = JSON.parse(savedUser);
+      parsed.name = editName;
+      localStorage.setItem('giro_mock_user', JSON.stringify(parsed));
+    }
+    if (mockSession) {
+      setMockSession({ ...mockSession, user: { ...mockSession.user, user_metadata: { ...mockSession.user.user_metadata, full_name: editName } } });
+    }
+    setIsCadastraisOpen(false);
+  };
+
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setImageSrc(e.target.result as string);
+          setCrop({ x: 0, y: 0 });
+          setZoom(1);
+          setCropModalOpen(true);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const cycleBadgeLevel = () => {
+    if (badgeLevel === 'gold') setBadgeLevel('silver');
+    else if (badgeLevel === 'silver') setBadgeLevel('bronze');
+    else setBadgeLevel('gold');
+  };
+
+  const togglePreference = (pref: string) => {
+    setUserPreferences((prev) =>
+      prev.includes(pref) ? prev.filter((p) => p !== pref) : [...prev, pref]
+    );
+  };
+
+  const handleLogout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+    }
+    setMockSession(null);
+    window.dispatchEvent(new CustomEvent('giro-logout'));
+  };
+
+  const prefs = [
+    { id: 'pet', label: '🐶 Pet Friendly' },
+    { id: 'vegan', label: '🌿 Vegano' },
+    { id: 'work', label: '💻 Trabalhar' },
+    { id: 'outdoor', label: '☀️ Ar Livre' },
+    { id: 'live-music', label: '🎶 Música ao Vivo' },
+    { id: 'date', label: '🍷 Encontro' },
+    { id: 'specialty-coffee', label: '☕ Café Especial' },
+    { id: 'craft-beer', label: '🍺 Cerveja Artesanal' },
+    { id: 'street-food', label: '🍕 Comida de Rua' },
+    { id: 'cultural', label: '🎨 Cultural' },
+    { id: 'kids', label: '🧒 Espaço Kids' },
+    { id: 'accessible', label: '♿ Acessível' }
+  ];
+
+  const activeSession = session || mockSession;
+  const user = activeSession?.user;
+  const metadata = user?.user_metadata || {};
+  const userName = metadata?.full_name || user?.email || "Usuário Giro";
+  const userNickname = metadata?.full_name 
+    ? `@${metadata.full_name.toLowerCase().replace(/\s+/g, '_')}` 
+    : user?.email 
+      ? `@${user.email.split('@')[0]}` 
+      : "@usuario_giro";
+  const profilePhotoUrl = metadata?.avatar_url || null;
+  const firstLetter = userName.charAt(0).toUpperCase();
+  const avatarToShow = userAvatar || profilePhotoUrl;
 
   return (
-    <div className="pb-24 text-slate-100">
+    <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
       <Header title="Meu Perfil" showLocationSelector={false} />
 
-      <div className="px-6 py-4 max-w-md mx-auto">
-        {isLoggedIn ? (
-          /* USUÁRIO LOGADO */
-          <div className="space-y-6">
-            {/* Cartão de Perfil */}
-            <div className="glass-card rounded-3xl p-5 border border-white/5 flex items-center gap-4 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-brand-coral-500/10 blur-xl -z-10" />
-              <img 
-                src={user.avatar} 
-                alt={user.name} 
-                className="w-16 h-16 rounded-full object-cover border-2 border-brand-coral-500 shadow-md shrink-0" 
-              />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-outfit font-bold text-white line-clamp-1 leading-snug">{user.name}</h3>
-                <p className="text-xs text-slate-400 line-clamp-1 mb-2">{user.email}</p>
-                <div className="flex items-center gap-1.5 text-[10px] text-brand-teal-400 font-semibold tracking-wide uppercase">
-                  <Award className="w-3.5 h-3.5" /> Explorador Iniciante
+      <div className="px-6 py-6 max-w-md mx-auto w-full flex flex-col">
+        {/* Segmented Control */}
+        <div className="bg-brand-indigo-950/80 border border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6">
+          <button
+            onClick={() => setProfileSubTab('personal')}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              profileSubTab === 'personal'
+                ? 'bg-brand-coral-500 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Meu Perfil
+          </button>
+          <button
+            onClick={() => setProfileSubTab('business')}
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              profileSubTab === 'business'
+                ? 'bg-brand-coral-500 text-white shadow-md'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Meu Negócio
+          </button>
+        </div>
+
+        {/* Subtab Content */}
+        <div className="w-full">
+          {profileSubTab === 'personal' ? (
+            loading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-coral-500 animate-pulse"></div>
+              </div>
+            ) : !activeSession ? (
+              <div className="glass-card rounded-[32px] p-8 text-center border border-white/5 flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500">
+                  {authView === 'options' ? <User className="w-8 h-8" /> : <Mail className="w-8 h-8" />}
+                </div>
+                <h3 className="text-lg font-outfit font-bold text-slate-900 dark:text-white mb-2">
+                  {authView === 'options' ? 'Acesse sua Conta' : authView === 'email-login' ? 'Entrar com E-mail' : 'Criar Conta'}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed mb-6">
+                  {authView === 'options'
+                    ? 'Entre no Giro para calibrar seu Swipe, salvar seus locais favoritos e ganhar selos de atividade.'
+                    : authView === 'email-login'
+                      ? 'Use seu e-mail e senha para acessar sua conta.'
+                      : 'Preencha os dados abaixo para criar sua conta no Giro.'}
+                </p>
+
+                {authView === 'options' ? (
+                  <div className="w-full max-w-[280px] space-y-3">
+                    <button
+                      onClick={handleGoogleLogin}
+                      className="w-full h-12 rounded-2xl bg-white text-slate-800 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-slate-100 transition-all btn-premium shadow-md border border-slate-100"
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      </svg>
+                      Entrar com o Google
+                    </button>
+                    <button
+                      onClick={() => { setAuthView('email-login'); setAuthError(''); }}
+                      className="w-full h-12 rounded-2xl bg-brand-indigo-900 text-white border border-white/10 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-brand-indigo-900/80 transition-all btn-premium"
+                    >
+                      <Mail className="w-5 h-5 text-slate-300" />
+                      Entrar com e-mail
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-full max-w-[300px] space-y-3">
+                    <button
+                      onClick={() => { setAuthView('options'); setAuthError(''); }}
+                      className="text-xs text-brand-coral-500 hover:text-brand-coral-600 font-semibold mb-1 flex items-center gap-1 transition-colors"
+                    >
+                      ← Voltar
+                    </button>
+
+                    {authView === 'email-signup' && (
+                      <div className="relative">
+                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Nome completo"
+                          value={nameInput}
+                          onChange={(e) => setNameInput(e.target.value)}
+                          className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                        />
+                      </div>
+                    )}
+
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={emailInput}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                      />
+                    </div>
+
+                    <div className="relative">
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Senha"
+                        value={passwordInput}
+                        onChange={(e) => setPasswordInput(e.target.value)}
+                        className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-11 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    {authError && (
+                      <p className="text-xs text-rose-500 font-semibold text-center">{authError}</p>
+                    )}
+
+                    <button
+                      onClick={authView === 'email-login' ? handleEmailLogin : handleEmailSignup}
+                      disabled={authLoading}
+                      className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm transition-all btn-premium shadow-md shadow-brand-coral-500/20 disabled:opacity-50"
+                    >
+                      {authLoading ? 'Carregando...' : authView === 'email-login' ? 'Entrar' : 'Criar Conta'}
+                    </button>
+
+                    <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+                      {authView === 'email-login' ? (
+                        <>Não tem conta? <button onClick={() => { setAuthView('email-signup'); setAuthError(''); }} className="text-brand-coral-500 font-bold hover:underline">Cadastre-se</button></>
+                      ) : (
+                        <>Já tem conta? <button onClick={() => { setAuthView('email-login'); setAuthError(''); }} className="text-brand-coral-500 font-bold hover:underline">Faça login</button></>
+                      )}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                {/* Avatar Section */}
+                <div className="relative group avatar-container mb-4">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-brand-coral-500/30 bg-brand-indigo-900/50 flex items-center justify-center relative transition-all duration-300 avatar-pulse">
+                    {avatarToShow ? (
+                      <img src={avatarToShow} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-tr from-brand-coral-500 to-amber-500 flex items-center justify-center">
+                        <span className="text-3xl font-outfit font-extrabold text-white">{firstLetter}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Upload Button */}
+                  <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-brand-coral-500 border-2 border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 transition-all hover:scale-110 active:scale-95 shadow-lg">
+                    <Edit2 className="w-3.5 h-3.5 text-white" />
+                    <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                  </label>
+                </div>
+
+                {/* Name and Username */}
+                <h2 className="text-xl font-outfit font-extrabold text-slate-900 dark:text-white">{userName}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{userNickname}</p>
+
+                {/* Selo Giro Visual Card */}
+                <div
+                  onClick={cycleBadgeLevel}
+                  className="glass-card rounded-3xl p-4 w-full border border-white/5 flex items-center gap-4 mt-5 cursor-pointer select-none hover:border-brand-coral-500/30 transition-all"
+                >
+                  <div className="relative shrink-0 overflow-hidden rounded-xl">
+                    {/* SVG Stamp Badge */}
+                    <svg className="w-14 h-14 drop-shadow-md" viewBox="0 0 100 100">
+                      <defs>
+                        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#FFE082" />
+                          <stop offset="30%" stopColor="#FFB300" />
+                          <stop offset="70%" stopColor="#FF8F00" />
+                          <stop offset="100%" stopColor="#FFE082" />
+                        </linearGradient>
+                        <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#ECEFF1" />
+                          <stop offset="50%" stopColor="#B0BEC5" />
+                          <stop offset="100%" stopColor="#90A4AE" />
+                        </linearGradient>
+                        <linearGradient id="bronzeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#D7CCC8" />
+                          <stop offset="50%" stopColor="#8D6E63" />
+                          <stop offset="100%" stopColor="#5D4037" />
+                        </linearGradient>
+                      </defs>
+                      {/* Stamp Path with Scalloped Edge */}
+                      <path
+                        fill={
+                          badgeLevel === 'gold'
+                            ? 'url(#goldGrad)'
+                            : badgeLevel === 'silver'
+                            ? 'url(#silverGrad)'
+                            : 'url(#bronzeGrad)'
+                        }
+                        d="M 10 10 Q 18 18 26 10 Q 34 18 42 10 Q 50 18 58 10 Q 66 18 74 10 Q 82 18 90 10 Q 82 18 90 26 Q 82 34 90 42 Q 82 50 90 58 Q 82 66 90 74 Q 82 82 90 90 Q 82 82 74 90 Q 66 82 58 90 Q 50 82 42 90 Q 34 82 26 90 Q 18 82 10 90 Q 18 82 10 74 Q 18 66 10 58 Q 18 50 10 42 Q 18 34 10 26 Q 18 18 10 10 Z"
+                      />
+                      {/* Letter G in debossed 3D styling */}
+                      <text x="50" y="61" fontFamily="'Outfit', 'Inter', sans-serif" fontSize="34" fontWeight="900" textAnchor="middle" fill="rgba(255,255,255,0.22)">G</text>
+                      <text x="50" y="60" fontFamily="'Outfit', 'Inter', sans-serif" fontSize="34" fontWeight="900" textAnchor="middle" fill="rgba(0,0,0,0.55)">G</text>
+                    </svg>
+                    <div className="shimmer-badge-overlay"></div>
+                  </div>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">
+                        Selo {badgeLevel === 'gold' ? 'Ouro' : badgeLevel === 'silver' ? 'Prata' : 'Bronze'}
+                      </h3>
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        {badgeLevel === 'gold' ? '85%' : badgeLevel === 'silver' ? '60%' : '30%'} ativo
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">
+                      Clique para ciclar selos • Nível de atividade para manter o selo atual.
+                    </p>
+                    {/* Progress Bar */}
+                    <div className="w-full h-1.5 bg-brand-indigo-950 rounded-full overflow-hidden mt-2">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          badgeLevel === 'gold'
+                            ? 'bg-amber-500 w-[85%]'
+                            : badgeLevel === 'silver'
+                            ? 'bg-slate-300 w-[60%]'
+                            : 'bg-amber-700 w-[30%]'
+                        }`}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Estatísticas Rápidas (Cards de Métrica) */}
+                <div className="grid grid-cols-3 gap-3 w-full mt-4">
+                  <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                    <Bookmark className="w-4 h-4 text-brand-teal-400 mb-1.5" />
+                    <span className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">
+                      {favoritesCount}
+                    </span>
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">
+                      Salvos
+                    </span>
+                  </div>
+                  <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                    <Edit3 className="w-4 h-4 text-brand-gold-400 mb-1.5" />
+                    <span className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">12</span>
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Reviews</span>
+                  </div>
+                  <div className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                    <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />
+                    <span className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">142</span>
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Ajudou</span>
+                  </div>
+                </div>
+
+                {/* Seleção de Preferências (Exibição Limpa) */}
+                <div className="glass-card rounded-3xl p-5 w-full border border-white/5 mt-4 text-left">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                      Minhas Preferências
+                    </h3>
+                    {userPreferences.length > 0 && (
+                      <button
+                        onClick={() => setIsPrefsSheetOpen(true)}
+                        className="text-xs text-brand-coral-500 hover:text-brand-coral-600 flex items-center gap-1 font-semibold transition-colors"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        Editar
+                      </button>
+                    )}
+                  </div>
+                  
+                  {userPreferences.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 mt-3 justify-start">
+                      {prefs
+                        .filter((pref) => userPreferences.includes(pref.id))
+                        .map((pref) => (
+                          <span
+                            key={pref.id}
+                            className="px-3 py-1.5 rounded-full text-xs font-semibold border border-brand-coral-500 bg-brand-coral-500 text-white shadow-md shadow-brand-coral-500/20"
+                          >
+                            {pref.label}
+                          </span>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <button
+                        onClick={() => setIsPrefsSheetOpen(true)}
+                        className="text-xs text-slate-400 hover:text-white font-semibold transition-colors flex items-center justify-center gap-1 w-full"
+                      >
+                        Nenhuma preferência selecionada. <span className="text-brand-coral-500">[+ Adicionar]</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Configurações e Menu da Conta */}
+                <div className="glass-card rounded-3xl w-full border border-white/5 mt-4 overflow-hidden">
+                  <button
+                    onClick={openCadastrais}
+                    className="w-full flex items-center justify-between px-5 py-4 border-b border-white/5 hover:bg-white/5 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <User className="w-4 h-4 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                        Dados Cadastrais
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-950 dark:group-hover:text-white transition-colors" />
+                  </button>
+                  <button
+                    onClick={() => alert('Configurações de Notificação (Em breve!)')}
+                    className="w-full flex items-center justify-between px-5 py-4 border-b border-white/5 hover:bg-white/5 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bell className="w-4 h-4 text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors" />
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                        Gerenciar Notificações
+                      </span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-slate-950 dark:group-hover:text-white transition-colors" />
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-between px-5 py-4 hover:bg-rose-500/10 transition-all text-left group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <LogOut className="w-4 h-4 text-rose-500 dark:text-rose-400" />
+                      <span className="text-xs font-bold text-rose-500 dark:text-rose-400">Sair da Conta</span>
+                    </div>
+                  </button>
                 </div>
               </div>
-            </div>
-
-            {/* Estatísticas */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="glass-card rounded-2xl p-3 border border-white/5 text-center">
-                <span className="block text-lg font-outfit font-black text-brand-coral-500">{favoritesCount}</span>
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Favoritos</span>
-              </div>
-              <div className="glass-card rounded-2xl p-3 border border-white/5 text-center">
-                <span className="block text-lg font-outfit font-black text-brand-teal-400">{user.checkins}</span>
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Check-ins</span>
-              </div>
-              <div className="glass-card rounded-2xl p-3 border border-white/5 text-center">
-                <span className="block text-lg font-outfit font-black text-brand-gold-400">{user.reviews}</span>
-                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Reviews</span>
-              </div>
-            </div>
-
-            {/* Ações Rápidas */}
-            <div className="glass-card rounded-3xl border border-white/5 divide-y divide-white/5 overflow-hidden">
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 active:bg-white/10 transition-all text-left">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-brand-coral-500/10 text-brand-coral-500"><Bell className="w-4 h-4" /></div>
-                  <span className="text-xs font-semibold text-slate-200">Notificações</span>
-                </div>
-                <div className="w-8 h-5 rounded-full bg-brand-coral-500/20 flex items-center p-0.5 justify-end"><div className="w-4 h-4 rounded-full bg-brand-coral-500" /></div>
-              </button>
-
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 active:bg-white/10 transition-all text-left">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-brand-teal-500/10 text-brand-teal-400"><Languages className="w-4 h-4" /></div>
-                  <span className="text-xs font-semibold text-slate-200">Idioma</span>
-                </div>
-                <span className="text-[10px] text-slate-400 font-bold uppercase">Português</span>
-              </button>
-
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 active:bg-white/10 transition-all text-left">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-brand-gold-500/10 text-brand-gold-400"><Moon className="w-4 h-4" /></div>
-                  <span className="text-xs font-semibold text-slate-200">Tema Claro / Escuro</span>
-                </div>
-                <div className="w-8 h-5 rounded-full bg-brand-gold-500/20 flex items-center p-0.5 justify-end"><div className="w-4 h-4 rounded-full bg-brand-gold-400" /></div>
-              </button>
-            </div>
-
-            {/* Suporte e Segurança */}
-            <div className="glass-card rounded-3xl border border-white/5 divide-y divide-white/5 overflow-hidden">
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-all text-left">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/5 text-slate-400"><Shield className="w-4 h-4" /></div>
-                  <span className="text-xs font-semibold text-slate-200">Políticas & LGPD</span>
-                </div>
-              </button>
-              
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-all text-left">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/5 text-slate-400"><HelpCircle className="w-4 h-4" /></div>
-                  <span className="text-xs font-semibold text-slate-200">Central de Ajuda</span>
-                </div>
-              </button>
-            </div>
-
-            {/* Sair da Conta e Excluir */}
-            <div className="space-y-2 pt-2">
-              <button 
-                onClick={handleLogout}
-                className="w-full h-11 rounded-2xl border border-white/10 text-xs font-bold text-slate-300 hover:bg-white/5 transition-all active:scale-98 btn-premium"
-              >
-                Sair da Conta
-              </button>
-              
-              <button className="w-full h-11 rounded-2xl border border-red-500/20 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-all active:scale-98 btn-premium flex items-center justify-center gap-2">
-                <Trash2 className="w-4 h-4" /> Excluir Minha Conta (LGPD)
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* USUÁRIO DESLOGADO */
-          <div className="space-y-8 py-10 text-center">
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md flex items-center justify-center mb-6">
-                <User className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-xl font-outfit font-extrabold text-white mb-2">Participe da comunidade</h2>
-              <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
-                Crie uma conta para salvar seus locais favoritos, fazer check-ins, avaliar experiências e receber recomendações sob medida.
+            )
+          ) : (
+            <div className="glass-card rounded-[32px] p-8 text-center border border-white/5">
+              <p className="text-sm font-semibold text-slate-300">
+                Painel do Estabelecimento e Cadastro (Em breve)
               </p>
             </div>
-
-            {/* Botões de Login Social (Únicos permitidos - Google / Apple) */}
-            <div className="space-y-3">
-              <button
-                onClick={() => handleLogin('google')}
-                className="w-full h-12 rounded-2xl bg-white text-black font-semibold text-sm flex items-center justify-center gap-3 hover:bg-slate-100 transition-all active:scale-98 btn-premium shadow-md"
-              >
-                <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-                  <path
-                    fill="#4285F4"
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  />
-                </svg>
-                <span>Entrar com o Google</span>
-              </button>
-
-              <button
-                onClick={() => handleLogin('apple')}
-                className="w-full h-12 rounded-2xl bg-black text-white border border-white/10 font-semibold text-sm flex items-center justify-center gap-3 hover:bg-slate-900 transition-all active:scale-98 btn-premium shadow-md"
-              >
-                <svg className="w-4.5 h-4.5 shrink-0 -translate-y-0.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.22.67-2.94 1.5-.64.74-1.2 1.88-1.05 3 .12.01.24.02.35.02.96 0 2.1-.61 2.65-1.46z" />
-                </svg>
-                <span>Entrar com a Apple</span>
-              </button>
-            </div>
-            
-            <div className="pt-8">
-              <p className="text-[10px] text-slate-500 leading-relaxed max-w-xs mx-auto">
-                Ao continuar, você concorda com nossos Termos de Uso e Política de Privacidade de acordo com a LGPD.
-              </p>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Crop Image Modal */}
+      {cropModalOpen && imageSrc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="glass-card w-full max-w-md rounded-[32px] border border-white/5 overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="p-5 border-b border-white/5 text-center">
+              <h3 className="text-base font-outfit font-bold text-white">Ajustar Foto de Perfil</h3>
+              <p className="text-[10px] text-slate-400 mt-1">Mova e aproxime a foto para centralizá-la no círculo</p>
+            </div>
+
+            {/* Cropper Container */}
+            <div className="relative w-full h-72 bg-brand-indigo-950/40">
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_croppedArea, croppedAreaPixels) => {
+                  setCroppedAreaPixels(croppedAreaPixels);
+                }}
+              />
+            </div>
+
+            {/* Controls */}
+            <div className="p-5 flex flex-col gap-4">
+              {/* Zoom Slider */}
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Zoom</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="flex-1 accent-brand-coral-500 bg-white/10 rounded-lg h-1.5 cursor-pointer"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setCropModalOpen(false);
+                    setImageSrc(null);
+                  }}
+                  className="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-all text-slate-300 active:scale-95"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      if (imageSrc && croppedAreaPixels) {
+                        const croppedBase64 = await getCroppedImg(imageSrc, croppedAreaPixels);
+                        setUserAvatar(croppedBase64);
+                        setCropModalOpen(false);
+                        setImageSrc(null);
+                      }
+                    } catch (e) {
+                      console.error('Erro ao recortar imagem:', e);
+                    }
+                  }}
+                  className="flex-1 py-3 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/10"
+                >
+                  Confirmar Corte
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preferences Bottom Sheet Drawer */}
+      {isPrefsSheetOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[4px]">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0" 
+            onClick={() => {
+              localStorage.setItem('giro_preferences', JSON.stringify(userPreferences));
+              setIsPrefsSheetOpen(false);
+            }} 
+          />
+          
+          {/* Drawer Body */}
+          <div className="relative w-full max-w-md bg-white dark:bg-brand-indigo-950 border-t border-slate-100 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl z-10 animate-[slideUp_0.3s_ease-out] flex flex-col" style={{ maxHeight: '80vh' }}>
+            {/* Handle bar */}
+            <div 
+              className="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer mb-5 shrink-0" 
+              onClick={() => {
+                localStorage.setItem('giro_preferences', JSON.stringify(userPreferences));
+                setIsPrefsSheetOpen(false);
+              }}
+            />
+            
+            <div className="text-center mb-5 shrink-0">
+              <h3 className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">Editar Preferências</h3>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Selecione o que você busca para calibrar seu Swipe ⚡</p>
+            </div>
+
+            {/* Scrollable preferences grid */}
+            <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 gap-2 mb-6 min-h-0">
+              {prefs.map((pref) => {
+                const isActive = userPreferences.includes(pref.id);
+                return (
+                  <button
+                    key={pref.id}
+                    onClick={() => {
+                      setUserPreferences((prev) => {
+                        const updated = prev.includes(pref.id)
+                          ? prev.filter((p) => p !== pref.id)
+                          : [...prev, pref.id];
+                        return updated;
+                      });
+                    }}
+                    className={`px-4 py-3 rounded-2xl text-xs font-semibold border flex items-center gap-2.5 transition-all duration-200 active:scale-95 ${
+                      isActive 
+                        ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md shadow-brand-coral-500/20' 
+                        : 'border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="text-sm shrink-0">{pref.label.split(' ')[0]}</span>
+                    <span className="truncate">{pref.label.split(' ').slice(1).join(' ')}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Confirm button */}
+            <button
+              onClick={() => {
+                localStorage.setItem('giro_preferences', JSON.stringify(userPreferences));
+                setIsPrefsSheetOpen(false);
+              }}
+              className="w-full py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/20 shrink-0"
+            >
+              Confirmar Alterações
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Dados Cadastrais Bottom Sheet */}
+      {isCadastraisOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-[4px]">
+          <div className="absolute inset-0" onClick={() => setIsCadastraisOpen(false)} />
+          <div className="relative w-full max-w-md bg-white dark:bg-brand-indigo-950 border-t border-slate-100 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl z-10 animate-[slideUp_0.3s_ease-out] flex flex-col" style={{ maxHeight: '80vh' }}>
+            <div className="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer mb-5 shrink-0" onClick={() => setIsCadastraisOpen(false)} />
+
+            <div className="text-center mb-6 shrink-0">
+              <h3 className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">Dados Cadastrais</h3>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">Edite seus dados pessoais</p>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Nome Completo</label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Nickname</label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">@</span>
+                  <input
+                    type="text"
+                    value={editNickname.replace('@', '')}
+                    onChange={(e) => setEditNickname(`@${e.target.value.replace('@', '')}`)}
+                    className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">E-mail</label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
+                  <input
+                    type="email"
+                    value={user?.email || ''}
+                    readOnly
+                    className="w-full h-12 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 text-sm text-slate-400 pl-10 pr-10 cursor-not-allowed"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={saveCadastrais}
+              className="w-full py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold transition-all text-white active:scale-95 btn-premium shadow-md shadow-brand-coral-500/20 shrink-0 flex items-center justify-center gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Salvar Alterações
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -157,3 +157,56 @@
 .place-marker-custom:hover {
   transform: scale(1.15) translateY(-2px);
 }
+
+/* Giro 3D Coin Utilities */
+.transform-style-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+/* Rotação automática da moeda baseada no tema da tag HTML */
+html:not(.dark) .coin-container {
+  transform: rotateY(180deg);
+}
+
+/* Shimmer stamp badge effect */
+.shimmer-badge-overlay {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  transform: rotate(45deg);
+  animation: shimmer-effect 3s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes shimmer-effect {
+  0% {
+    transform: translateX(-150%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(150%) rotate(45deg);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

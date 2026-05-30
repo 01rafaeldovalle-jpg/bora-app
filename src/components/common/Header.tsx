@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Compass, Sparkles, MapPin, ChevronDown, Search, Locate, X } from 'lucide-react';
+import { Compass, Moon, Sun, MapPin, ChevronDown, Search, Locate, X } from 'lucide-react';
 
 interface HeaderProps {
   title?: string;
@@ -62,9 +62,11 @@ export default function Header({
     // 1. Detectar o tema inicial
     let initialTheme = localStorage.getItem('giro_theme') as 'light' | 'dark' | null;
     if (!initialTheme) {
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      if (prefersDark) {
         initialTheme = 'dark';
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      } else if (prefersLight) {
         initialTheme = 'light';
       } else {
         const hour = new Date().getHours();
@@ -278,40 +280,52 @@ export default function Header({
 
   return (
     <>
-      <header className="glass-panel sticky top-0 z-50 flex items-center justify-between px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
-        <div className="flex flex-col">
-          <div 
-            onClick={handleLogoClick}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 self-start"
-          >
-            {/* LOGO DO GIRO */}
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
-              <Compass className="w-5 h-5 text-white animate-pulse" />
+      <header className="glass-panel sticky top-0 z-50 px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
+        <div className="w-full max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex flex-col">
+            <div 
+              onClick={handleLogoClick}
+              className="flex items-center gap-2 cursor-pointer hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 self-start"
+            >
+              {/* LOGO DO GIRO */}
+              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 shadow-md shrink-0">
+                <Compass className="w-5 h-5 text-white animate-pulse" />
+              </div>
+              <h1 className="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-500 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent leading-tight">
+                {title}
+              </h1>
             </div>
-            <h1 className="text-xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-600 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent transition-colors duration-300 leading-tight">
-              {title}
-            </h1>
+            {showLocationSelector && (
+              <div className="pl-[44px] mt-[-2px]">
+                <div 
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center gap-1 text-[10px] text-brand-teal-500 dark:text-brand-teal-400 font-semibold tracking-wider uppercase cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95 inline-flex"
+                >
+                  <MapPin className="w-3 h-3" />
+                  <span>{locationLabel}</span>
+                  <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                </div>
+              </div>
+            )}
           </div>
-          {showLocationSelector && (
-            <div className="pl-[44px] mt-[-2px]">
-              <div 
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center gap-1 text-[10px] text-brand-teal-500 dark:text-brand-teal-400 font-semibold tracking-wider uppercase cursor-pointer hover:bg-slate-200/40 dark:hover:bg-white/10 px-1.5 py-0.5 rounded-md transition-all active:scale-95 inline-flex"
-              >
-                <MapPin className="w-3 h-3" />
-                <span>{locationLabel}</span>
-                <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+
+          <button 
+            onClick={handleToggleTheme} 
+            className="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full relative focus:outline-none" 
+            aria-label="Alterar Tema"
+          >
+            <div className="coin-container w-8 h-8 relative transition-transform duration-500 transform-style-3d pointer-events-none">
+              {/* FACE NOITE (LUA) - Visível no modo Dark */}
+              <div className="coin-face coin-face-dark absolute inset-0 rounded-full flex items-center justify-center bg-brand-indigo-900 border border-white/10 text-brand-teal-400 backface-hidden">
+                <Moon className="w-4 h-4" />
+              </div>
+              {/* FACE DIA (SOL) - Visível no modo Light (Rotacionada em 180 graus) */}
+              <div className="coin-face coin-face-light absolute inset-0 rounded-full flex items-center justify-center bg-amber-500 border border-amber-400 text-white backface-hidden rotate-y-180">
+                <Sun className="w-4 h-4" />
               </div>
             </div>
-          )}
+          </button>
         </div>
-
-        <button 
-          onClick={handleToggleTheme}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-brand-coral-500 dark:hover:bg-brand-coral-500 hover:text-white transition-all btn-premium"
-        >
-          <Sparkles className={`w-4 h-4 transition-colors ${theme === 'dark' ? 'text-brand-gold-400' : 'text-slate-500'}`} />
-        </button>
       </header>
 
       {/* BOTTOM SHEET / MODAL DE LOCALIZAÇÃO MANUAL */}

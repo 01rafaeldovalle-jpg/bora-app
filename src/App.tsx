@@ -13,6 +13,7 @@ type Tab = 'home' | 'explore' | 'favorites' | 'profile';
 
 export default function App() {
   const [currentTab, setTab] = useState<Tab>('home');
+  const [viewMode, setViewMode] = useState<'swipe' | 'list'>('swipe');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [activeCoords, setActiveCoords] = useState<{ lat: number; lng: number }>({
@@ -22,6 +23,28 @@ export default function App() {
   const [mapFilterFavoritesOnly, setMapFilterFavoritesOnly] = useState(false);
   const [isDesktopMapOpen, setIsDesktopMapOpen] = useState(true);
   const [searchRadius, setSearchRadius] = useState<number>(10.0);
+
+  // Early theme initialization
+  useEffect(() => {
+    let savedTheme = localStorage.getItem('giro_theme');
+    if (!savedTheme) {
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      if (prefersDark) {
+        savedTheme = 'dark';
+      } else if (prefersLight) {
+        savedTheme = 'light';
+      } else {
+        const hour = new Date().getHours();
+        savedTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
+      }
+    }
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
 
   // Reset filter when changing tabs to anything other than home or explore
   useEffect(() => {
@@ -149,6 +172,8 @@ export default function App() {
       case 'home':
         return (
           <Home 
+            viewMode={viewMode}
+            setViewMode={setViewMode}
             onSelectPlace={handleSelectPlaceFromHome}
             favorites={favorites}
             onFavoriteToggle={handleFavoriteToggle}
@@ -190,6 +215,8 @@ export default function App() {
       default:
         return (
           <Home 
+            viewMode={viewMode}
+            setViewMode={setViewMode}
             onSelectPlace={handleSelectPlaceFromHome}
             favorites={favorites}
             onFavoriteToggle={handleFavoriteToggle}
@@ -202,11 +229,23 @@ export default function App() {
 
   return (
     <div className="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 font-sans overflow-hidden transition-colors duration-300">
-      <main id="main-app-container" className="w-full max-w-md mx-auto h-full flex flex-col relative overflow-hidden md:border-x border-slate-200 dark:border-white/5 md:shadow-2xl bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
-        <div className="flex-1 w-full relative bg-transparent pb-16 h-full overflow-y-auto">
+      <main id="main-app-container" className="w-full h-full flex flex-col relative overflow-hidden bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
+        <div className={`flex-1 w-full relative bg-transparent pb-16 h-full flex flex-col min-h-0 ${
+          (currentTab === 'home' && viewMode === 'swipe') || currentTab === 'explore'
+            ? 'overflow-hidden'
+            : 'overflow-y-auto'
+        }`}>
           {renderTabContent()}
         </div>
-        <BottomNavigation currentTab={currentTab} setTab={setTab} />
+        <BottomNavigation 
+          currentTab={currentTab} 
+          setTab={(tab) => {
+            if (tab === 'home') {
+              setViewMode('swipe');
+            }
+            setTab(tab);
+          }} 
+        />
       </main>
     </div>
   );

@@ -15,6 +15,8 @@ const IconRenderer = ({ name, className }: { name: string; className: string }) 
 };
 
 interface HomeProps {
+  viewMode: 'swipe' | 'list';
+  setViewMode: (mode: 'swipe' | 'list') => void;
   onSelectPlace: (place: Place) => void;
   favorites: string[];
   onFavoriteToggle: (id: string) => void;
@@ -38,6 +40,8 @@ const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: nu
 };
 
 export default function Home({ 
+  viewMode,
+  setViewMode,
   onSelectPlace, 
   favorites, 
   onFavoriteToggle, 
@@ -48,7 +52,6 @@ export default function Home({
 }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'swipe' | 'list'>('swipe');
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
   // Injetar distâncias nos locais em tempo real
@@ -136,11 +139,11 @@ export default function Home({
   };
 
   return (
-    <div className="pb-24 text-slate-100">
+    <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
       <Header searchRadius={searchRadius} setSearchRadius={setSearchRadius} />
 
       {/* Hero Header Banner */}
-      <div className="px-6 py-4">
+      <div className="px-6 py-4 max-w-6xl mx-auto w-full">
         <div className="relative rounded-3xl overflow-hidden bg-gradient-to-tr from-brand-indigo-900 to-brand-indigo-950 border border-white/5 p-6 shadow-premium">
           {/* Background overlay shapes */}
           <div className="absolute top-[-30px] right-[-30px] w-48 h-48 rounded-full bg-brand-coral-500/10 blur-2xl" />
@@ -162,12 +165,12 @@ export default function Home({
       </div>
 
       {/* Barra de Busca */}
-      <div className="px-2">
+      <div className="px-6 max-w-6xl mx-auto w-full">
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
       </div>
 
       {/* Switch View Selectors */}
-      <div className="px-6 py-2 flex justify-between items-center mt-2">
+      <div className="px-6 py-2 flex justify-between items-center mt-2 max-w-6xl mx-auto w-full">
         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Descoberta Reativa</span>
         <div className="bg-brand-indigo-950/80 dark:bg-brand-indigo-950/40 border border-slate-200/50 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
           <button 
@@ -186,7 +189,7 @@ export default function Home({
       </div>
 
       {/* Categorias Horizontal Slider */}
-      <div className="py-4">
+      <div className="py-4 max-w-6xl mx-auto w-full">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Categorias</h3>
         
         <div className="flex gap-3 overflow-x-auto px-6 pb-2 scrollbar-none snap-x">
@@ -219,11 +222,11 @@ export default function Home({
       </div>
 
       {viewMode === 'swipe' ? (
-        <div className="flex-1 flex flex-col justify-center items-center py-2 px-6 relative max-w-sm mx-auto animate-fade-in">
+        <div className="flex-1 flex flex-col justify-center items-center py-2 px-6 relative max-w-md mx-auto animate-fade-in w-full min-h-0">
           {swipeQueue.length > 0 && activePlace ? (
-            <div className="w-full flex flex-col items-center">
+            <div className="w-full flex-1 flex flex-col justify-between items-center min-h-0">
               {/* Card Container */}
-              <div className="w-full relative h-[420px] select-none">
+              <div className="w-full flex-1 min-h-[260px] max-h-[420px] relative select-none">
                 {/* Background Card (Next Card) */}
                 {swipeQueue.length > 1 && nextPlace && (
                   <div className="absolute inset-x-2 bottom-[-16px] h-full rounded-[32px] overflow-hidden border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-brand-indigo-900/40 opacity-60 scale-[0.93] translate-y-4 -z-10 pointer-events-none flex flex-col shadow-lg">
@@ -245,11 +248,11 @@ export default function Home({
                   </div>
 
                   {/* Place Info */}
-                  <div className="absolute bottom-6 left-6 right-6 text-left">
-                    <h3 className="text-xl font-outfit font-extrabold text-white mb-1.5 flex items-center gap-1.5 leading-tight">
+                  <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 text-left">
+                    <h3 className="text-lg sm:text-xl font-outfit font-extrabold text-white mb-1 flex items-center gap-1.5 leading-tight">
                       {activePlace.name}
                     </h3>
-                    <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed mb-3">
+                    <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed mb-2 sm:mb-3">
                       {activePlace.description}
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-slate-300 font-medium">
@@ -266,7 +269,7 @@ export default function Home({
               </div>
 
               {/* Swipe Control Buttons */}
-              <div className="flex items-center justify-center gap-6 mt-10">
+              <div className="flex items-center justify-center gap-6 mt-4 sm:mt-8">
                 <button 
                   onClick={handleSwipeNope}
                   className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all"
@@ -307,10 +310,10 @@ export default function Home({
           )}
         </div>
       ) : (
-        <>
+        <div className="w-full flex flex-col">
           {/* Seção Destaques (Apenas se nenhuma busca/filtro ativo) */}
           {!searchQuery && !selectedCategory && (
-            <div className="py-2">
+            <div className="py-2 max-w-6xl mx-auto w-full">
               <div className="flex items-center justify-between px-6 mb-3">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-brand-gold-400" /> Destaques em Destaque
@@ -334,10 +337,10 @@ export default function Home({
 
           {/* Seção Eventos Próximos de Curitiba */}
           {!searchQuery && !selectedCategory && (
-            <div className="py-4">
+            <div className="py-4 max-w-6xl mx-auto w-full">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Próximos Eventos</h3>
               
-              <div className="flex flex-col gap-3 px-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-6">
                 {MOCK_EVENTS.map((event) => (
                   <div 
                     key={event.id}
@@ -368,13 +371,13 @@ export default function Home({
           )}
 
           {/* Lista Principal de Locais */}
-          <div className="py-4 px-6">
+          <div className="py-4 px-6 max-w-6xl mx-auto w-full">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
               {searchQuery || selectedCategory ? 'Resultados da Busca' : 'Todos os Locais'}
             </h3>
             
             {filteredPlaces.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {filteredPlaces.map((place) => (
                   <PlaceCard
                     key={place.id}
@@ -400,7 +403,7 @@ export default function Home({
               </div>
             )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

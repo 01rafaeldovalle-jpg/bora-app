@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giro — Dossiê de Apresentação Estratégica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-coral: #FF5422;
+            --brand-indigo: #1B0E3F;
+            --brand-teal: #14B800;
+            --text-dark: #1E293B;
+            --text-muted: #64748B;
+            --bg-light: #F8FAFC;
+            --border-color: #E2E8F0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            line-height: 1.6;
+            background-color: var(--bg-light);
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Capa / Cabeçalho */
+        header {
+            border-bottom: 2px solid var(--brand-coral);
+            padding-bottom: 2rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .logo-area {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .logo-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--brand-coral);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 10px rgba(255, 84, 34, 0.3);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--brand-indigo);
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-weight: 400;
+        }
+
+        /* Seções */
+        section {
+            margin-bottom: 2.5rem;
+            page-break-inside: avoid;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+            color: var(--brand-indigo);
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            color: var(--brand-indigo);
+            margin: 1.2rem 0 0.6rem 0;
+        }
+
+        p {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            text-align: justify;
+            color: #334155;
+        }
+
+        strong {
+            font-weight: 600;
+            color: var(--brand-indigo);
+        }
+
+        /* Listas */
+        ul {
+            list-style: none;
+            margin-bottom: 1.2rem;
+        }
+
+        li {
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #334155;
+        }
+
+        li::before {
+            content: "•";
+            color: var(--brand-coral);
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0.3rem;
+            top: -0.1rem;
+        }
+
+        /* Destaques e Alertas */
+        .callout {
+            background-color: var(--bg-light);
+            border-left: 4px solid var(--brand-coral);
+            padding: 1.2rem;
+            border-radius: 0 12px 12px 0;
+            margin: 1.5rem 0;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-style: italic;
+            color: var(--text-dark);
+        }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-light);
+            color: var(--brand-indigo);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #F1F5F9;
+        }
+
+        /* Diagrama Simulado */
+        .diagram-container {
+            background-color: var(--bg-light);
+            border: 1px dashed var(--text-muted);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--brand-indigo);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* Rodapé de Impressão */
+        footer {
+            margin-top: 3rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Configuração de Impressão (Ctrl + P) */
+        @media print {
+            body {
+                background-color: #ffffff;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+
+            footer {
+                position: running(footer);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Cabeçalho -->
+        <header>
+            <div class="logo-area">
+                <div class="logo-circle">G</div>
+                <h1>Giro</h1>
+            </div>
+            <div class="subtitle">Dossiê de Apresentação Estratégica, Fundamentação Científica e Posicionamento de Marca</div>
+        </header>
+
+        <!-- Seção 1 -->
+        <section>
+            <h2>1. O Rebranding Estratégico: A Transição de "Bora!" para "Giro"</h2>
+            <p>O projeto nasceu sob o nome de <strong>Bora!</strong>, uma expressão de entusiasmo e ação. Contudo, a evolução do produto, os testes com usuários e a análise jurídica de propriedade industrial revelaram a necessidade de uma transição de marca estratégica.</p>
+            <p><strong>A partir de agora, o nome oficial da plataforma é GIRO.</strong></p>
+            
+            <h3>A. A Lógica do Rebranding: Separar o Substantivo do Verbo</h3>
+            <p>Para viabilizar a marca, a arquitetura do aplicativo foi dividida em duas forças complementares:</p>
+            <ul>
+                <li><strong>O Aplicativo (O Substantivo):</strong> Batizado de <strong>Giro</strong>. Ele representa o espaço, o mapa, o radar, o local de busca.</li>
+                <li><strong>O Botão de Ação (O Verbo):</strong> Mantido como <strong>BORA!</strong>. Ele é o comando coral e vibrante que o usuário clica para se deslocar.</li>
+            </ul>
+            <p>A frase que rege a experiência do usuário agora é orgânica e natural: <em>"Abre o Giro aí para ver o que tem aberto... achei! Clica no BORA!."</em></p>
+
+            <h3>B. Matriz de Análise de Risco Jurídico (Bora! vs. Local vs. Giro)</h3>
+            <p>Para definir o nome final, foi realizada uma pesquisa profunda de anterioridade na Classe 09 (softwares e aplicativos) do INPI, mapeando o nível de risco de cada opção com base no <strong>Princípio da Especialidade e Afinidade de Mercado</strong>:</p>
+            <ul>
+                <li><strong>Opção 1: BORA! / BORA (Risco Altíssimo - Bloqueio Direto)</strong><br>
+                Existem registros ativos na mesma classe pertencentes a concorrentes diretos no nicho de eventos e mobilidade local (ex: <em>"BORA APP DE EVENTOS"</em>, <em>"Bora Experiências"</em>, <em>"Bora Ali Mobilidade Urbana"</em>). O uso comercial de "Bora" colocaria a empresa em risco imediato de processos por plágio de marca e remoção compulsória das lojas de aplicativos por colidência direta de atividade.</li>
+                <li><strong>Opção 2: LOCAL / LOCAL APP (Risco Alto - Saturação e Genérico)</strong><br>
+                "Local" é um termo de caráter descritivo/genérico em TI, o que dificulta a exclusividade de registro. Adicionalmente, já existe um registro ativo de marca mista da palavra <strong>LOCAL</strong> na Classe 09 por uma holding financeira, além de dezenas de marcas semelhantes pendentes.</li>
+                <li><strong>Opção 3: GIRO (Risco Baixíssimo - Caminho Livre em Software)</strong><br>
+                Embora existam registros ativos da palavra "Giro" na Classe 09, <strong>nenhum deles é um software, aplicativo, guia local, rede social ou serviço de mapas</strong>. Os registros pertencem à <em>Bell Sports, Inc.</em> (para capacetes de ciclismo e esportivos) e à <em>Global Aliança</em> (para óculos e lentes). Como os produtos são completamente distintos, o INPI concede a coexistência de marcas. O setor de tecnologia e aplicativos móveis está livre para a marca <strong>Giro</strong>.</li>
+            </ul>
+        </section>
+
+        <!-- Seção 2 -->
+        <section>
+            <h2>2. A Origem e a Força Cultural da Palavra "Giro"</h2>
+            <p>A escolha do nome <strong>Giro</strong> não é apenas uma alternativa jurídica; é uma decisão de marketing de alta aderência cultural.</p>
+            
+            <h3>A. Etimologia: Da Geometria à Ação</h3>
+            <p>A palavra deriva do latim <em>gyrus</em> ("círculo", "volta"), que por sua vez vem do grego <strong><em>gýros</em> (γῦρος)</strong>, significando círculo ou anel. O aplicativo realiza a busca por <strong>raio circular</strong> (um giro de 360 graus na geolocalização). A própria interface do usuário varre o mapa ao redor dele através de uma animação circular — um "giro" de radar.</p>
+
+            <h3>B. A Evolução Popular (A Analogia com o "Brechó")</h3>
+            <p>Na língua portuguesa, as palavras se transformam pela usabilidade prática. Um exemplo clássico no Brasil é o termo <strong>"brechó"</strong>: no Rio de Janeiro do século XIX, um comerciante de roupas usadas chamado <em>Belchior</em> ficou tão famoso que as pessoas diziam <em>"vou comprar no Belchior"</em>. Pela fala popular, o nome próprio sofreu corrupção fonética e virou "brechó", uma palavra de dicionário que designa toda uma categoria.</p>
+            <p>O termo <strong>Giro</strong> seguiu um caminho de apropriação urbana semelhante no Brasil. <strong>"Dar um giro"</strong> tornou-se a gíria nacional para sair de casa, passear no bairro, explorar a vizinhança ou ir à rua resolver uma urgência física. Ao nomear o aplicativo como Giro, a marca se apropria de uma expressão que o usuário e o comerciante já usam em seu cotidiano. O nome deixa de ser técnico e passa a ser um comportamento natural.</p>
+        </section>
+
+        <!-- Seção 3 -->
+        <section>
+            <h2>3. Estudo Projecional de Aceitação de Marca: Naming & Cases de Sucesso</h2>
+            <p>Uma das maiores dúvidas no desenvolvimento de novas marcas é se o nome escolhido será aceito pelo público. Um estudo projecional baseado em percepções psicológicas e comportamento do consumidor demonstra que <strong>o nome "Giro" é 100% amigável, memorável e aceitável</strong>.</p>
+            <p>Mais do que isso, a história das marcas de tecnologia prova uma regra de ouro no branding: <strong>a funcionalidade e a utilidade prática superam e definem a marca, não o contrário.</strong> Um nome começa como um recipiente vazio; é a dor que o produto resolve que o preenche com significado e valor.</p>
+            
+            <h3>Cases de Nomes Complexos que se Consolidaram pela Utilidade:</h3>
+            <ul>
+                <li><strong>WhatsApp (O caso da adaptação cultural):</strong> Um trocadilho em inglês com a expressão <em>"What's up?"</em> (Como vai/E aí?). Para o público brasileiro, é uma palavra de pronúncia difícil e ortografia confusa. No entanto, a utilidade de comunicação instantânea era tão vital que a cultura popular brasileira simplesmente adaptou o nome, criando o termo <strong>"Zap"</strong> ou <strong>"ZapZap"</strong>.</li>
+                <li><strong>Airbnb (O caso do nome longo e confuso):</strong> Nasceu de <em>"Air Bed and Breakfast"</em> (Colchão de ar e café da manhã). Um nome longo, difícil de soletrar para falantes de outros idiomas e restritivo comercialmente. A dor resolvida (hospedagem barata e sem burocracia) foi tão forte que o nome "Airbnb" tornou-se um verbo global.</li>
+                <li><strong>Duolingo (O caso do nome híbrido acadêmico):</strong> Junção de <em>"Duo"</em> (duas pessoas/mascote da coruja) com <em>"Lingo"</em> (gíria em inglês para idioma). Um termo artificial e abstrato para o ensino de línguas. Hoje, sua dinâmica de usabilidade lúdica (gamificação) consolidou a marca como líder mundial do segmento.</li>
+                <li><strong>iFood (O caso do hibridismo idiomático):</strong> A junção da letra "i" (internet/digital) com a palavra em inglês <em>"Food"</em> (comida). Uma mistura anglo-portuguesa que no início exigia explicação. A praticidade de pedir comida em dois cliques transformou o nome próprio em sinônimo de delivery de qualquer coisa (<em>"pedir um ifood"</em>).</li>
+            </ul>
+        </section>
+
+        <!-- Seção 4 -->
+        <section>
+            <h2>4. O Pitch de Elevador (Elevator Pitch) & A Lacuna de Mercado</h2>
+            <p>O <strong>Giro</strong> é um mecanismo de busca física em tempo real. Ele conecta a necessidade imediata de consumo do usuário ao comércio mais próximo e ativo ao redor dele.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Funcionalidade</th>
+                        <th>Google Maps</th>
+                        <th>Instagram</th>
+                        <th>Giro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Filtro de Proximidade</strong></td>
+                        <td>Distorcido por anúncios pagos</td>
+                        <td>Inexistente</td>
+                        <td><strong>Rígido (raio físico exato)</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status "Aberto Agora"</strong></td>
+                        <td>Frequentemente desatualizado</td>
+                        <td>Não disponível</td>
+                        <td><strong>Atualizado pelo lojista em 1 clique</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Usabilidade do Lojista</strong></td>
+                        <td>Complexa (exige agência/TI)</td>
+                        <td>Fácil (Stories)</td>
+                        <td><strong>Extremamente simples (liga/desliga)</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Jornada de Ação</strong></td>
+                        <td>Várias etapas de navegação</td>
+                        <td>Sem integração de rotas</td>
+                        <td><strong>1 clique (Hub Unificado)</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Seção 5 -->
+        <section>
+            <h2>5. A Força da Unificação de APIs</h2>
+            <p>Hoje, para descobrir um local e ir até ele, o usuário precisa fragmentar sua jornada em múltiplos aplicativos. O <strong>Giro</strong> atua como um <strong>hub unificador de serviços</strong>:</p>
+            
+            <div class="diagram-container">
+                [ CARTÃO DO ESTABELECIMENTO NO GIRO ]<br>
+                |<br>
+                +---------------------------+---------------------------+<br>
+                |                           |                           |<br>
+                [ PARA IR ]              [ PARA CONTATO ]            [ PARA PEDIR ]<br>
+                Atalhos de Rota            Conversa Direta           Delivery Integrado<br>
+                - Uber / 99 / Maps         - WhatsApp / Instagram     - iFood
+            </div>
+
+            <p>Ao abrir o card de um estabelecimento no Giro, o usuário tem acesso a um <strong>campo de decisão unificado</strong>:</p>
+            <ul>
+                <li><strong>Deslocamento:</strong> Dispara as rotas no <strong>Uber</strong>, <strong>99</strong> ou <strong>Google Maps</strong> de forma nativa e sem precisar copiar o endereço.</li>
+                <li><strong>Validação Visual:</strong> Atalho direto para o perfil do <strong>Instagram</strong> do local para ver fotos reais e recentes tiradas por clientes.</li>
+                <li><strong>Atendimento:</strong> Atalho direto para o <strong>WhatsApp</strong> para tirar dúvidas em tempo real com o proprietário.</li>
+                <li><strong>Delivery:</strong> Atalho direto para o <strong>iFood</strong> caso decida consumir à distância.</li>
+            </ul>
+        </section>
+
+        <!-- Seção 6 -->
+        <section>
+            <h2>6. Embasamento Científico e Comportamental</h2>
+            <h3>A. O Paradoxo da Escolha (Iyengar & Lepper, 2000)</h3>
+            <p>A psicologia comportamental prova que o excesso de opções causa paralisia e estresse cognitivo. No famoso <em>Estudo das Geleias</em>, um catálogo com 24 opções converteu apenas <strong>3%</strong> das pessoas em compradores, enquanto um catálogo com apenas 6 opções converteu <strong>30%</strong> (aumento de <strong>10 vezes</strong>).</p>
+            <ul>
+                <li>O cérebro humano processa de forma confortável apenas $7 \pm 2$ itens simultâneos (<em>Lei de Miller</em>).</li>
+                <li>O <strong>Giro</strong> atua combatendo a fadiga de decisão: ele filtra a busca pela proximidade física, apresentando apenas o que é relevante e está ao redor, acelerando a escolha do usuário.</li>
+            </ul>
+
+            <h3>B. Acessibilidade vs. Obsolescência Geracional</h3>
+            <ul>
+                <li><strong>Para o público sênior/leigo:</strong> Buscas complexas no Google com múltiplos filtros são excludentes. O Giro resolve isso com botões de ação direta (um clique para chamar o Uber ou falar no WhatsApp).</li>
+                <li><strong>Para a Gen Z / Gen Alpha:</strong> Listas de textos longas (padrão do Google) são vistas como ultrapassadas. Os jovens buscam conteúdo visual rápido. O Giro atende a essa demanda integrando o design em cards limpos com o visual das redes sociais.</li>
+            </ul>
+        </section>
+
+        <!-- Seção 7 -->
+        <section>
+            <h2>7. Branding em Ação: Slogans, Campanhas e Absorção de Público</h2>
+            <p>Para garantir a rápida adoção do aplicativo pelo consumidor final e a adesão em massa dos comerciantes, o posicionamento de marca foi estruturado com mensagens claras e diretas.</p>
+            
+            <h3>A. Slogans e Exemplos de Uso para o Consumidor Final</h3>
+            <ul>
+                <li><strong>"Bora dar um Giro?"</strong> <em>(O slogan principal, usando a própria gíria nacional)</em></li>
+                <li><strong>"Quem está perto não precisa pesquisar."</strong> <em>(Ataque direto à complexidade do Google)</em></li>
+                <li><strong>"O seu bairro a um giro de distância."</strong> <em>(Posicionamento hiperlocal)</em></li>
+                <li><strong>"Abriu o Giro. Achou. BORA!"</strong> <em>(Fixação da jornada de uso de três etapas)</em></li>
+            </ul>
+
+            <h3>Casos de Uso no Cotidiano:</h3>
+            <p>Para o usuário, o termo deixa de ser uma marca corporativa e passa a ser uma alternativa prática de linguagem para buscas geográficas imediatas:</p>
+            <ul>
+                <li><strong>"Dá um Giro aí pra ver o que tem."</strong> (Substitui a frase 'procura no Google/Instagram' e a transforma em uma ação funcional de escaneamento de conveniência no mapa).</li>
+                <li><strong>"Dá um Giro rápido para ver se tem papelaria/farmácia aberta."</strong> (Foco na resolução de uma necessidade de localização específica e urgente no próprio bairro).</li>
+            </ul>
+
+            <h3>B. Slogans para o Comerciante / B2B</h3>
+            <ul>
+                <li><strong>"Coloque o seu negócio no Giro de quem está perto."</strong> <em>(Apelo geográfico)</em></li>
+                <li><strong>"Sem leilão, sem complicação. Quem está perto aparece."</strong> <em>(Diferenciação contra o Google Ads)</em></li>
+                <li><strong>"Gire o botão e apareça para a vizinhança."</strong> <em>(Foco na facilidade de uso do app do lojista)</em></li>
+            </ul>
+
+            <h3>C. Conceitos de Campanhas Publicitárias (Ads de Alta Conversão)</h3>
+            <p><strong>Campanha 1 (Foco no Usuário): "A Paralisia do Rolê"</strong><br>
+            Três amigos na calçada de madrugada. O bar em que estavam desliga as luzes e fecha a porta. Um dos amigos abre um aplicativo de busca tradicional e começa a rolar uma lista interminável de locais, lendo avaliações antigas, enquanto os outros dois começam a desanimar ("perda de tesão"). A virada ocorre quando o outro amigo abre o <strong>Giro</strong>. A tela mostra a animação do radar girando e localizando um carrinho de lanches e um bar abertos a 300 metros. Ele clica no botão coral <strong>BORA!</strong> e o Uber chega instantaneamente. <em>Assinatura: "O rolê não precisa acabar na dúvida. Bora dar um Giro?"</em></p>
+            
+            <p><strong>Campanha 2 (Foco no Comerciante): "O Fantasma Digital"</strong><br>
+            O dono de uma padaria de bairro de braços cruzados olhando para a rua vazia. Ele comenta sobre a dificuldade de configurar o Google e as pessoas irem a padarias de redes famosas longe dali porque não sabem que ele existe. A solução ocorre quando ele abre o aplicativo do comerciante do <strong>Giro</strong> e dá um toque em um interruptor escrito <strong>"Aberto"</strong>. A tela mostra os moradores vizinhos recebendo o sinal da padaria ativa a 150 metros. <em>Assinatura: "Sua loja não precisa ser invisível para quem está ao seu lado. Coloque seu negócio no Giro."</em></p>
+        </section>
+
+        <!-- Seção 8 -->
+        <section>
+            <h2>8. Funcionalidades de Retenção e Monetização (Próximos Passos)</h2>
+            
+            <h3>A. O Comerciante no Controle Real</h3>
+            <ul>
+                <li><strong>Alertas de Feriados:</strong> Em feriados, o sistema envia uma notificação push automatizada para o celular do lojista: <em>"Amanhã é feriado de Tiradentes. O seu estabelecimento vai abrir?"</em>. Com um clique na notificação, os dados do mapa são atualizados, eliminando a frustração do usuário.</li>
+                <li><strong>Interruptor Dinâmico:</strong> Se o lojista fechar mais cedo por motivos de força maior (chuva, falta de insumos), ele desliga o status com um toque e o local some da busca imediata.</li>
+            </ul>
+
+            <h3>B. Pastas de Giros vs. Pastas do Instagram</h3>
+            <p>Enquanto as pessoas salvam publicações no Instagram que viram "pastas fantasmas" por falta de mapa e busca funcional, o <strong>Giro</strong> permite criar <strong>Pastas de Favoritos Geolocalizadas</strong> (ex: <em>"Giros de Sexta"</em>, <em>"Cafés para Reunião"</em>, <em>"Urgências"</em>). Os locais salvos permanecem plotados no mapa do usuário e dizem se estão abertos em tempo real.</p>
+
+            <h3>C. Monetização Justa: A Categoria "Bombando"</h3>
+            <p>Para monetizar sem distorcer as buscas por proximidade, o app oferece o recurso <strong>"Bombando"</strong>. O lojista pode pagar por micro-impulsionamentos para ter seu local destacado no radar dos usuários próximos por períodos curtos (ex: <strong>12 horas</strong> ou <strong>24 horas</strong>), ideal para atrair movimento imediato em eventos ou promoções rápidas.</p>
+        </section>
+
+        <!-- Rodapé -->
+        <footer>
+            <p>© 2026 Giro App Inc. Documento Confidencial de Propriedade Intelectual.</p>
+            <p class="no-print" style="margin-top: 0.5rem; font-weight: bold; color: var(--brand-coral);">Dica de Impressão: Pressione Ctrl + P (ou Cmd + P no Mac) e selecione "Salvar como PDF" no destino para gerar o arquivo.</p>
+        </footer>
+    </div>
+
+</body>
+</html>

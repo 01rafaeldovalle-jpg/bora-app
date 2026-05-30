@@ -51,12 +51,12 @@ export default function Favorites({
   }, [favorites, activeCoords]);
 
   return (
-    <div className="pb-24 text-slate-100">
+    <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
       <Header title="Meus Favoritos" showLocationSelector={false} />
 
-      <div className="px-6 py-4">
+      <div className="px-6 py-4 max-w-6xl mx-auto w-full">
         {favoritedPlaces.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {favoritedPlaces.map((place) => (
               <PlaceCard
                 key={place.id}
