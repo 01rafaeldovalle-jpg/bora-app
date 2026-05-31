@@ -349,20 +349,19 @@ export default function Header({
         </div>
       </header>
 
-      {/* BOTTOM SHEET / MODAL DE LOCALIZAÇÃO MANUAL */}
+      {/* MODAL DE LOCALIZAÇÃO MANUAL CENTRALIZADO */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-end justify-center">
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
           {/* Backdrop */}
           <div 
             onClick={() => setIsModalOpen(false)}
             className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 animate-fade-in"
           />
           
-          {/* Sheet Panel */}
-          <div className="relative w-full max-w-lg bg-slate-50 dark:bg-brand-indigo-950 border-t border-slate-200 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl z-10 animate-slide-up flex flex-col gap-6 text-slate-900 dark:text-slate-100 max-h-[85vh]">
-            {/* Handle bar / Close */}
-            <div className="flex justify-between items-center">
-              <div className="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full cursor-pointer" onClick={() => setIsModalOpen(false)} />
+          {/* Modal Panel */}
+          <div className="relative w-full max-w-sm bg-slate-50 dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[32px] p-6 shadow-2xl z-10 flex flex-col gap-6 text-slate-900 dark:text-slate-100 max-h-[80vh] overflow-y-auto">
+            {/* Close Button */}
+            <div className="flex justify-end">
               <button 
                 onClick={() => setIsModalOpen(false)}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-brand-coral-500 hover:text-white transition-all btn-premium shadow-md shrink-0"
