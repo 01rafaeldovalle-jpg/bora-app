@@ -332,7 +332,7 @@ function OnboardingOverlay({
                 Giro
               </h1>
               <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal-600 dark:text-brand-teal-400 mt-2">
-                Sua próxima parada
+                Seu próximo destino
               </p>
             </div>
             <div className="text-center mb-4">
