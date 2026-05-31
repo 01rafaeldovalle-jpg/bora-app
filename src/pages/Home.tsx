@@ -23,6 +23,7 @@ interface HomeProps {
   onPinClick?: () => void;
   searchRadius?: number;
   setSearchRadius?: (radius: number) => void;
+  collections: Record<string, string[]>;
 }
 
 // Fórmula matemática de Haversine para distâncias em km
@@ -47,11 +48,13 @@ export default function Home({
   activeCoords, 
   onPinClick,
   searchRadius,
-  setSearchRadius
+  setSearchRadius,
+  collections
 }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [activeFolder, setActiveFolder] = useState<string | null>(null);
 
   // Refs de Swipe Físico
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -244,6 +247,63 @@ export default function Home({
     return featured;
   }, [placesWithDistance, activeCoords, searchRadius]);
 
+  // Helpers para gerenciamento de pastas e coleções na aba Lista
+  const folderList = React.useMemo(() => {
+    const list = [
+      {
+        name: 'Todos os Salvos',
+        ids: favorites,
+        isDefault: true
+      }
+    ];
+
+    Object.keys(collections).forEach(name => {
+      if (name === 'Salvos' || name === 'Todos os Salvos') return;
+      list.push({
+        name,
+        ids: collections[name] || [],
+        isDefault: false
+      });
+    });
+
+    return list;
+  }, [collections, favorites]);
+
+  const folderPlaceIds = React.useMemo(() => {
+    if (!activeFolder) return [];
+    if (activeFolder === 'Salvos' || activeFolder === 'Todos os Salvos') {
+      return favorites;
+    }
+    return collections[activeFolder] || [];
+  }, [activeFolder, collections, favorites]);
+
+  const filteredFolderPlaces = React.useMemo(() => {
+    if (!activeFolder) return [];
+    
+    const basePlaces = placesWithDistance.filter(place => folderPlaceIds.includes(place.id));
+    const filtered = basePlaces.filter(place => {
+      const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            place.address.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
+      const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
+      return matchesSearch && matchesCategory && matchesRadius;
+    });
+
+    if (activeCoords) {
+      filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    }
+    return filtered;
+  }, [placesWithDistance, folderPlaceIds, activeFolder, searchQuery, selectedCategory, activeCoords, searchRadius]);
+
+  const getFolderCover = (placeIds: string[]) => {
+    if (placeIds && placeIds.length > 0) {
+      const place = MOCK_PLACES.find(p => p.id === placeIds[0]);
+      if (place) return place.image_url;
+    }
+    return null;
+  };
+
   // Reset active card index when filter changes
   React.useEffect(() => {
     setActiveCardIndex(0);
@@ -255,6 +315,7 @@ export default function Home({
       setSearchQuery('');
       setSelectedCategory(null);
       setViewMode('swipe');
+      setActiveFolder(null);
       setActiveCardIndex(0);
     };
 
@@ -288,16 +349,21 @@ export default function Home({
     <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
 
       {/* Barra de Busca */}
-      <div className="px-6 pt-4 max-w-6xl mx-auto w-full">
-        <SearchBar value={searchQuery} onChange={setSearchQuery} />
-      </div>
+      {!(viewMode === 'list' && activeFolder === null) && (
+        <div className="px-6 pt-4 max-w-6xl mx-auto w-full animate-fade-in">
+          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        </div>
+      )}
 
       {/* Switch View Selectors */}
       <div className="px-6 py-2 flex justify-between items-center mt-2 max-w-6xl mx-auto w-full">
         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Descoberta Reativa</span>
         <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
           <button 
-            onClick={() => setViewMode('swipe')} 
+            onClick={() => {
+              setActiveFolder(null);
+              setViewMode('swipe');
+            }} 
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'}`}
           >
             <Flame className="w-3.5 h-3.5" /> Match
@@ -312,37 +378,39 @@ export default function Home({
       </div>
 
       {/* Categorias Horizontal Slider */}
-      <div className="py-4 max-w-6xl mx-auto w-full">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Categorias</h3>
-        
-        <div className="flex gap-3 overflow-x-auto px-6 pb-2 scrollbar-none snap-x">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${
-              selectedCategory === null
-                ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md'
-                : 'bg-slate-100 dark:bg-brand-indigo-900/40 border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/10'
-            }`}
-          >
-            <span className="text-xs">Todos</span>
-          </button>
-
-          {CATEGORIES.map((cat) => (
+      {!(viewMode === 'list' && activeFolder === null) && (
+        <div className="py-4 max-w-6xl mx-auto w-full animate-fade-in">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Categorias</h3>
+          
+          <div className="flex gap-3 overflow-x-auto px-6 pb-2 scrollbar-none snap-x">
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id === selectedCategory ? null : cat.id)}
+              onClick={() => setSelectedCategory(null)}
               className={`snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${
-                selectedCategory === cat.id
+                selectedCategory === null
                   ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md'
                   : 'bg-slate-100 dark:bg-brand-indigo-900/40 border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/10'
               }`}
             >
-              <IconRenderer name={cat.icon} className={`w-4 h-4 ${selectedCategory === cat.id ? 'text-white' : 'text-brand-teal-400'}`} />
-              <span className="text-xs">{cat.name}</span>
+              <span className="text-xs">Todos</span>
             </button>
-          ))}
+
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id === selectedCategory ? null : cat.id)}
+                className={`snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${
+                  selectedCategory === cat.id
+                    ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md'
+                    : 'bg-slate-100 dark:bg-brand-indigo-900/40 border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/10'
+                }`}
+              >
+                <IconRenderer name={cat.icon} className={`w-4 h-4 ${selectedCategory === cat.id ? 'text-white' : 'text-brand-teal-400'}`} />
+                <span className="text-xs">{cat.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {viewMode === 'swipe' ? (
         <div className="flex-1 flex flex-col justify-center items-center py-2 px-6 relative max-w-md mx-auto animate-fade-in w-full min-h-0">
@@ -474,41 +542,127 @@ export default function Home({
           )}
         </div>
       ) : (
-        <div className="w-full flex flex-col">
-          {/* Lista Principal de Locais */}
-          <div className="py-4 px-6 max-w-6xl mx-auto w-full">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-              {searchQuery || selectedCategory ? 'Resultados da Busca' : 'Todos os Locais'}
-            </h3>
-            
-            {filteredPlaces.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {filteredPlaces.map((place) => (
-                  <PlaceCard
-                    key={place.id}
-                    place={place}
-                    isFavorited={favorites.includes(place.id)}
-                    onFavoriteToggle={onFavoriteToggle}
-                    onSelect={onSelectPlace}
-                  />
-                ))}
+        activeFolder === null ? (
+          <div className="w-full flex flex-col animate-fade-in">
+            {/* Lista de Pastas/Coleções */}
+            <div className="py-4 px-6 max-w-6xl mx-auto w-full">
+              <h3 className="text-xs font-bold text-slate-450 dark:text-slate-500 uppercase tracking-widest mb-4">
+                Minhas Coleções
+              </h3>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {folderList.map((folder) => {
+                  const coverUrl = getFolderCover(folder.ids);
+                  return (
+                    <div 
+                      key={folder.name}
+                      onClick={() => {
+                        setSearchQuery('');
+                        setSelectedCategory(null);
+                        setActiveFolder(folder.name);
+                      }}
+                      className="group cursor-pointer flex flex-col h-full rounded-[24px] overflow-hidden glass-card border border-slate-200/15 p-3 hover:border-brand-coral-500/20 dark:hover:border-white/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.99] bg-white/70 dark:bg-brand-indigo-950/40"
+                    >
+                      {/* Capa */}
+                      <div className="relative aspect-video w-full rounded-[18px] overflow-hidden bg-brand-indigo-950 flex items-center justify-center mb-3">
+                        {coverUrl ? (
+                          <img src={coverUrl} alt={folder.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        ) : (
+                          <div className="absolute inset-0 bg-gradient-to-br from-brand-coral-500/10 to-brand-indigo-950 flex items-center justify-center">
+                            <Icons.FolderHeart className="w-8 h-8 text-brand-coral-500/80" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                        
+                        {/* Rótulo de Privacidade */}
+                        <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/45 backdrop-blur-xs text-[9px] text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1">
+                          <Icons.Lock className="w-2.5 h-2.5" />
+                          Privada
+                        </div>
+                      </div>
+
+                      {/* Textos */}
+                      <div className="px-1.5 pb-1 flex-1 flex flex-col justify-between">
+                        <div>
+                          <h4 className="text-sm font-outfit font-black text-slate-900 dark:text-white group-hover:text-brand-coral-500 transition-colors line-clamp-1 mb-0.5">
+                            {folder.name}
+                          </h4>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            {folder.ids.length} {folder.ids.length === 1 ? 'local' : 'locais'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ) : (
-              <div className="glass-card rounded-3xl p-8 text-center border border-white/5">
-                <p className="text-sm text-slate-400">Nenhum local encontrado para a sua seleção.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full flex flex-col animate-fade-in">
+            {/* Locais da Pasta Ativa */}
+            <div className="py-4 px-6 max-w-6xl mx-auto w-full">
+              {/* Cabeçalho com botão voltar e título */}
+              <div className="flex items-center justify-between mb-6 border-b border-slate-200/50 dark:border-white/5 pb-4">
                 <button
                   onClick={() => {
                     setSearchQuery('');
                     setSelectedCategory(null);
+                    setActiveFolder(null);
                   }}
-                  className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
+                  className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 transition-colors py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 active:scale-[0.98] transition-all text-slate-800 dark:text-white"
                 >
-                  Limpar Filtros
+                  <Icons.ArrowLeft className="w-3.5 h-3.5" />
+                  Voltar para Pastas
                 </button>
+                <div className="flex items-center gap-2">
+                  <Icons.FolderHeart className="w-4 h-4 text-brand-coral-500" />
+                  <h3 className="text-sm font-outfit font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    {activeFolder}
+                  </h3>
+                </div>
               </div>
-            )}
+
+              {/* Listagem */}
+              {folderPlaceIds.length === 0 ? (
+                <div className="glass-card rounded-[32px] p-8 text-center border border-slate-200/50 dark:border-white/5 w-full max-w-md mx-auto my-8 bg-white/70 dark:bg-brand-indigo-950/40">
+                  <div className="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500 mx-auto">
+                    <Icons.FolderHeart className="w-8 h-8 text-brand-coral-500/80" />
+                  </div>
+                  <h3 className="text-base font-outfit font-bold text-slate-950 dark:text-white mb-2">Pasta vazia</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
+                    Nenhum local nesta pasta. Use o Swipe para salvar locais aqui!
+                  </p>
+                </div>
+              ) : filteredFolderPlaces.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {filteredFolderPlaces.map((place) => (
+                    <PlaceCard
+                      key={place.id}
+                      place={place}
+                      isFavorited={favorites.includes(place.id)}
+                      onFavoriteToggle={onFavoriteToggle}
+                      onSelect={onSelectPlace}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="glass-card rounded-3xl p-8 text-center border border-slate-200/50 dark:border-white/5 bg-white/70 dark:bg-brand-indigo-950/40">
+                  <p className="text-sm text-slate-550 dark:text-slate-400">Nenhum local encontrado para a sua seleção nesta pasta.</p>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory(null);
+                    }}
+                    className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
+                  >
+                    Limpar Filtros
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )
       )}
     </div>
   );

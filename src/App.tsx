@@ -529,6 +529,7 @@ export default function App() {
             onPinClick={handlePinClick}
             searchRadius={searchRadius}
             setSearchRadius={setSearchRadius}
+            collections={collections}
           />
         );
       case 'explore':
@@ -572,6 +573,7 @@ export default function App() {
             onFavoriteToggle={handleFavoriteToggle}
             activeCoords={activeCoords}
             onPinClick={handlePinClick}
+            collections={collections}
           />
         );
     }
