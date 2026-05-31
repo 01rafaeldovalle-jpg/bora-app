@@ -362,7 +362,7 @@
   <!-- PRINCIPAL CONTAINER FLUIDO E RESPONSIVO -->
   <div class="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 transition-colors duration-300 overflow-hidden">
     
-    <main id="main-app-container" class="w-full h-full flex flex-col relative overflow-hidden bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
+    <main id="main-app-container" class="w-full h-full flex flex-col relative overflow-hidden bg-slate-50/50 dark:bg-brand-indigo-950/40">
 
       <!-- HEADER -->
       <header class="glass-panel sticky top-0 z-50 px-6 py-4 text-slate-900 dark:text-white transition-colors duration-300">
@@ -548,10 +548,18 @@
   </div>
 
   <!-- BOTTOM SHEET DADOS CADASTRAIS -->
-  <div id="cadastrais-sheet" class="fixed inset-0 z-[10000] invisible">
+  <div id="cadastrais-sheet" class="fixed inset-0 z-[10000] invisible flex items-center justify-center p-4">
     <div onclick="closeCadastraisSheet()" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="cadastrais-sheet-backdrop"></div>
-    <div class="absolute bottom-0 left-0 right-0 w-full max-w-lg mx-auto bg-white dark:bg-brand-indigo-950 border-t border-slate-100 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl transition-transform duration-300 transform translate-y-full flex flex-col" id="cadastrais-sheet-panel">
-      <div class="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer mb-5" onclick="closeCadastraisSheet()"></div>
+    <div class="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[32px] p-6 shadow-2xl transition-transform duration-300 transform translate-y-full flex flex-col max-h-[80vh] overflow-y-auto" id="cadastrais-sheet-panel">
+      <!-- Close button -->
+      <div class="flex justify-end shrink-0">
+        <button onclick="closeCadastraisSheet()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center cursor-pointer transition-all border-0 shadow-inner">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
 
       <div class="text-center mb-6">
         <h3 class="text-base font-outfit font-extrabold text-slate-900 dark:text-white">Dados Cadastrais</h3>
@@ -822,10 +830,10 @@
     }
 
     // PROFILE TAB HANDLERS
-    function openVanillaCropModal(imageSrc, onComplete) {
+    function openVanillaCropModal(imageSrc, onComplete, type = 'avatar') {
       // Create Modal Container
       const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4';
+      modal.className = 'fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4';
       
       let zoom = 1.0;
       let offsetX = 0;
@@ -834,18 +842,23 @@
       let startX = 0;
       let startY = 0;
       
+      const title = type === 'business' ? 'Ajustar Foto de Capa' : 'Ajustar Foto de Perfil';
+      const maskHtml = type === 'business'
+        ? '<div class="absolute w-72 h-40 border-2 border-brand-coral-500/80 shadow-[0_0_0_9999px_rgba(13,7,36,0.6)] pointer-events-none z-10"></div>'
+        : '<div class="absolute w-48 h-48 rounded-full border-2 border-brand-coral-500/80 shadow-[0_0_0_9999px_rgba(13,7,36,0.6)] pointer-events-none z-10"></div>';
+
       modal.innerHTML = `
         <div class="glass-card w-full max-w-md rounded-[32px] border border-white/5 overflow-hidden flex flex-col">
           <!-- Header -->
           <div class="p-5 border-b border-white/5 text-center">
-            <h3 class="text-base font-outfit font-bold text-white">Ajustar Foto de Perfil</h3>
+            <h3 class="text-base font-outfit font-bold text-white">${title}</h3>
             <p class="text-[10px] text-slate-400 mt-1">Arraste para mover e use o slider para ampliar</p>
           </div>
 
           <!-- Crop Viewport Container -->
           <div class="relative w-full h-72 bg-brand-indigo-950/40 overflow-hidden cursor-move touch-none select-none flex items-center justify-center" id="crop-viewport">
-            <!-- Crop Guide (Circle Mask) -->
-            <div class="absolute w-48 h-48 rounded-full border-2 border-brand-coral-500/80 shadow-[0_0_0_9999px_rgba(13,7,36,0.6)] pointer-events-none z-10"></div>
+            <!-- Crop Guide -->
+            ${maskHtml}
             <!-- Interactive Image -->
             <img src="${imageSrc}" id="crop-image" class="max-w-none origin-center absolute pointer-events-none" style="transform: translate(0px, 0px) scale(1);" />
           </div>
@@ -855,18 +868,10 @@
             <!-- Zoom Slider -->
             <div class="flex items-center gap-3">
               <span class="text-[10px] font-bold text-slate-400 uppercase">Zoom</span>
-              <input
-                type="range"
-                min="1"
-                max="3"
-                step="0.1"
-                value="1"
+              <input type="range" min="1" max="3" step="0.1" value="1"
                 id="crop-zoom-slider"
-                class="flex-1 accent-brand-coral-500 bg-white/10 rounded-lg h-1.5 cursor-pointer"
-              />
+                class="flex-1 accent-brand-coral-500 bg-white/10 rounded-lg h-1.5 cursor-pointer" />
             </div>
-
-            <!-- Action Buttons -->
             <div class="flex gap-3">
               <button id="crop-cancel-btn" class="flex-1 py-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold transition-all text-slate-300 active:scale-95">
                 Cancelar
@@ -879,8 +884,6 @@
         </div>
       `;
       
-      document.body.appendChild(modal);
-      
       const viewport = modal.querySelector('#crop-viewport');
       const img = modal.querySelector('#crop-image');
       const zoomSlider = modal.querySelector('#crop-zoom-slider');
@@ -890,9 +893,12 @@
       let imgWidth = 0;
       let imgHeight = 0;
       
+      document.body.appendChild(modal);
+      
       const tempImg = new Image();
       tempImg.onload = function() {
-        const scale = Math.max(200 / tempImg.width, 200 / tempImg.height);
+        const targetMin = type === 'business' ? 288 : 200;
+        const scale = Math.max(targetMin / tempImg.width, targetMin / tempImg.height);
         imgWidth = tempImg.width * scale;
         imgHeight = tempImg.height * scale;
         img.style.width = imgWidth + 'px';
@@ -953,23 +959,25 @@
       
       saveBtn.addEventListener('click', () => {
         const canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 300;
+        const canvasW = type === 'business' ? 640 : 300;
+        const canvasH = type === 'business' ? 360 : 300;
+        canvas.width = canvasW;
+        canvas.height = canvasH;
         const ctx = canvas.getContext('2d');
         
         const cropImgEl = new Image();
         cropImgEl.onload = function() {
           ctx.fillStyle = '#0d0724';
-          ctx.fillRect(0, 0, 300, 300);
+          ctx.fillRect(0, 0, canvasW, canvasH);
           
           const vpRect = viewport.getBoundingClientRect();
-          const maskSize = 192;
-          const canvasScale = 300 / maskSize;
+          const maskW = type === 'business' ? 288 : 192;
+          const canvasScale = canvasW / maskW;
           
           ctx.save();
           
-          const centerX = 150;
-          const centerY = 150;
+          const centerX = canvasW / 2;
+          const centerY = canvasH / 2;
           
           ctx.translate(centerX, centerY);
           ctx.scale(zoom * canvasScale, zoom * canvasScale);
@@ -994,6 +1002,305 @@
       });
     }
 
+    // ─── ESTADOS DO "MEU NEGÓCIO" (HTML/VANILLA) ───
+    let merchantPlace = null;
+    try {
+      const savedMerchant = localStorage.getItem('giro_merchant_place');
+      if (savedMerchant) {
+        merchantPlace = JSON.parse(savedMerchant);
+        if (merchantPlace && merchantPlace.id) {
+          const exists = MOCK_PLACES.some(p => p.id === merchantPlace.id);
+          if (!exists) {
+            MOCK_PLACES.push(merchantPlace);
+          }
+        }
+      }
+    } catch(e) { console.error('Erro ao ler giro_merchant_place do localStorage:', e); }
+
+    let isCreatingBusiness = false;
+    let businessStep = 1;
+    let isOpenNow = true;
+    let isLiveMusicToday = false;
+
+    // Campos do formulário
+    window.bizFields = {
+      name: '',
+      category: 'Café',
+      price: '$$',
+      description: '',
+      cep: '',
+      street: '',
+      number: '',
+      complement: '',
+      neighborhood: '',
+      lat: -25.4290,
+      lng: -49.2671,
+      phone: '',
+      instagram: '',
+      website: '',
+      image: null,
+      hours: 'Diariamente, das 09h às 22h'
+    };
+
+    if (merchantPlace) {
+      window.bizFields = {
+        name: merchantPlace.name || '',
+        category: merchantPlace.category_id || 'Café',
+        price: merchantPlace.price_range || '$$',
+        description: merchantPlace.description || '',
+        cep: '',
+        street: merchantPlace.address || '',
+        number: '',
+        complement: '',
+        neighborhood: '',
+        lat: merchantPlace.latitude || -25.4290,
+        lng: merchantPlace.longitude || -49.2671,
+        phone: merchantPlace.phone || '',
+        instagram: merchantPlace.instagram_handle || '',
+        website: merchantPlace.website_url || '',
+        image: merchantPlace.image_url || null,
+        hours: (merchantPlace.operating_hours && merchantPlace.operating_hours["Seg-Dom"]) || 'Diariamente, das 09h às 22h'
+      };
+    }
+
+    window.formatPhone = function(val) {
+      const digits = val.replace(/\D/g, '');
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
+    };
+
+    window.startCreatingBusiness = function() {
+      isCreatingBusiness = true;
+      businessStep = 1;
+      renderCurrentTab();
+      lucide.createIcons();
+    };
+
+    window.cancelCreatingBusiness = function() {
+      isCreatingBusiness = false;
+      renderCurrentTab();
+      lucide.createIcons();
+    };
+
+    window.prevBusinessStep = function() {
+      if (businessStep > 1) {
+        businessStep--;
+        renderCurrentTab();
+        lucide.createIcons();
+      }
+    };
+
+    window.nextBusinessStep = function() {
+      if (businessStep < 5) {
+        businessStep++;
+        renderCurrentTab();
+        lucide.createIcons();
+      }
+    };
+
+    window.updateBizField = function(field, value) {
+      window.bizFields[field] = value;
+      if (field === 'name' || field === 'description') {
+        window.validateStep1();
+      } else if (field === 'number' || field === 'street' || field === 'neighborhood') {
+        window.validateStep2();
+      } else if (field === 'phone' || field === 'instagram' || field === 'website') {
+        window.validateStep3();
+      } else if (field === 'hours') {
+        window.validateStep5();
+      }
+    };
+
+    window.handleCepInput = async function(value) {
+      window.bizFields.cep = value;
+      const cleanCep = value.replace(/\D/g, '');
+      const loaderEl = document.getElementById('biz-cep-loader');
+      if (cleanCep.length === 8) {
+        if (loaderEl) loaderEl.classList.remove('hidden');
+        try {
+          const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+          const data = await res.json();
+          if (data && !data.erro) {
+            window.bizFields.street = data.logradouro || '';
+            window.bizFields.neighborhood = data.bairro || '';
+            
+            const streetEl = document.getElementById('biz-street-input');
+            const neighEl = document.getElementById('biz-neighborhood-input');
+            if (streetEl) streetEl.value = window.bizFields.street;
+            if (neighEl) neighEl.value = window.bizFields.neighborhood;
+
+            const fullAddress = `${data.logradouro || ''}, Curitiba, PR, Brasil`;
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`)
+              .then(res => res.json())
+              .then(geoData => {
+                if (geoData && geoData[0]) {
+                  window.bizFields.lat = parseFloat(geoData[0].lat);
+                  window.bizFields.lng = parseFloat(geoData[0].lon);
+                }
+              }).catch(console.error);
+          }
+        } catch (e) {
+          console.error('Erro ao buscar CEP:', e);
+        } finally {
+          if (loaderEl) loaderEl.classList.add('hidden');
+        }
+      }
+      window.validateStep2();
+    };
+
+    window.handleBizPhotoUpload = function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          openVanillaCropModal(e.target.result, function(croppedBase64) {
+            window.bizFields.image = croppedBase64;
+            renderCurrentTab();
+            lucide.createIcons();
+          }, 'business');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.validateStep1 = function() {
+      const name = (window.bizFields.name || '').trim();
+      const desc = (window.bizFields.description || '').trim();
+      const valid = name.length >= 3 && desc.length >= 5;
+      const btn = document.getElementById('biz-next-btn');
+      if (btn) btn.disabled = !valid;
+    };
+    window.validateStep2 = function() {
+      const cep = (window.bizFields.cep || '').replace(/\D/g, '');
+      const street = (window.bizFields.street || '').trim();
+      const neigh = (window.bizFields.neighborhood || '').trim();
+      const num = (window.bizFields.number || '').trim();
+      const valid = cep.length === 8 && street.length > 0 && neigh.length > 0 && num.length > 0;
+      const btn = document.getElementById('biz-next-btn');
+      if (btn) btn.disabled = !valid;
+    };
+    window.validateStep3 = function() {
+      const phone = (window.bizFields.phone || '').trim();
+      const insta = (window.bizFields.instagram || '').trim();
+      const web = (window.bizFields.website || '').trim();
+      const valid = phone.length > 0 || insta.length > 0 || web.length > 0;
+      const btn = document.getElementById('biz-next-btn');
+      if (btn) btn.disabled = !valid;
+    };
+    window.validateStep4 = function() {
+      const valid = !!window.bizFields.image;
+      const btn = document.getElementById('biz-next-btn');
+      if (btn) btn.disabled = !valid;
+    };
+    window.validateStep5 = function() {
+      const hours = (window.bizFields.hours || '').trim();
+      const valid = hours.length >= 5;
+      const btn = document.getElementById('biz-finish-btn');
+      if (btn) btn.disabled = !valid;
+    };
+
+    window.toggleBizOpenNow = function() {
+      isOpenNow = !isOpenNow;
+      renderCurrentTab();
+      lucide.createIcons();
+    };
+
+    window.toggleBizMusicToday = function() {
+      isLiveMusicToday = !isLiveMusicToday;
+      renderCurrentTab();
+      lucide.createIcons();
+    };
+
+    window.finishBusinessSignup = function() {
+      const id = 'biz_' + Date.now();
+      const newPlace = {
+        id: id,
+        name: window.bizFields.name,
+        description: window.bizFields.description,
+        address: `${window.bizFields.street}, ${window.bizFields.number}${window.bizFields.complement ? ` - ${window.bizFields.complement}` : ''} - ${window.bizFields.neighborhood}, Curitiba - PR`,
+        phone: window.bizFields.phone || undefined,
+        instagram_handle: window.bizFields.instagram || undefined,
+        website_url: window.bizFields.website || undefined,
+        category_id: window.bizFields.category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+        latitude: window.bizFields.lat,
+        longitude: window.bizFields.lng,
+        image_url: window.bizFields.image || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=60',
+        avg_rating: 5.0,
+        review_count: 1,
+        price_range: window.bizFields.price,
+        is_featured: false,
+        is_verified: true,
+        operating_hours: {
+          "Seg-Dom": window.bizFields.hours
+        }
+      };
+
+      localStorage.setItem('giro_merchant_place', JSON.stringify(newPlace));
+      merchantPlace = newPlace;
+
+      const exists = MOCK_PLACES.some(p => p.id === newPlace.id);
+      if (!exists) {
+        MOCK_PLACES.push(newPlace);
+      }
+
+      swipeQueue = [...MOCK_PLACES];
+      
+      if (typeof renderDesktopMapPins === 'function') {
+        renderDesktopMapPins();
+      }
+
+      isCreatingBusiness = false;
+      businessStep = 1;
+      
+      renderCurrentTab();
+      lucide.createIcons();
+      showToast('Negócio publicado e integrado ao Giro!', 3000);
+    };
+
+    window.deleteBusiness = function() {
+      if (!merchantPlace) return;
+      const id = merchantPlace.id;
+
+      localStorage.removeItem('giro_merchant_place');
+      merchantPlace = null;
+
+      const index = MOCK_PLACES.findIndex(p => p.id === id);
+      if (index > -1) {
+        MOCK_PLACES.splice(index, 1);
+      }
+
+      swipeQueue = [...MOCK_PLACES];
+
+      window.bizFields = {
+        name: '',
+        category: 'Café',
+        price: '$$',
+        description: '',
+        cep: '',
+        street: '',
+        number: '',
+        complement: '',
+        neighborhood: '',
+        lat: -25.4290,
+        lng: -49.2671,
+        phone: '',
+        instagram: '',
+        website: '',
+        image: null,
+        hours: 'Diariamente, das 09h às 22h'
+      };
+
+      if (typeof renderDesktopMapPins === 'function') {
+        renderDesktopMapPins();
+      }
+
+      renderCurrentTab();
+      lucide.createIcons();
+      showToast('Negócio removido com sucesso.', 2500);
+    };
+
     function handleAvatarUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -1010,7 +1317,7 @@
 
     function openPreferencesSheet() {
       const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 z-[1000] flex items-end justify-center bg-black/60 backdrop-blur-[4px]';
+      modal.className = 'fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px]';
       
       const prefs = [
         { id: 'pet', label: '🐶 Pet Friendly' },
@@ -1050,9 +1357,16 @@
         <div id="pref-sheet-backdrop" class="absolute inset-0"></div>
         
         <!-- Drawer Panel -->
-        <div id="pref-sheet-panel" class="relative w-full max-w-md bg-white dark:bg-brand-indigo-950 border-t border-slate-100 dark:border-white/10 rounded-t-[32px] p-6 shadow-2xl z-10 transition-transform duration-300 transform translate-y-full flex flex-col" style="max-height: 80vh;">
-          <!-- Handle bar -->
-          <div id="pref-sheet-close" class="w-12 h-1.5 bg-slate-300 dark:bg-white/15 rounded-full mx-auto cursor-pointer mb-5 shrink-0"></div>
+        <div id="pref-sheet-panel" class="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[32px] p-6 shadow-2xl z-10 transition-transform duration-300 transform translate-y-full flex flex-col max-h-[80vh] overflow-y-auto">
+          <!-- Close button -->
+          <div class="flex justify-end shrink-0">
+            <button id="pref-sheet-close" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center cursor-pointer transition-all border-0 shadow-inner">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
           
           <div class="text-center mb-5 shrink-0">
             <h3 class="text-base font-outfit font-bold text-slate-900 dark:text-white">Editar Preferências</h3>
@@ -2430,6 +2744,550 @@
       `;
     }
 
+    // RENDER BUSINESS TAB CONTENT AND STEPS (HTML/VANILLA)
+    function renderBusinessTabContent() {
+      // 1. Dashboard do Parceiro
+      if (merchantPlace) {
+        return `
+          <div class="flex flex-col gap-6 text-left animate-fadeIn">
+            <!-- Header Card -->
+            <div class="relative h-44 rounded-[32px] overflow-hidden border border-white/5 shadow-xl bg-brand-indigo-950/40">
+              <img 
+                src="${merchantPlace.image_url}" 
+                alt="${merchantPlace.name}" 
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-brand-indigo-950/90 via-brand-indigo-950/40 to-transparent"></div>
+              
+              <!-- Status Tag -->
+              <div class="absolute top-4 right-4 flex gap-2">
+                <span class="px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider shadow-sm transition-all duration-300 ${
+                  isOpenNow ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                }">
+                  ${isOpenNow ? 'Aberto Agora' : 'Fechado'}
+                </span>
+                ${isLiveMusicToday ? `
+                  <span class="px-3 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider bg-brand-teal-500/20 text-brand-teal-400 border border-brand-teal-500/30 shadow-sm animate-pulse">
+                    Ao Vivo Hoje
+                  </span>
+                ` : ''}
+              </div>
+
+              <!-- Info overlay -->
+              <div class="absolute bottom-5 left-6 right-6">
+                <div class="flex items-center gap-1.5 mb-1">
+                  <span class="px-2 py-0.5 rounded bg-brand-coral-500/20 text-brand-coral-400 border border-brand-coral-500/20 text-[9px] font-bold uppercase tracking-wider">
+                    ${merchantPlace.category_id.charAt(0).toUpperCase() + merchantPlace.category_id.slice(1)}
+                  </span>
+                  <span class="text-[10px] text-slate-300">•</span>
+                  <div class="flex items-center gap-0.5 text-brand-gold-400">
+                    <i data-lucide="star" class="w-3 h-3 fill-brand-gold-400 text-brand-gold-400"></i>
+                    <span class="text-xs font-bold font-outfit">5.0</span>
+                  </div>
+                </div>
+                <h2 class="text-xl font-outfit font-black text-white line-clamp-1">${merchantPlace.name}</h2>
+              </div>
+            </div>
+
+            <!-- Métricas Mockadas -->
+            <div class="grid grid-cols-3 gap-3">
+              <div class="glass-card p-4 rounded-[24px] flex flex-col items-center justify-center border border-white/5 text-center bg-white/5">
+                <i data-lucide="eye" class="w-4 h-4 text-brand-teal-400 mb-1.5"></i>
+                <span class="text-lg font-outfit font-black text-white">242</span>
+                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Views</span>
+              </div>
+              <div class="glass-card p-4 rounded-[24px] flex flex-col items-center justify-center border border-white/5 text-center bg-white/5">
+                <i data-lucide="heart" class="w-4 h-4 text-brand-coral-500 mb-1.5"></i>
+                <span class="text-lg font-outfit font-black text-white">88</span>
+                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Swipes</span>
+              </div>
+              <div class="glass-card p-4 rounded-[24px] flex flex-col items-center justify-center border border-white/5 text-center bg-white/5">
+                <i data-lucide="bookmark" class="w-4 h-4 text-brand-gold-400 mb-1.5"></i>
+                <span class="text-lg font-outfit font-black text-white">14</span>
+                <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">Salvos</span>
+              </div>
+            </div>
+
+            <!-- Toggles Rápidos -->
+            <div class="glass-card rounded-[28px] border border-white/5 p-5 flex flex-col gap-4 bg-white/5">
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-brand-coral-400"></i> Painel Operacional
+              </h3>
+              
+              <div class="flex items-center justify-between py-2 border-b border-white/5">
+                <div>
+                  <h4 class="text-xs font-bold text-white">Status de Funcionamento</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Controla se o local aparece aberto agora</p>
+                </div>
+                <button 
+                  onclick="toggleBizOpenNow()"
+                  class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isOpenNow ? 'bg-emerald-500' : 'bg-white/10'}"
+                >
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isOpenNow ? 'translate-x-5' : 'translate-x-0'}"></span>
+                </button>
+              </div>
+
+              <div class="flex items-center justify-between py-2">
+                <div>
+                  <h4 class="text-xs font-bold text-white">Música ao Vivo Hoje?</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Ativa a etiqueta de atração musical em tempo real</p>
+                </div>
+                <button 
+                  onclick="toggleBizMusicToday()"
+                  class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isLiveMusicToday ? 'bg-brand-coral-500' : 'bg-white/10'}"
+                >
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isLiveMusicToday ? 'translate-x-5' : 'translate-x-0'}"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Informações de Cadastro -->
+            <div class="glass-card rounded-[28px] border border-white/5 p-5 flex flex-col gap-4 bg-white/5">
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                <i data-lucide="building-2" class="w-3.5 h-3.5 text-brand-teal-400"></i> Dados do Estabelecimento
+              </h3>
+
+              <div class="space-y-3.5 text-xs text-slate-300">
+                <div class="flex items-start gap-2.5">
+                  <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase">Endereço comercial</span>
+                    <span>${merchantPlace.address}</span>
+                  </div>
+                </div>
+
+                ${merchantPlace.phone ? `
+                  <div class="flex items-start gap-2.5">
+                    <i data-lucide="phone" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                    <div>
+                      <span class="text-[10px] font-bold text-slate-400 block uppercase">WhatsApp comercial</span>
+                      <span>${formatPhone(merchantPlace.phone)}</span>
+                    </div>
+                  </div>
+                ` : ''}
+
+                ${merchantPlace.instagram_handle ? `
+                  <div class="flex items-start gap-2.5">
+                    <i data-lucide="instagram" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                    <div>
+                      <span class="text-[10px] font-bold text-slate-400 block uppercase">Instagram comercial</span>
+                      <span>@${merchantPlace.instagram_handle}</span>
+                    </div>
+                  </div>
+                ` : ''}
+
+                ${merchantPlace.website_url ? `
+                  <div class="flex items-start gap-2.5">
+                    <i data-lucide="globe" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                    <div>
+                      <span class="text-[10px] font-bold text-slate-400 block uppercase">Link de cardápio / Site</span>
+                      <a href="${merchantPlace.website_url.startsWith('http') ? merchantPlace.website_url : `https://${merchantPlace.website_url}`}" target="_blank" rel="noopener noreferrer" class="text-brand-coral-400 hover:underline">
+                        ${merchantPlace.website_url}
+                      </a>
+                    </div>
+                  </div>
+                ` : ''}
+
+                <div class="flex items-start gap-2.5">
+                  <i data-lucide="clock" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                  <div>
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase">Horário de funcionamento</span>
+                    <span>${merchantPlace.operating_hours["Seg-Dom"]}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Excluir Registro -->
+            <button
+              onclick="if(confirm('Deseja realmente excluir permanentemente o cadastro do seu negócio? Isso removerá o local do Swipe e do Mapa de forma imediata.')) deleteBusiness();"
+              class="w-full py-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-xs font-bold text-rose-400 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+            >
+              <i data-lucide="trash-2" class="w-4 h-4"></i> Excluir Registro do Negócio
+            </button>
+          </div>
+        `;
+      }
+
+      // 2. Wizard de Cadastro (Durante a Criação)
+      if (isCreatingBusiness) {
+        return `
+          <div class="glass-card rounded-[32px] border border-white/5 p-6 text-left bg-white/5 flex flex-col gap-5 animate-fadeIn">
+            <!-- Progress Indicator -->
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-[9px] font-extrabold text-brand-coral-400 uppercase tracking-widest block">Cadastrar Estabelecimento</span>
+                <h3 class="text-sm font-bold text-white mt-0.5">
+                  ${businessStep === 1 ? 'Informações Básicas' : ''}
+                  ${businessStep === 2 ? 'Endereço Comercial' : ''}
+                  ${businessStep === 3 ? 'Canais de Contato' : ''}
+                  ${businessStep === 4 ? 'Foto de Capa' : ''}
+                  ${businessStep === 5 ? 'Horário de Funcionamento' : ''}
+                </h3>
+              </div>
+              <div class="flex gap-1">
+                ${[1, 2, 3, 4, 5].map(s => `
+                  <div class="h-1 w-5 rounded-full transition-all duration-300 ${s <= businessStep ? 'bg-brand-coral-500' : 'bg-white/10'}"></div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="border-t border-white/5 pt-5 min-h-[220px]">
+              ${renderStepHtml()}
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="flex gap-3 border-t border-white/5 pt-5">
+              ${businessStep > 1 ? `
+                <button
+                  type="button"
+                  onclick="prevBusinessStep()"
+                  class="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold text-slate-300 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                >
+                  <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Voltar
+                </button>
+              ` : `
+                <button
+                  type="button"
+                  onclick="cancelCreatingBusiness()"
+                  class="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold text-rose-400/80 hover:text-rose-400 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                >
+                  Cancelar
+                </button>
+              `}
+
+              ${businessStep < 5 ? `
+                <button
+                  type="button"
+                  id="biz-next-btn"
+                  onclick="nextBusinessStep()"
+                  class="flex-[2] py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                >
+                  Avançar <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </button>
+              ` : `
+                <button
+                  type="button"
+                  id="biz-finish-btn"
+                  onclick="finishBusinessSignup()"
+                  class="flex-[2] py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-brand-coral-500/25 active:scale-[0.98]"
+                >
+                  Publicar e Integrar <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. Tela de Conversão (Sem Negócio)
+      return `
+        <div class="flex flex-col gap-6 animate-fadeIn">
+          <!-- Banner Premium -->
+          <div class="glass-card rounded-[32px] border border-brand-coral-500/20 bg-gradient-to-tr from-brand-coral-500/20 via-brand-indigo-950/20 to-amber-500/10 p-6 text-left relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-brand-coral-500/10 blur-2xl"></div>
+            
+            <div class="w-12 h-12 rounded-2xl bg-brand-coral-500/10 flex items-center justify-center mb-5 border border-brand-coral-500/20">
+              <i data-lucide="building-2" class="w-6 h-6 text-brand-coral-500"></i>
+            </div>
+
+            <h2 class="text-xl font-outfit font-black text-white tracking-tight leading-snug">
+              Promova seu Estabelecimento no Giro Curitiba
+            </h2>
+            <p class="text-[11px] text-slate-300 mt-2.5 leading-relaxed">
+              Cadastre seu café, bar, pub, hamburgueria ou restaurante e apareça imediatamente no feed de matches do Swipe e no mapa de exploração dos clientes.
+            </p>
+
+            <div class="mt-5 space-y-3.5 border-t border-white/5 pt-5">
+              <div class="flex gap-3 text-xs leading-tight">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="font-bold text-white text-[11px]">Visibilidade Instantânea</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Seu local entra direto no rodízio de cartas no Swipe.</p>
+                </div>
+              </div>
+              <div class="flex gap-3 text-xs leading-tight">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="font-bold text-white text-[11px]">Mapeamento Proximidade</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Apareça nos pins do mapa baseado na geolocalização do usuário.</p>
+                </div>
+              </div>
+              <div class="flex gap-3 text-xs leading-tight">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="font-bold text-white text-[11px]">Métricas de Desempenho</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Acompanhe visualizações, curtidas e salvos em tempo real.</p>
+                </div>
+              </div>
+              <div class="flex gap-3 text-xs leading-tight">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="font-bold text-white text-[11px]">Canais Diretos de Contato</h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Atalhos rápidos para o WhatsApp, Instagram ou seu cardápio.</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onclick="startCreatingBusiness()"
+              class="w-full py-4 mt-6 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/25 active:scale-[0.98] btn-premium"
+            >
+              <i data-lucide="building" class="w-4 h-4"></i> Cadastrar Meu Estabelecimento
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStepHtml() {
+      if (businessStep === 1) {
+        setTimeout(validateStep1, 20);
+        return `
+          <div class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nome Comercial</label>
+              <input
+                type="text"
+                placeholder="Ex: Giro Café & Co."
+                value="${window.bizFields.name}"
+                oninput="updateBizField('name', this.value)"
+                class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Categoria</label>
+                <select
+                  onchange="updateBizField('category', this.value)"
+                  class="w-full h-12 rounded-2xl bg-brand-indigo-950 border border-white/10 text-white px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors cursor-pointer"
+                >
+                  ${['Café', 'Bar', 'Pub', 'Hamburgueria', 'Restaurante'].map(cat => `
+                    <option value="${cat}" ${window.bizFields.category === cat ? 'selected' : ''}>${cat}</option>
+                  `).join('')}
+                </select>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Faixa de Preço</label>
+                <select
+                  onchange="updateBizField('price', this.value)"
+                  class="w-full h-12 rounded-2xl bg-brand-indigo-950 border border-white/10 text-white px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors cursor-pointer"
+                >
+                  ${['$', '$$', '$$$'].map(p => `
+                    <option value="${p}" ${window.bizFields.price === p ? 'selected' : ''}>${p} (${p === '$' ? 'Econômico' : p === '$$' ? 'Moderado' : 'Premium'})</option>
+                  `).join('')}
+                </select>
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Descrição Curta</label>
+              <textarea
+                placeholder="Conte o que torna o seu local incrível em poucas palavras..."
+                oninput="updateBizField('description', this.value)"
+                maxlength="150"
+                class="w-full h-24 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 p-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors resize-none"
+              >${window.bizFields.description}</textarea>
+            </div>
+          </div>
+        `;
+      }
+      if (businessStep === 2) {
+        setTimeout(validateStep2, 20);
+        return `
+          <div class="space-y-3.5">
+            <div class="grid grid-cols-3 gap-3">
+              <div class="col-span-2 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">CEP</label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="biz-cep-input"
+                    placeholder="Ex: 80010-010"
+                    maxlength="9"
+                    value="${window.bizFields.cep}"
+                    oninput="handleCepInput(this.value)"
+                    class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                  />
+                  <div id="biz-cep-loader" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
+                    <div class="animate-spin rounded-full h-4 w-4 border-2 border-brand-coral-500 border-t-transparent"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Cidade</label>
+                <input
+                  type="text"
+                  value="Curitiba"
+                  readonly
+                  class="w-full h-12 rounded-2xl bg-white/5 border border-white/5 text-slate-400 px-4 text-xs cursor-not-allowed focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Rua / Logradouro</label>
+              <input
+                type="text"
+                id="biz-street-input"
+                placeholder="Logradouro autocompletado pelo CEP"
+                value="${window.bizFields.street}"
+                oninput="updateBizField('street', this.value)"
+                class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+              />
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+              <div class="col-span-2 space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bairro</label>
+                <input
+                  type="text"
+                  id="biz-neighborhood-input"
+                  placeholder="Bairro autocompletado"
+                  value="${window.bizFields.neighborhood}"
+                  oninput="updateBizField('neighborhood', this.value)"
+                  class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                />
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Número</label>
+                <input
+                  type="text"
+                  placeholder="123"
+                  value="${window.bizFields.number}"
+                  oninput="updateBizField('number', this.value)"
+                  class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Complemento (opcional)</label>
+              <input
+                type="text"
+                placeholder="Ex: Bloco A, Sala 4 / Ao lado da praça"
+                value="${window.bizFields.complement}"
+                oninput="updateBizField('complement', this.value)"
+                class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+              />
+            </div>
+          </div>
+        `;
+      }
+      if (businessStep === 3) {
+        setTimeout(validateStep3, 20);
+        return `
+          <div class="space-y-4">
+            <p class="text-[10px] text-slate-400 mb-2 leading-relaxed">
+              Insira ao menos um canal de contato. Eles ficarão visíveis como botões de atalho rápido direto nos cards de estabelecimentos.
+            </p>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-500"></i> WhatsApp Comercial
+              </label>
+              <input
+                type="text"
+                placeholder="(41) 99999-9999"
+                value="${window.bizFields.phone}"
+                oninput="this.value = window.formatPhone(this.value); updateBizField('phone', this.value)"
+                class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+              />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                <i data-lucide="instagram" class="w-3.5 h-3.5 text-pink-500"></i> Instagram (@usuario)
+              </label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">@</span>
+                <input
+                  type="text"
+                  placeholder="nomedonegocio"
+                  value="${window.bizFields.instagram.replace(/^@/, '')}"
+                  oninput="updateBizField('instagram', this.value)"
+                  class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-8 pr-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                <i data-lucide="globe" class="w-3.5 h-3.5 text-brand-teal-400"></i> Site / Link do Cardápio
+              </label>
+              <input
+                type="text"
+                placeholder="https://linktr.ee/seunegocio"
+                value="${window.bizFields.website}"
+                oninput="updateBizField('website', this.value)"
+                class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+              />
+            </div>
+          </div>
+        `;
+      }
+      if (businessStep === 4) {
+        setTimeout(validateStep4, 20);
+        return `
+          <div class="space-y-4">
+            <p class="text-[10px] text-slate-400 leading-relaxed mb-1">
+              Adicione uma foto chamativa para representar o seu local. Ela será exibida no card do feed de Swipes e na capa dos detalhes do local.
+            </p>
+
+            <div class="flex flex-col items-center justify-center p-6 border border-dashed border-white/10 hover:border-brand-coral-500/50 rounded-[28px] bg-white/5 transition-all text-center">
+              ${window.bizFields.image ? `
+                <div class="w-full relative aspect-video rounded-[20px] overflow-hidden group border border-white/5 shadow-inner">
+                  <img src="${window.bizFields.image}" alt="Capa do local" class="w-full h-full object-cover">
+                  <label class="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-300">
+                    <i data-lucide="camera" class="w-6 h-6 text-white mb-1.5"></i>
+                    <span class="text-[11px] font-bold text-white">Alterar Foto de Capa</span>
+                    <input type="file" accept="image/*" class="hidden" onchange="handleBizPhotoUpload(event)">
+                  </label>
+                </div>
+              ` : `
+                <label class="w-full flex flex-col items-center justify-center cursor-pointer py-10">
+                  <div class="w-12 h-12 rounded-full bg-brand-coral-500/10 flex items-center justify-center mb-3">
+                    <i data-lucide="camera" class="w-5 h-5 text-brand-coral-500 animate-pulse"></i>
+                  </div>
+                  <span class="text-xs font-bold text-white">Adicionar Foto de Capa</span>
+                  <span class="text-[9px] text-slate-500 mt-1">Imagens retangulares (16:9) funcionam melhor</span>
+                  <input type="file" accept="image/*" class="hidden" onchange="handleBizPhotoUpload(event)">
+                </label>
+              `}
+            </div>
+          </div>
+        `;
+      }
+      if (businessStep === 5) {
+        setTimeout(validateStep5, 20);
+        return `
+          <div class="space-y-4">
+            <p class="text-[10px] text-slate-400 leading-relaxed mb-2">
+              Escreva de forma simples os horários em que seu estabelecimento fica aberto para os clientes.
+            </p>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Horários de Funcionamento</label>
+              <input
+                type="text"
+                placeholder="Ex: Terça a Domingo, das 17h às 23h"
+                value="${window.bizFields.hours}"
+                oninput="updateBizField('hours', this.value)"
+                class="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+              />
+              <div class="p-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] text-slate-400 leading-relaxed mt-4">
+                💡 <strong>Pronto para decolar!</strong> Ao publicar, o Giro irá incluir o seu local diretamente no feed de Swipes de todos os usuários em Curitiba. Você pode alterar as configurações ou excluir o cadastro quando quiser através deste painel.
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
     // PROFILE SCREEN
     function renderProfile(container) {
       console.log('[renderProfile] Início. isLoggedIn:', isLoggedIn, 'profileSubTab:', profileSubTab);
@@ -2615,11 +3473,7 @@
           </div>
         `;
       } else {
-        subTabContentHtml = `
-          <div class="glass-card rounded-[32px] p-8 text-center border border-white/5">
-            <p class="text-sm font-semibold text-slate-300">Painel do Estabelecimento e Cadastro (Em breve)</p>
-          </div>
-        `;
+        subTabContentHtml = renderBusinessTabContent();
       }
       } catch(profileErr) {
         console.error('[renderProfile] Erro ao montar HTML do perfil:', profileErr);
@@ -2976,6 +3830,51 @@
     // PLACE CARD TEMPLATE GENERATOR
     function renderPlaceCardTemplate(place) {
       const isFav = favorites.includes(place.id);
+      
+      let contactsHtml = '';
+      if (place.phone || place.instagram_handle || place.website_url) {
+        contactsHtml = `
+          <div class="flex flex-wrap gap-2 mb-4">
+            ${place.phone ? `
+              <a
+                href="https://wa.me/55${place.phone.replace(/\D/g, '')}"
+                target="_blank"
+                rel="noopener noreferrer"
+                onclick="event.stopPropagation()"
+                class="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold tracking-wide uppercase transition-all shadow-md shadow-emerald-600/10 decoration-none no-underline"
+              >
+                <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+                WhatsApp
+              </a>
+            ` : ''}
+            ${place.instagram_handle ? `
+              <a
+                href="https://instagram.com/${place.instagram_handle.replace(/^@/, '')}"
+                target="_blank"
+                rel="noopener noreferrer"
+                onclick="event.stopPropagation()"
+                class="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-90 text-white text-[10px] font-extrabold tracking-wide uppercase transition-all shadow-md shadow-pink-500/10 decoration-none no-underline"
+              >
+                <i data-lucide="instagram" class="w-3.5 h-3.5"></i>
+                Instagram
+              </a>
+            ` : ''}
+            ${place.website_url ? `
+              <a
+                href="${place.website_url.startsWith('http') ? place.website_url : `https://${place.website_url}`}"
+                target="_blank"
+                rel="noopener noreferrer"
+                onclick="event.stopPropagation()"
+                class="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-200 text-[10px] font-extrabold tracking-wide uppercase transition-all decoration-none no-underline"
+              >
+                <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                Site
+              </a>
+            ` : ''}
+          </div>
+        `;
+      }
+
       return `
         <div onclick="viewPlaceOnMap('${place.id}')" class="glass-card rounded-3xl overflow-hidden hover:border-brand-coral-500/20 active:scale-[0.99] transition-all duration-300 cursor-pointer flex flex-col h-full group">
           <div class="relative aspect-video max-h-[30dvh] overflow-hidden bg-brand-indigo-950">
@@ -3005,6 +3904,7 @@
             </div>
             
             <div class="border-t border-white/5 pt-4">
+              ${contactsHtml}
               <div class="flex items-center justify-between mb-3">
                 <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Giro de chegada:</span>
               </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
-import { Heart, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight } from 'lucide-react';
+import { Heart, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe } from 'lucide-react';
 
 interface PlaceCardProps {
   place: Place;
@@ -127,6 +127,46 @@ export default function PlaceCard({
 
         {/* Ações e Rotas Integradas */}
         <div className="border-t border-slate-100 dark:border-white/5 pt-4">
+          {(place.phone || place.instagram_handle || place.website_url) && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {place.phone && (
+                <a
+                  href={`https://wa.me/55${place.phone.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-[10px] font-extrabold tracking-wide uppercase transition-all shadow-md shadow-emerald-600/10 decoration-none no-underline"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  WhatsApp
+                </a>
+              )}
+              {place.instagram_handle && (
+                <a
+                  href={`https://instagram.com/${place.instagram_handle.replace(/^@/, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:opacity-90 active:scale-95 text-white text-[10px] font-extrabold tracking-wide uppercase transition-all shadow-md shadow-pink-500/10 decoration-none no-underline"
+                >
+                  <Instagram className="w-3.5 h-3.5" />
+                  Instagram
+                </a>
+              )}
+              {place.website_url && (
+                <a
+                  href={place.website_url.startsWith('http') ? place.website_url : `https://${place.website_url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 active:scale-95 border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-200 text-[10px] font-extrabold tracking-wide uppercase transition-all decoration-none no-underline"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  Site
+                </a>
+              )}
+            </div>
+          )}
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Como ir:</span>
             

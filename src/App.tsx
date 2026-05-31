@@ -224,6 +224,24 @@ export default function App() {
     }
   }, []);
 
+  // Carregar e injetar o estabelecimento do parceiro do localStorage
+  useEffect(() => {
+    try {
+      const savedMerchant = localStorage.getItem('giro_merchant_place');
+      if (savedMerchant) {
+        const merchantPlace = JSON.parse(savedMerchant);
+        if (merchantPlace && merchantPlace.id) {
+          const exists = MOCK_PLACES.some(p => p.id === merchantPlace.id);
+          if (!exists) {
+            MOCK_PLACES.push(merchantPlace);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Erro ao injetar o estabelecimento comercial no MOCK_PLACES:', e);
+    }
+  }, []);
+
   // Alternar favoritos
   const handleFavoriteToggle = async (id: string) => {
     let updated: string[] = [];
@@ -319,7 +337,7 @@ export default function App() {
 
   return (
     <div className="h-dvh w-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-brand-indigo-950 dark:to-slate-950 font-sans overflow-hidden transition-colors duration-300">
-      <main id="main-app-container" className="w-full h-full flex flex-col relative overflow-hidden bg-slate-50/50 dark:bg-brand-indigo-950/40 backdrop-blur-md">
+      <main id="main-app-container" className="w-full h-full flex flex-col relative overflow-hidden bg-slate-50/50 dark:bg-brand-indigo-950/40">
         <Header 
           title={
             currentTab === 'profile' 
