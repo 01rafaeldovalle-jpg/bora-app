@@ -10,6 +10,7 @@ import { MOCK_PLACES } from './utils/constants';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from './integrations/supabase/client';
 import Header from './components/common/Header';
+import CollectionModal from './components/common/CollectionModal';
 
 type Tab = 'home' | 'explore' | 'favorites' | 'profile';
 
@@ -26,6 +27,37 @@ export default function App() {
   const [isDesktopMapOpen, setIsDesktopMapOpen] = useState(true);
   const [searchRadius, setSearchRadius] = useState<number>(10.0);
   const [session, setSession] = useState<any>(null);
+
+  const [collections, setCollections] = useState<Record<string, string[]>>(() => {
+    const saved = localStorage.getItem('giro_collections');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Erro ao ler coleções do localStorage:', e);
+      }
+    }
+    return {};
+  });
+  const [collectionModalPlaceId, setCollectionModalPlaceId] = useState<string | null>(null);
+
+  // Sincronizar coleções com localStorage
+  useEffect(() => {
+    localStorage.setItem('giro_collections', JSON.stringify(collections));
+  }, [collections]);
+
+  // Ouvir o evento de abertura do modal de coleções
+  useEffect(() => {
+    const handleOpenCollection = (e: CustomEvent<{ placeId: string }>) => {
+      if (e.detail && e.detail.placeId) {
+        setCollectionModalPlaceId(e.detail.placeId);
+      }
+    };
+    window.addEventListener('giro-open-collection' as any, handleOpenCollection);
+    return () => {
+      window.removeEventListener('giro-open-collection' as any, handleOpenCollection);
+    };
+  }, []);
 
   // Escutar auth do Supabase para gerenciar sessão real no App
   useEffect(() => {
@@ -242,16 +274,29 @@ export default function App() {
     }
   }, []);
 
-  // Alternar favoritos
+  // Alternar favoritos (com sincronização de coleções)
   const handleFavoriteToggle = async (id: string) => {
-    let updated: string[] = [];
-    setFavorites((prev) => {
-      updated = prev.includes(id) 
-        ? prev.filter((favId) => favId !== id) 
-        : [...prev, id];
-      localStorage.setItem('giro_favorites', JSON.stringify(updated));
-      return updated;
-    });
+    const isCurrentlyFav = favorites.includes(id);
+    let updated = isCurrentlyFav
+      ? favorites.filter((favId) => favId !== id)
+      : [...favorites, id];
+    
+    setFavorites(updated);
+    localStorage.setItem('giro_favorites', JSON.stringify(updated));
+
+    if (isCurrentlyFav) {
+      setCollections(prev => {
+        const next = { ...prev };
+        let changed = false;
+        Object.keys(next).forEach(name => {
+          if (next[name]?.includes(id)) {
+            next[name] = next[name].filter(item => item !== id);
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    }
 
     if (supabase && session?.user) {
       try {
@@ -266,6 +311,105 @@ export default function App() {
         console.error('Erro ao salvar favoritos no Supabase:', e);
       }
     }
+  };
+
+  // Métodos de gerenciamento de coleções
+  const toggleCollectionItem = async (collectionName: string, placeId: string) => {
+    setCollections(prev => {
+      const next = { ...prev };
+      const list = next[collectionName] || [];
+      const isIn = list.includes(placeId);
+      
+      if (isIn) {
+        next[collectionName] = list.filter(id => id !== placeId);
+      } else {
+        next[collectionName] = [...list, placeId];
+      }
+
+      // Sincronizar com os favoritos globais
+      const willBeIn = !isIn;
+      setFavorites(prevFavs => {
+        let updatedFavs = [...prevFavs];
+        if (willBeIn) {
+          if (!prevFavs.includes(placeId)) {
+            updatedFavs = [...prevFavs, placeId];
+          }
+        } else {
+          // Se foi removido, checa se ainda pertence a qualquer outra coleção
+          const existsInOther = Object.keys(next).some(
+            name => next[name]?.includes(placeId)
+          );
+          if (!existsInOther && prevFavs.includes(placeId)) {
+            updatedFavs = prevFavs.filter(id => id !== placeId);
+          }
+        }
+        
+        localStorage.setItem('giro_favorites', JSON.stringify(updatedFavs));
+        
+        // Sincroniza Supabase
+        if (supabase && session?.user) {
+          supabase.from('profiles').update({ favorites: updatedFavs }).eq('id', session.user.id)
+            .then(({ error }) => {
+              if (error) console.error('Erro ao sincronizar favoritos no Supabase:', error);
+            });
+        }
+        
+        return updatedFavs;
+      });
+
+      return next;
+    });
+  };
+
+  const createCollection = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setCollections(prev => {
+      if (prev[trimmed]) return prev; // já existe
+      return {
+        ...prev,
+        [trimmed]: []
+      };
+    });
+  };
+
+  const deleteCollection = async (collectionName: string) => {
+    let itemsInDeleted: string[] = [];
+    setCollections(prev => {
+      const next = { ...prev };
+      itemsInDeleted = next[collectionName] || [];
+      delete next[collectionName];
+
+      // Sincronizar favoritos: qualquer item da coleção deletada que não esteja em NENHUMA outra coleção é removido de favoritos
+      setFavorites(prevFavs => {
+        let updatedFavs = [...prevFavs];
+        let changed = false;
+
+        itemsInDeleted.forEach(placeId => {
+          const existsInOther = Object.keys(next).some(
+            name => next[name]?.includes(placeId)
+          );
+          if (!existsInOther && prevFavs.includes(placeId)) {
+            updatedFavs = updatedFavs.filter(id => id !== placeId);
+            changed = true;
+          }
+        });
+
+        if (changed) {
+          localStorage.setItem('giro_favorites', JSON.stringify(updatedFavs));
+          if (supabase && session?.user) {
+            supabase.from('profiles').update({ favorites: updatedFavs }).eq('id', session.user.id)
+              .then(({ error }) => {
+                if (error) console.error('Erro ao sincronizar favoritos no Supabase:', error);
+              });
+          }
+        }
+
+        return updatedFavs;
+      });
+
+      return next;
+    });
   };
 
   // Função para transição direta da Home para o Mapa (Explorar) ao clicar no card
@@ -312,6 +456,8 @@ export default function App() {
             onSelectPlace={handleSelectPlaceFromHome}
             setTab={setTab}
             activeCoords={activeCoords}
+            collections={collections}
+            onDeleteCollection={deleteCollection}
           />
         );
       case 'profile':
@@ -367,6 +513,16 @@ export default function App() {
           }} 
         />
       </main>
+
+      {collectionModalPlaceId && (
+        <CollectionModal
+          placeId={collectionModalPlaceId}
+          collections={collections}
+          onToggleCollectionItem={toggleCollectionItem}
+          onCreateCollection={createCollection}
+          onClose={() => setCollectionModalPlaceId(null)}
+        />
+      )}
     </div>
   );
 }

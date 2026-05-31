@@ -394,6 +394,22 @@ export default function Home({
                     {activePlace.price_range} · {activePlace.avg_rating.toFixed(1)} ★
                   </div>
 
+                  {/* Botão de salvar na coleção */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: activePlace.id } }));
+                    }}
+                    className="absolute top-4 right-4 z-30 flex items-center justify-center w-9 h-9 rounded-full bg-white/80 dark:bg-brand-indigo-950/70 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white hover:bg-brand-coral-500/20 hover:border-brand-coral-500/50 transition-all btn-premium shadow-sm"
+                  >
+                    <Icons.Bookmark 
+                      className={`w-4 h-4 transition-all ${
+                        favorites.includes(activePlace.id) ? 'fill-brand-coral-500 text-brand-coral-500 scale-110' : 'text-slate-400 dark:text-slate-300'
+                      }`} 
+                    />
+                  </button>
+
                   {/* Place Info */}
                   <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 text-left pointer-events-none">
                     <h3 className="text-lg sm:text-xl font-outfit font-extrabold text-white mb-1 flex items-center gap-1.5 leading-tight">
