@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut, ChevronRight, Mail, Lock, Eye, EyeOff, Save, X, Trash2 } from 'lucide-react';
+import { Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut, ChevronRight, Mail, Lock, Eye, EyeOff, Save, X, Trash2, MapPin } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../utils/cropImage';
@@ -44,6 +44,11 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+  // Onboarding wizard states
+  const [signupStep, setSignupStep] = useState<number>(1);
+  const [googleOnboardingStep, setGoogleOnboardingStep] = useState<number>(0);
+  const [usernameInput, setUsernameInput] = useState('');
 
   // Dados Cadastrais bottom sheet states
   const [isCadastraisOpen, setIsCadastraisOpen] = useState(false);
@@ -97,7 +102,35 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     };
   }, []);
 
+  // Detectar login do Google para onboarding remanescente (passos 4 e 5)
+  useEffect(() => {
+    const activeSession = session || mockSession;
+    if (activeSession?.user) {
+      const isPending = localStorage.getItem('giro_google_onboarding_pending') === 'true';
+      if (isPending) {
+        setGoogleOnboardingStep(4);
+      }
+    }
+  }, [session, mockSession]);
+
+  // Helper para verificar força da senha
+  const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return { label: '', color: '', pct: 0 };
+    if (pwd.length < 6) return { label: 'Muito Curta', color: 'bg-rose-500', pct: 20 };
+    
+    let score = 0;
+    if (pwd.length >= 8) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+
+    if (score <= 1) return { label: 'Fraca', color: 'bg-rose-400', pct: 40 };
+    if (score === 2) return { label: 'Média', color: 'bg-amber-500', pct: 70 };
+    return { label: 'Forte', color: 'bg-brand-teal-500', pct: 100 };
+  };
+
   const handleGoogleLogin = async () => {
+    localStorage.setItem('giro_google_onboarding_pending', 'true');
     if (supabase) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -160,30 +193,90 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     setAuthLoading(false);
   };
 
-  const handleEmailSignup = async () => {
+  const handleCompleteEmailSignup = async () => {
     setAuthError('');
     if (!nameInput.trim()) { setAuthError('Preencha seu nome completo.'); return; }
     if (!emailInput.trim()) { setAuthError('Preencha o e-mail.'); return; }
     if (passwordInput.length < 6) { setAuthError('A senha deve ter pelo menos 6 caracteres.'); return; }
     setAuthLoading(true);
+    
     if (supabase) {
-      const { error } = await supabase.auth.signUp({
+      const { data: authData, error } = await supabase.auth.signUp({
         email: emailInput,
         password: passwordInput,
-        options: { data: { full_name: nameInput } },
+        options: { 
+          data: { 
+            full_name: nameInput,
+            avatar_url: userAvatar
+          } 
+        },
       });
       if (error) {
         setAuthError(error.message);
-      } else {
+      } else if (authData?.user) {
+        // Criar perfil correspondente no banco de dados profiles
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            full_name: nameInput,
+            nickname: usernameInput || `@${nameInput.toLowerCase().replace(/\s+/g, '_')}`,
+            avatar_url: userAvatar,
+            preferences: userPreferences,
+            favorites: []
+          });
+        
+        if (profileError) {
+          console.error('Erro ao cadastrar perfil no profiles:', profileError);
+        }
         setAuthError('');
         setAuthView('email-login');
-        setAuthLoading(false);
-        return;
+        setSignupStep(1);
       }
     } else {
-      localStorage.setItem('giro_mock_user', JSON.stringify({ email: emailInput, password: passwordInput, name: nameInput }));
-      setMockSession({ user: { email: emailInput, user_metadata: { full_name: nameInput } } });
+      // Mock local
+      localStorage.setItem('giro_mock_user', JSON.stringify({ 
+        email: emailInput, 
+        password: passwordInput, 
+        name: nameInput,
+        nickname: usernameInput || `@${nameInput.toLowerCase().replace(/\s+/g, '_')}`,
+        avatar: userAvatar,
+        preferences: userPreferences
+      }));
+      setMockSession({ 
+        user: { 
+          email: emailInput, 
+          user_metadata: { 
+            full_name: nameInput,
+            avatar_url: userAvatar
+          } 
+        } 
+      });
+      setSignupStep(1);
     }
+    setAuthLoading(false);
+  };
+
+  const handleCompleteGoogleOnboarding = async () => {
+    setAuthLoading(true);
+    const activeSession = session || mockSession;
+    if (supabase && activeSession?.user && !mockSession) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({
+            preferences: userPreferences
+          })
+          .eq('id', activeSession.user.id);
+        if (error) {
+          console.error('Erro ao atualizar preferências Google no Supabase:', error);
+        }
+      } catch (e) {
+        console.error('Erro ao atualizar preferências Google:', e);
+      }
+    }
+    localStorage.removeItem('giro_google_onboarding_pending');
+    setGoogleOnboardingStep(0);
     setAuthLoading(false);
   };
 
@@ -374,13 +467,13 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 <h3 className="text-lg font-outfit font-bold text-slate-900 dark:text-white mb-2">
                   {authView === 'options' ? 'Acesse sua Conta' : authView === 'email-login' ? 'Entrar com E-mail' : 'Criar Conta'}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed mb-6">
-                  {authView === 'options'
-                    ? 'Entre no Giro para calibrar seu Swipe, salvar seus locais favoritos e ganhar selos de atividade.'
-                    : authView === 'email-login'
-                      ? 'Use seu e-mail e senha para acessar sua conta.'
-                      : 'Preencha os dados abaixo para criar sua conta no Giro.'}
-                </p>
+                {authView !== 'email-signup' && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed mb-6">
+                    {authView === 'options'
+                      ? 'Entre no Giro para calibrar seu Swipe, salvar seus locais favoritos e ganhar selos de atividade.'
+                      : 'Use seu e-mail e senha para acessar sua conta.'}
+                  </p>
+                )}
 
                 {authView === 'options' ? (
                   <div className="w-full max-w-[280px] space-y-3">
@@ -404,7 +497,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       Entrar com e-mail
                     </button>
                   </div>
-                ) : (
+                ) : authView === 'email-login' ? (
                   <div className="w-full max-w-[300px] space-y-3">
                     <button
                       onClick={() => { setAuthView('options'); setAuthError(''); }}
@@ -412,19 +505,6 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                     >
                       ← Voltar
                     </button>
-
-                    {authView === 'email-signup' && (
-                      <div className="relative">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input
-                          type="text"
-                          placeholder="Nome completo"
-                          value={nameInput}
-                          onChange={(e) => setNameInput(e.target.value)}
-                          className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
-                        />
-                      </div>
-                    )}
 
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -455,50 +535,472 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       </button>
                     </div>
 
-                    {authView === 'email-signup' && (
-                      <div className="flex items-start gap-2 px-1 py-1 text-left">
-                        <input
-                          id="terms-checkbox"
-                          type="checkbox"
-                          checked={acceptTerms}
-                          onChange={(e) => setAcceptTerms(e.target.checked)}
-                          className="mt-1 rounded border-slate-300 text-brand-coral-500 focus:ring-brand-coral-500 cursor-pointer w-4 h-4"
-                        />
-                        <label htmlFor="terms-checkbox" className="text-[11px] leading-snug text-slate-500 dark:text-slate-400 select-none">
-                          Li e aceito os{' '}
-                          <button
-                            type="button"
-                            onClick={() => setIsTermsModalOpen(true)}
-                            className="text-brand-coral-500 font-bold hover:underline bg-transparent border-0 p-0 cursor-pointer inline"
-                          >
-                            Termos de Uso e a Política de Privacidade
-                          </button>
-                          .
-                        </label>
-                      </div>
-                    )}
-
                     {authError && (
                       <p className="text-xs text-rose-500 font-semibold text-center">{authError}</p>
                     )}
 
                     <button
-                      onClick={authView === 'email-login' ? handleEmailLogin : handleEmailSignup}
-                      disabled={authLoading || (authView === 'email-signup' && !acceptTerms)}
+                      onClick={handleEmailLogin}
+                      disabled={authLoading}
                       className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm transition-all btn-premium shadow-md shadow-brand-coral-500/20 disabled:opacity-50"
                     >
-                      {authLoading ? 'Carregando...' : authView === 'email-login' ? 'Entrar' : 'Criar Conta'}
+                      {authLoading ? 'Carregando...' : 'Entrar'}
                     </button>
 
                     <p className="text-xs text-center text-slate-500 dark:text-slate-400">
-                      {authView === 'email-login' ? (
-                        <>Não tem conta? <button onClick={() => { setAuthView('email-signup'); setAuthError(''); }} className="text-brand-coral-500 font-bold hover:underline">Cadastre-se</button></>
-                      ) : (
-                        <>Já tem conta? <button onClick={() => { setAuthView('email-login'); setAuthError(''); }} className="text-brand-coral-500 font-bold hover:underline">Faça login</button></>
-                      )}
+                      Não tem conta? <button onClick={() => { setAuthView('email-signup'); setAuthError(''); setSignupStep(1); }} className="text-brand-coral-500 font-bold hover:underline">Cadastre-se</button>
+                    </p>
+                  </div>
+                ) : (
+                  /* Wizard de Cadastro Passo a Passo */
+                  <div className="w-full max-w-[320px] space-y-4">
+                    {/* Indicador de Passo */}
+                    <div className="flex flex-col items-center mb-2">
+                      <span className="text-[10px] uppercase font-bold text-brand-coral-500 tracking-widest">Passo {signupStep} de 5</span>
+                      <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden flex gap-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <div 
+                            key={s} 
+                            className={`h-full flex-1 transition-all duration-300 rounded-full ${
+                              s <= signupStep ? 'bg-brand-coral-500' : 'bg-white/10'
+                            }`} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {signupStep === 1 && (
+                      <div className="space-y-3">
+                        <div className="text-center mb-1">
+                          <h3 className="text-sm font-outfit font-bold text-slate-900 dark:text-white">Defina seu Acesso</h3>
+                          <p className="text-[10px] text-slate-400">Insira seu e-mail e crie uma senha forte.</p>
+                        </div>
+
+                        <div className="relative">
+                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={emailInput}
+                            onChange={(e) => setEmailInput(e.target.value)}
+                            className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                          />
+                        </div>
+
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="Senha"
+                            value={passwordInput}
+                            onChange={(e) => setPasswordInput(e.target.value)}
+                            className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-11 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+
+                        {passwordInput && (
+                          <div className="space-y-1">
+                            <div className="flex justify-between items-center text-[9px]">
+                              <span className="text-slate-400">Força da senha:</span>
+                              <span className="font-bold text-slate-300">{getPasswordStrength(passwordInput).label}</span>
+                            </div>
+                            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full transition-all duration-300 ${getPasswordStrength(passwordInput).color}`}
+                                style={{ width: `${getPasswordStrength(passwordInput).pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-start gap-2 px-1 py-1 text-left">
+                          <input
+                            id="terms-checkbox"
+                            type="checkbox"
+                            checked={acceptTerms}
+                            onChange={(e) => setAcceptTerms(e.target.checked)}
+                            className="mt-1 rounded border-slate-300 text-brand-coral-500 focus:ring-brand-coral-500 cursor-pointer w-4 h-4 shrink-0"
+                          />
+                          <label htmlFor="terms-checkbox" className="text-[11px] leading-snug text-slate-500 dark:text-slate-400 select-none">
+                            Li e aceito os{' '}
+                            <button
+                              type="button"
+                              onClick={() => setIsTermsModalOpen(true)}
+                              className="text-brand-coral-500 font-bold hover:underline bg-transparent border-0 p-0 cursor-pointer inline"
+                            >
+                              Termos de Uso e a Política de Privacidade
+                            </button>
+                            .
+                          </label>
+                        </div>
+
+                        {authError && <p className="text-xs text-rose-500 font-semibold text-center">{authError}</p>}
+
+                        <div className="flex gap-2 pt-2">
+                          <button
+                            onClick={() => { setAuthView('options'); setAuthError(''); }}
+                            className="flex-1 h-12 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold transition-all text-slate-300 border border-white/10"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!emailInput.trim() || !emailInput.includes('@')) {
+                                setAuthError('Insira um e-mail válido.');
+                                return;
+                              }
+                              if (passwordInput.length < 6) {
+                                setAuthError('A senha deve ter pelo menos 6 caracteres.');
+                                return;
+                              }
+                              if (!acceptTerms) {
+                                setAuthError('Você deve aceitar os termos para continuar.');
+                                return;
+                              }
+                              setAuthError('');
+                              setSignupStep(2);
+                            }}
+                            disabled={!acceptTerms || !emailInput || passwordInput.length < 6}
+                            className="flex-1 h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md shadow-brand-coral-500/10"
+                          >
+                            Avançar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {signupStep === 2 && (
+                      <div className="space-y-3">
+                        <div className="text-center mb-1">
+                          <h3 className="text-sm font-outfit font-bold text-slate-900 dark:text-white">Quem é você?</h3>
+                          <p className="text-[10px] text-slate-400">Como você deseja ser chamado.</p>
+                        </div>
+
+                        <div className="relative">
+                          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <input
+                            type="text"
+                            placeholder="Nome completo"
+                            value={nameInput}
+                            onChange={(e) => setNameInput(e.target.value)}
+                            className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                          />
+                        </div>
+
+                        <div className="relative">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">@</span>
+                          <input
+                            type="text"
+                            placeholder="username"
+                            value={usernameInput.replace(/^@/, '')}
+                            onChange={(e) => {
+                              const clean = e.target.value.replace(/^@/, '').replace(/\s+/g, '_').toLowerCase();
+                              setUsernameInput(`@${clean}`);
+                            }}
+                            className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors"
+                          />
+                        </div>
+
+                        {authError && <p className="text-xs text-rose-500 font-semibold text-center">{authError}</p>}
+
+                        <div className="flex gap-2 pt-2">
+                          <button
+                            onClick={() => setSignupStep(1)}
+                            className="flex-1 h-12 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold transition-all text-slate-300 border border-white/10"
+                          >
+                            Voltar
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (!nameInput.trim()) {
+                                setAuthError('Preencha seu nome completo.');
+                                return;
+                              }
+                              if (usernameInput.replace(/^@/, '').length < 3) {
+                                setAuthError('O apelido deve ter pelo menos 3 caracteres.');
+                                return;
+                              }
+                              setAuthError('');
+                              setSignupStep(3);
+                            }}
+                            disabled={!nameInput.trim() || usernameInput.replace(/^@/, '').length < 3}
+                            className="flex-1 h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md shadow-brand-coral-500/10"
+                          >
+                            Avançar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {signupStep === 3 && (
+                      <div className="space-y-4 flex flex-col items-center">
+                        <div className="text-center mb-1 w-full">
+                          <h3 className="text-sm font-outfit font-bold text-slate-900 dark:text-white">Escolha sua Foto</h3>
+                          <p className="text-[10px] text-slate-400">Uma imagem para o seu perfil (opcional).</p>
+                        </div>
+
+                        <div className="relative group avatar-container mt-1">
+                          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-brand-coral-500/30 bg-brand-indigo-900/50 flex items-center justify-center relative shadow-lg">
+                            {userAvatar ? (
+                              <img src={userAvatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-tr from-brand-coral-500 to-amber-500 flex items-center justify-center">
+                                <span className="text-3xl font-outfit font-extrabold text-white">
+                                  {nameInput ? nameInput.charAt(0).toUpperCase() : '?'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-brand-coral-500 border-2 border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 transition-all hover:scale-110 active:scale-95 shadow-md">
+                            <Edit2 className="w-3.5 h-3.5 text-white" />
+                            <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                          </label>
+                        </div>
+
+                        <div className="flex gap-2 pt-2 w-full">
+                          <button
+                            onClick={() => setSignupStep(2)}
+                            className="flex-1 h-12 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold transition-all text-slate-300 border border-white/10"
+                          >
+                            Voltar
+                          </button>
+                          <button
+                            onClick={() => setSignupStep(4)}
+                            className="flex-1 h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs transition-all shadow-md shadow-brand-coral-500/10"
+                          >
+                            {userAvatar ? 'Avançar' : 'Pular'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {signupStep === 4 && (
+                      <div className="space-y-4">
+                        <div className="text-center mb-1">
+                          <h3 className="text-sm font-outfit font-bold text-slate-900 dark:text-white">Escolha suas Preferências</h3>
+                          <p className="text-[10px] text-slate-400">Selecione no mínimo 3 tags para calibrar seu Swipe ⚡</p>
+                        </div>
+
+                        {/* Grid de Tags */}
+                        <div className="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-1 text-left">
+                          {prefs.map((pref) => {
+                            const isActive = userPreferences.includes(pref.id);
+                            return (
+                              <button
+                                key={pref.id}
+                                onClick={() => togglePreference(pref.id)}
+                                className={`px-3 py-2.5 rounded-xl text-[10px] font-semibold border flex items-center gap-2 transition-all duration-200 active:scale-95 ${
+                                  isActive
+                                    ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md shadow-brand-coral-500/10'
+                                    : 'border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10'
+                                }`}
+                              >
+                                <span className="text-xs shrink-0">{pref.label.split(' ')[0]}</span>
+                                <span className="truncate">{pref.label.split(' ').slice(1).join(' ')}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div className="text-center">
+                          <span className="text-[10px] font-bold text-slate-400">
+                            Selecionadas: {userPreferences.length}/3 obrigatórias
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2 pt-2">
+                          <button
+                            onClick={() => setSignupStep(3)}
+                            className="flex-1 h-12 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-bold transition-all text-slate-300 border border-white/10"
+                          >
+                            Voltar
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (userPreferences.length < 3) return;
+                              setSignupStep(5);
+                            }}
+                            disabled={userPreferences.length < 3}
+                            className="flex-1 h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md shadow-brand-coral-500/10"
+                          >
+                            Avançar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {signupStep === 5 && (
+                      <div className="space-y-4 text-center">
+                        <div className="w-12 h-12 rounded-full bg-brand-teal-500/10 flex items-center justify-center mx-auto text-brand-teal-500 animate-pulse">
+                          <MapPin className="w-6 h-6" />
+                        </div>
+
+                        <div className="space-y-1">
+                          <h3 className="text-sm font-outfit font-bold text-slate-900 dark:text-white">Ativar Localização</h3>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed px-2">
+                            O Giro utiliza geolocalização para te recomendar os estabelecimentos a poucos metros de distância.
+                          </p>
+                        </div>
+
+                        {authError && <p className="text-xs text-rose-500 font-semibold text-center">{authError}</p>}
+
+                        <div className="flex flex-col gap-2 pt-2 w-full">
+                          <button
+                            onClick={() => {
+                              if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(
+                                  () => { handleCompleteEmailSignup(); },
+                                  () => { handleCompleteEmailSignup(); }
+                                );
+                              } else {
+                                handleCompleteEmailSignup();
+                              }
+                            }}
+                            disabled={authLoading}
+                            className="w-full h-12 rounded-2xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-bold text-xs transition-all shadow-md shadow-brand-teal-500/10 flex items-center justify-center gap-2"
+                          >
+                            {authLoading ? 'Criando Conta...' : 'Ativar GPS (Recomendado)'}
+                          </button>
+                          <button
+                            onClick={handleCompleteEmailSignup}
+                            disabled={authLoading}
+                            className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 font-bold text-xs transition-all"
+                          >
+                            {authLoading ? 'Criando Conta...' : 'Continuar sem GPS'}
+                          </button>
+                          <button
+                            onClick={() => setSignupStep(4)}
+                            disabled={authLoading}
+                            className="text-xs text-slate-500 hover:text-white font-semibold mt-2 bg-transparent border-none p-0 cursor-pointer"
+                          >
+                            ← Voltar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-center text-slate-500 dark:text-slate-400 mt-4">
+                      Já tem conta? <button onClick={() => { setAuthView('email-login'); setAuthError(''); }} className="text-brand-coral-500 font-bold hover:underline">Faça login</button>
                     </p>
                   </div>
                 )}
+              </div>
+            ) : googleOnboardingStep > 0 ? (
+              /* Modal Google Onboarding passos 4 e 5 */
+              <div className="glass-card rounded-[32px] p-8 text-center border border-white/5 flex flex-col items-center">
+                <div className="w-full max-w-[320px] space-y-4">
+                  <div className="flex flex-col items-center mb-2">
+                    <span className="text-[10px] uppercase font-bold text-brand-coral-500 tracking-widest">Completar Cadastro - Passo {googleOnboardingStep === 4 ? '1' : '2'} de 2</span>
+                    <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden flex gap-1">
+                      <div className="h-full flex-1 bg-brand-coral-500 rounded-full" />
+                      <div className={`h-full flex-1 transition-all duration-300 rounded-full ${googleOnboardingStep === 5 ? 'bg-brand-coral-500' : 'bg-white/10'}`} />
+                    </div>
+                  </div>
+
+                  {googleOnboardingStep === 4 && (
+                    <div className="space-y-4">
+                      <div className="text-center mb-1">
+                        <h3 className="text-sm font-outfit font-bold text-slate-900 dark:text-white">Escolha suas Preferências</h3>
+                        <p className="text-[10px] text-slate-400">Selecione no mínimo 3 tags para calibrar seu Swipe ⚡</p>
+                      </div>
+
+                      {/* Grid de Tags */}
+                      <div className="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-1 text-left">
+                        {prefs.map((pref) => {
+                          const isActive = userPreferences.includes(pref.id);
+                          return (
+                            <button
+                              key={pref.id}
+                              onClick={() => togglePreference(pref.id)}
+                              className={`px-3 py-2.5 rounded-xl text-[10px] font-semibold border flex items-center gap-2 transition-all duration-200 active:scale-95 ${
+                                isActive
+                                  ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md shadow-brand-coral-500/10'
+                                  : 'border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10'
+                              }`}
+                            >
+                              <span className="text-xs shrink-0">{pref.label.split(' ')[0]}</span>
+                              <span className="truncate">{pref.label.split(' ').slice(1).join(' ')}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="text-center">
+                        <span className="text-[10px] font-bold text-slate-400">
+                          Selecionadas: {userPreferences.length}/3 obrigatórias
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          if (userPreferences.length < 3) return;
+                          setGoogleOnboardingStep(5);
+                        }}
+                        disabled={userPreferences.length < 3}
+                        className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md shadow-brand-coral-500/10"
+                      >
+                        Avançar
+                      </button>
+                    </div>
+                  )}
+
+                  {googleOnboardingStep === 5 && (
+                    <div className="space-y-4 text-center">
+                      <div className="w-12 h-12 rounded-full bg-brand-teal-500/10 flex items-center justify-center mx-auto text-brand-teal-500 animate-pulse">
+                        <MapPin className="w-6 h-6" />
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-outfit font-bold text-slate-900 dark:text-white">Ativar Localização</h3>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed px-2">
+                          O Giro utiliza geolocalização para te recomendar os estabelecimentos a poucos metros de distância.
+                        </p>
+                      </div>
+
+                      {authError && <p className="text-xs text-rose-500 font-semibold text-center">{authError}</p>}
+
+                      <div className="flex flex-col gap-2 pt-2 w-full">
+                        <button
+                          onClick={() => {
+                            if (navigator.geolocation) {
+                              navigator.geolocation.getCurrentPosition(
+                                () => { handleCompleteGoogleOnboarding(); },
+                                () => { handleCompleteGoogleOnboarding(); }
+                              );
+                            } else {
+                              handleCompleteGoogleOnboarding();
+                            }
+                          }}
+                          disabled={authLoading}
+                          className="w-full h-12 rounded-2xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-bold text-xs transition-all shadow-md shadow-brand-teal-500/10 flex items-center justify-center gap-2"
+                        >
+                          {authLoading ? 'Salvando...' : 'Ativar GPS (Recomendado)'}
+                        </button>
+                        <button
+                          onClick={handleCompleteGoogleOnboarding}
+                          disabled={authLoading}
+                          className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 font-bold text-xs transition-all"
+                        >
+                          {authLoading ? 'Salvando...' : 'Continuar sem GPS'}
+                        </button>
+                        <button
+                          onClick={() => setGoogleOnboardingStep(4)}
+                          disabled={authLoading}
+                          className="text-xs text-slate-500 hover:text-white font-semibold mt-2 bg-transparent border-none p-0 cursor-pointer"
+                        >
+                          ← Voltar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center">
