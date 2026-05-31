@@ -1022,10 +1022,39 @@
     let isOpenNow = true;
     let isLiveMusicToday = false;
 
+    function getCategoryId(cat) {
+      const normalized = cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (
+        normalized.includes('cafeteria') ||
+        normalized.includes('cafe') ||
+        normalized.includes('doces') ||
+        normalized.includes('bolos') ||
+        normalized.includes('padaria') ||
+        normalized.includes('sorveteria') ||
+        normalized.includes('gelateria') ||
+        normalized.includes('acai') ||
+        normalized.includes('panificadora')
+      ) {
+        return '3'; // Cafés e Doces
+      }
+      if (
+        normalized.includes('cervejaria') ||
+        normalized.includes('pub') ||
+        normalized.includes('adega') ||
+        normalized.includes('vinhos') ||
+        normalized.includes('drinks') ||
+        normalized.includes('coqueteis') ||
+        normalized.includes('bar')
+      ) {
+        return '4'; // Vida Noturna
+      }
+      return '2'; // Gastronomia (default fallback)
+    }
+
     // Campos do formulário
     window.bizFields = {
       name: '',
-      category: 'Café',
+      category: '🍕 Pizzaria',
       price: '$$',
       description: '',
       cep: '',
@@ -1045,7 +1074,7 @@
     if (merchantPlace) {
       window.bizFields = {
         name: merchantPlace.name || '',
-        category: merchantPlace.category_id || 'Café',
+        category: merchantPlace.category_name || merchantPlace.category_id || '🍕 Pizzaria',
         price: merchantPlace.price_range || '$$',
         description: merchantPlace.description || '',
         cep: '',
@@ -1223,7 +1252,8 @@
         phone: window.bizFields.phone || undefined,
         instagram_handle: window.bizFields.instagram || undefined,
         website_url: window.bizFields.website || undefined,
-        category_id: window.bizFields.category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+        category_id: getCategoryId(window.bizFields.category),
+        category_name: window.bizFields.category,
         latitude: window.bizFields.lat,
         longitude: window.bizFields.lng,
         image_url: window.bizFields.image || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=60',
@@ -2777,7 +2807,7 @@
               <div class="absolute bottom-5 left-6 right-6">
                 <div class="flex items-center gap-1.5 mb-1">
                   <span class="px-2 py-0.5 rounded bg-brand-coral-500/20 text-brand-coral-400 border border-brand-coral-500/20 text-[9px] font-bold uppercase tracking-wider">
-                    ${merchantPlace.category_id.charAt(0).toUpperCase() + merchantPlace.category_id.slice(1)}
+                    ${merchantPlace.category_name || (merchantPlace.category_id === '2' ? 'Gastronomia' : merchantPlace.category_id === '3' ? 'Cafés e Doces' : merchantPlace.category_id === '4' ? 'Vida Noturna' : merchantPlace.category_id)}
                   </span>
                   <span class="text-[10px] text-slate-300">•</span>
                   <div class="flex items-center gap-0.5 text-brand-gold-400">
@@ -3063,7 +3093,33 @@
                   onchange="updateBizField('category', this.value)"
                   class="w-full h-12 rounded-2xl bg-brand-indigo-950 border border-white/10 text-white px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors cursor-pointer"
                 >
-                  ${['Café', 'Bar', 'Pub', 'Hamburgueria', 'Restaurante'].map(cat => `
+                  ${[
+                    '🍕 Pizzaria',
+                    '🍔 Hamburgueria',
+                    '🥩 Carnes & Churrascaria',
+                    '🍝 Italiana & Massas',
+                    '🍣 Japonesa',
+                    '🌮 Mexicana',
+                    '🥙 Árabe',
+                    '🥡 Asiática & Chinesa',
+                    '🍤 Frutos do Mar',
+                    '🥘 Brasileira & PF',
+                    '🥪 Lanches & Sanduíches',
+                    '🥟 Pastelaria',
+                    '🌭 Cachorro-Quente',
+                    '🌯 Tapiocaria & Creparia',
+                    '🍟 Porções & Petiscos',
+                    '☕ Cafeteria & Café Especial',
+                    '🥐 Padaria & Panificadora',
+                    '🍰 Doces & Bolos',
+                    '🍦 Sorveteria & Gelateria',
+                    '🍇 Açaí',
+                    '🌿 Vegetariana & Vegana',
+                    '🥗 Saudável & Fit',
+                    '🍺 Cervejaria & Pub',
+                    '🍷 Adega & Bar de Vinhos',
+                    '🍹 Drinks & Coquetéis'
+                  ].map(cat => `
                     <option value="${cat}" ${window.bizFields.category === cat ? 'selected' : ''}>${cat}</option>
                   `).join('')}
                 </select>

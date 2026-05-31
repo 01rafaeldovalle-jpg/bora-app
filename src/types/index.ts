@@ -15,6 +15,7 @@ export interface Place {
   instagram_handle?: string;
   website_url?: string;
   category_id: string;
+  category_name?: string;
   latitude: number;
   longitude: number;
   image_url: string;

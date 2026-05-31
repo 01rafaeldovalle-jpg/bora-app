@@ -901,7 +901,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
 
   // Formulário do Negócio
   const [bizName, setBizName] = useState('');
-  const [bizCategory, setBizCategory] = useState('Café');
+  const [bizCategory, setBizCategory] = useState('🍕 Pizzaria');
   const [bizPrice, setBizPrice] = useState<'$' | '$$' | '$$$'>('$$');
   const [bizDescription, setBizDescription] = useState('');
   
@@ -962,6 +962,35 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     }
   };
 
+  const getCategoryId = (cat: string) => {
+    const normalized = cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (
+      normalized.includes('cafeteria') ||
+      normalized.includes('cafe') ||
+      normalized.includes('doces') ||
+      normalized.includes('bolos') ||
+      normalized.includes('padaria') ||
+      normalized.includes('sorveteria') ||
+      normalized.includes('gelateria') ||
+      normalized.includes('acai') ||
+      normalized.includes('panificadora')
+    ) {
+      return '3'; // Cafés e Doces
+    }
+    if (
+      normalized.includes('cervejaria') ||
+      normalized.includes('pub') ||
+      normalized.includes('adega') ||
+      normalized.includes('vinhos') ||
+      normalized.includes('drinks') ||
+      normalized.includes('coqueteis') ||
+      normalized.includes('bar')
+    ) {
+      return '4'; // Vida Noturna
+    }
+    return '2'; // Gastronomia (default fallback)
+  };
+
   const handleFinishBusinessSignup = async () => {
     const id = `biz_${Date.now()}`;
     const newPlace = {
@@ -972,7 +1001,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       phone: bizPhone || undefined,
       instagram_handle: bizInstagram || undefined,
       website_url: bizWebsite || undefined,
-      category_id: bizCategory.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+      category_id: getCategoryId(bizCategory),
+      category_name: bizCategory,
       latitude: bizLat,
       longitude: bizLng,
       image_url: bizImage || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=60',
@@ -1235,7 +1265,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             <div className="absolute bottom-5 left-6 right-6">
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="px-2 py-0.5 rounded bg-brand-coral-500/20 text-brand-coral-400 border border-brand-coral-500/20 text-[9px] font-bold uppercase tracking-wider">
-                  {merchantPlace.category_id.charAt(0).toUpperCase() + merchantPlace.category_id.slice(1)}
+                  {merchantPlace.category_name || merchantPlace.category_id}
                 </span>
                 <span className="text-[10px] text-slate-300">•</span>
                 <div className="flex items-center gap-0.5 text-brand-gold-400">
@@ -1424,7 +1454,33 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       onChange={(e) => setBizCategory(e.target.value)}
                       className="w-full h-12 rounded-2xl bg-brand-indigo-950 border border-white/10 text-white px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors cursor-pointer"
                     >
-                      {['Café', 'Bar', 'Pub', 'Hamburgueria', 'Restaurante'].map((cat) => (
+                      {[
+                        '🍕 Pizzaria',
+                        '🍔 Hamburgueria',
+                        '🥩 Carnes & Churrascaria',
+                        '🍝 Italiana & Massas',
+                        '🍣 Japonesa',
+                        '🌮 Mexicana',
+                        '🥙 Árabe',
+                        '🥡 Asiática & Chinesa',
+                        '🍤 Frutos do Mar',
+                        '🥘 Brasileira & PF',
+                        '🥪 Lanches & Sanduíches',
+                        '🥟 Pastelaria',
+                        '🌭 Cachorro-Quente',
+                        '🌯 Tapiocaria & Creparia',
+                        '🍟 Porções & Petiscos',
+                        '☕ Cafeteria & Café Especial',
+                        '🥐 Padaria & Panificadora',
+                        '🍰 Doces & Bolos',
+                        '🍦 Sorveteria & Gelateria',
+                        '🍇 Açaí',
+                        '🌿 Vegetariana & Vegana',
+                        '🥗 Saudável & Fit',
+                        '🍺 Cervejaria & Pub',
+                        '🍷 Adega & Bar de Vinhos',
+                        '🍹 Drinks & Coquetéis'
+                      ].map((cat) => (
                         <option key={cat} value={cat} className="bg-brand-indigo-950 text-white">{cat}</option>
                       ))}
                     </select>
