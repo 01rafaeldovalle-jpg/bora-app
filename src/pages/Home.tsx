@@ -399,7 +399,8 @@ export default function Home({
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: activePlace.id } }));
+                      const isFavorited = favorites.includes(activePlace.id);
+                      window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: activePlace.id, autoSave: !isFavorited } }));
                     }}
                     className="absolute top-4 right-4 z-30 flex items-center justify-center w-9 h-9 rounded-full bg-white/80 dark:bg-brand-indigo-950/70 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white hover:bg-brand-coral-500/20 hover:border-brand-coral-500/50 transition-all btn-premium shadow-sm"
                   >

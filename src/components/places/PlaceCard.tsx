@@ -90,7 +90,7 @@ export default function PlaceCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: place.id } }));
+            window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: place.id, autoSave: !isFavorited } }));
           }}
           className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-white/80 dark:bg-brand-indigo-950/70 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white hover:bg-brand-coral-500/20 hover:border-brand-coral-500/50 transition-all btn-premium shadow-sm"
         >

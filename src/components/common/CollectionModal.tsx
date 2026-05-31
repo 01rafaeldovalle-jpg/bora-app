@@ -7,6 +7,7 @@ interface CollectionModalProps {
   onToggleCollectionItem: (collectionName: string, placeId: string) => void;
   onCreateCollection: (name: string) => void;
   onClose: () => void;
+  onRemoveFromAll?: (placeId: string) => void;
 }
 
 export default function CollectionModal({
@@ -14,7 +15,8 @@ export default function CollectionModal({
   collections,
   onToggleCollectionItem,
   onCreateCollection,
-  onClose
+  onClose,
+  onRemoveFromAll
 }: CollectionModalProps) {
   const [newCollectionName, setNewCollectionName] = useState('');
 
@@ -29,6 +31,7 @@ export default function CollectionModal({
   };
 
   const collectionNames = Object.keys(collections);
+  const isSavedInAny = Object.values(collections).some(list => list.includes(placeId));
 
   return (
     <div className="fixed inset-0 z-[11000] backdrop-blur-md bg-black/60 flex items-center justify-center p-4 animate-fade-in">
@@ -86,6 +89,19 @@ export default function CollectionModal({
               <p className="text-xs">Nenhuma pasta criada ainda.</p>
               <p className="text-[10px] mt-1">Crie sua primeira pasta abaixo!</p>
             </div>
+          )}
+
+          {isSavedInAny && onRemoveFromAll && (
+            <button
+              type="button"
+              onClick={() => {
+                onRemoveFromAll(placeId);
+                onClose();
+              }}
+              className="w-full mt-4 py-2.5 text-center text-xs font-bold text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl transition-all active:scale-[0.98]"
+            >
+              Remover de todos os salvos
+            </button>
           )}
         </div>
 
