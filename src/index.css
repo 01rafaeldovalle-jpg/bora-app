@@ -60,6 +60,68 @@
   .btn-premium {
     @apply transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
   }
+
+  /* Botão Principal Coral (Destaque) */
+  .btn-primary {
+    background-color: #ff5422 !important; /* brand-coral-500 */
+    color: #ffffff !important;
+    font-weight: 700;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 12px rgba(255, 84, 34, 0.2);
+  }
+  .btn-primary:hover {
+    background-color: #f03b0a !important;
+  }
+  .btn-primary:active {
+    transform: scale(0.97);
+  }
+
+  /* Botão Secundário / Cancelar (Dinâmico) */
+  .btn-secondary {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    color: #334155 !important; /* slate-700 */
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+  }
+  .dark .btn-secondary {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #e2e8f0 !important; /* slate-200 */
+  }
+  .btn-secondary:hover {
+    background-color: rgba(0, 0, 0, 0.08) !important;
+  }
+  .dark .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+  }
+  .btn-secondary:active {
+    transform: scale(0.97);
+  }
+
+  /* Campo de Formulário / Inputs / Dropdowns (Dinâmico) */
+  .form-input {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    color: #0f172a !important; /* slate-900 */
+    transition: all 0.2s ease-in-out;
+  }
+  .dark .form-input {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+  }
+  .form-input:focus {
+    outline: none !important;
+    border-color: #ff5422 !important; /* brand-coral-500 */
+    box-shadow: 0 0 0 2px rgba(255, 84, 34, 0.15);
+  }
+  .form-input::placeholder {
+    color: #94a3b8 !important; /* slate-400 */
+  }
+  .dark .form-input::placeholder {
+    color: #64748b !important; /* slate-500 */
+  }
 }
 
 /* Customizing Leaflet Map to look premium */

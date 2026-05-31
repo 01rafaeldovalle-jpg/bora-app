@@ -402,8 +402,8 @@ function OnboardingOverlay({
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-7 h-7 text-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-white">Entrar</h2>
-              <p className="text-sm text-slate-400 mt-1">Use seu e-mail e senha do Giro</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Entrar</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Use seu e-mail e senha do Giro</p>
             </div>
 
             <div className="space-y-3">
@@ -415,7 +415,7 @@ function OnboardingOverlay({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleEmailLogin()}
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-11 pr-4 text-sm focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                  className="w-full h-14 rounded-2xl form-input pl-11 pr-4 text-sm"
                 />
               </div>
               <div className="relative">
@@ -426,12 +426,12 @@ function OnboardingOverlay({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleEmailLogin()}
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-11 pr-12 text-sm focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                  className="w-full h-14 rounded-2xl form-input pl-11 pr-12 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -443,7 +443,7 @@ function OnboardingOverlay({
             <button
               onClick={handleEmailLogin}
               disabled={loading}
-              className="w-full h-14 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/30 active:scale-[0.97] transition-all"
+              className="w-full h-14 rounded-2xl btn-primary disabled:opacity-50 text-sm flex items-center justify-center gap-2"
             >
               {loading ? 'Entrando...' : 'Entrar'}
               {!loading && <ArrowRight className="w-4 h-4" />}
@@ -468,8 +468,8 @@ function OnboardingOverlay({
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-7 h-7 text-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-white">Crie seu acesso</h2>
-              <p className="text-sm text-slate-400 mt-1">E-mail e uma senha forte</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Crie seu acesso</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">E-mail e uma senha forte</p>
             </div>
 
             <div className="space-y-3">
@@ -480,7 +480,7 @@ function OnboardingOverlay({
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-11 pr-4 text-sm focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                  className="w-full h-14 rounded-2xl form-input pl-11 pr-4 text-sm"
                 />
               </div>
               <div className="relative">
@@ -490,12 +490,12 @@ function OnboardingOverlay({
                   placeholder="Senha (mín. 6 caracteres)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-11 pr-12 text-sm focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                  className="w-full h-14 rounded-2xl form-input pl-11 pr-12 text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -547,7 +547,7 @@ function OnboardingOverlay({
             <button
               onClick={handleSignupStep1}
               disabled={!email || password.length < 6 || !acceptTerms}
-              className="w-full h-14 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/30 active:scale-[0.97] transition-all"
+              className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
               Continuar
               <ArrowRight className="w-4 h-4" />
@@ -572,8 +572,8 @@ function OnboardingOverlay({
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <User className="w-7 h-7 text-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-white">Quem é você?</h2>
-              <p className="text-sm text-slate-400 mt-1">Como você quer ser chamado no Giro</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Quem é você?</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Como você quer ser chamado no Giro</p>
             </div>
 
             <div className="space-y-3">
@@ -584,7 +584,7 @@ function OnboardingOverlay({
                   placeholder="Nome completo"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-11 pr-4 text-sm focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                  className="w-full h-14 rounded-2xl form-input pl-11 pr-4 text-sm"
                 />
               </div>
               <div className="relative">
@@ -597,7 +597,7 @@ function OnboardingOverlay({
                     const clean = e.target.value.replace(/^@/, '').replace(/\s+/g, '_').toLowerCase();
                     setUsername(`@${clean}`);
                   }}
-                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-11 pr-4 text-sm focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                  className="w-full h-14 rounded-2xl form-input pl-11 pr-4 text-sm"
                 />
               </div>
             </div>
@@ -607,7 +607,7 @@ function OnboardingOverlay({
             <button
               onClick={handleSignupStep2}
               disabled={!name.trim() || username.replace(/^@/, '').length < 3}
-              className="w-full h-14 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/30 active:scale-[0.97] transition-all"
+              className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
               Continuar
               <ArrowRight className="w-4 h-4" />
@@ -619,13 +619,13 @@ function OnboardingOverlay({
         {view === 'signup-3' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 animate-[fadeInUp_0.35s_ease-out]">
             <div className="text-center mt-2">
-              <h2 className="text-2xl font-outfit font-black text-white">Sua foto</h2>
-              <p className="text-sm text-slate-400 mt-1">Escolha um avatar para seu perfil (opcional)</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Sua foto</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Escolha um avatar para seu perfil (opcional)</p>
             </div>
 
             {/* Avatar picker */}
             <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-brand-coral-500/40 bg-brand-indigo-900 flex items-center justify-center shadow-2xl shadow-brand-coral-500/20">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-brand-coral-500/40 bg-slate-200 dark:bg-brand-indigo-900 flex items-center justify-center shadow-2xl shadow-brand-coral-500/20">
                 {avatar ? (
                   <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -636,7 +636,7 @@ function OnboardingOverlay({
                   </div>
                 )}
               </div>
-              <label className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-brand-coral-500 border-4 border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 active:scale-95 transition-all shadow-lg">
+              <label className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-brand-coral-500 border-4 border-slate-50 dark:border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 active:scale-95 transition-all shadow-lg">
                 <Camera className="w-4 h-4 text-white" />
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
               </label>
@@ -645,15 +645,15 @@ function OnboardingOverlay({
             <div className="w-full space-y-3">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/10 active:scale-[0.97] transition-all"
+                className="w-full h-14 rounded-2xl btn-secondary text-sm flex items-center justify-center gap-2"
               >
-                <Camera className="w-5 h-5 text-slate-300" />
+                <Camera className="w-5 h-5 text-slate-500 dark:text-slate-300" />
                 {avatar ? 'Trocar Foto' : 'Escolher Foto da Galeria'}
               </button>
 
               <button
                 onClick={() => setView('signup-4')}
-                className="w-full h-14 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/30 active:scale-[0.97] transition-all"
+                className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2"
               >
                 {avatar ? 'Confirmar e Continuar' : 'Pular por Agora'}
                 <ArrowRight className="w-4 h-4" />
@@ -669,8 +669,8 @@ function OnboardingOverlay({
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-7 h-7 text-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-white">Seus interesses</h2>
-              <p className="text-sm text-slate-400 mt-1">Escolha pelo menos 3 para calibrar seu Swipe ⚡</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Seus interesses</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Escolha pelo menos 3 para calibrar seu Swipe ⚡</p>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
@@ -683,7 +683,7 @@ function OnboardingOverlay({
                     className={`h-12 rounded-2xl text-xs font-semibold border flex items-center gap-2.5 px-3 transition-all duration-200 active:scale-95 ${
                       active
                         ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md shadow-brand-coral-500/20'
-                        : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20'
+                        : 'bg-slate-200/50 dark:bg-white/5 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-300/50 dark:hover:bg-white/10'
                     }`}
                   >
                     <span className="text-base shrink-0">{pref.label.split(' ')[0]}</span>
@@ -695,7 +695,7 @@ function OnboardingOverlay({
             </div>
 
             <div className="flex items-center justify-center gap-2">
-              <div className={`text-xs font-bold transition-colors ${prefs.length >= 3 ? 'text-emerald-400' : 'text-slate-500'}`}>
+              <div className={`text-xs font-bold transition-colors ${prefs.length >= 3 ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-500'}`}>
                 {prefs.length >= 3 ? `✓ ${prefs.length} selecionadas` : `${prefs.length}/3 mínimo`}
               </div>
             </div>
@@ -703,7 +703,7 @@ function OnboardingOverlay({
             <button
               onClick={() => { if (prefs.length >= 3) setView('signup-5'); }}
               disabled={prefs.length < 3}
-              className="w-full h-14 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/30 active:scale-[0.97] transition-all"
+              className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
               Continuar
               <ArrowRight className="w-4 h-4" />
@@ -719,8 +719,8 @@ function OnboardingOverlay({
             </div>
 
             <div>
-              <h2 className="text-2xl font-outfit font-black text-white">Ativar Localização</h2>
-              <p className="text-sm text-slate-400 mt-2 leading-relaxed max-w-[260px] mx-auto">
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Ativar Localização</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed max-w-[260px] mx-auto">
                 O Giro usa sua localização para recomendar os melhores lugares perto de você em tempo real.
               </p>
             </div>
@@ -756,7 +756,7 @@ function OnboardingOverlay({
               <button
                 onClick={handleFinishSignup}
                 disabled={loading}
-                className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-slate-300 font-semibold text-sm active:scale-[0.97] transition-all disabled:opacity-50"
+                className="w-full h-14 rounded-2xl btn-secondary text-sm"
               >
                 {loading ? 'Criando sua conta...' : 'Continuar sem GPS'}
               </button>
@@ -1441,23 +1441,23 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             {businessStep === 1 && (
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Nome Comercial</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Nome Comercial</label>
                   <input
                     type="text"
                     placeholder="Ex: Giro Café & Co."
                     value={bizName}
                     onChange={(e) => setBizName(e.target.value)}
-                    className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Categoria</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Categoria</label>
                     <select
                       value={bizCategory}
                       onChange={(e) => setBizCategory(e.target.value)}
-                      className="w-full h-12 rounded-2xl bg-brand-indigo-950 border border-white/10 text-white px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors cursor-pointer"
+                      className="w-full h-12 rounded-2xl form-input px-4 text-xs cursor-pointer"
                     >
                       {[
                         '🍕 Pizzaria',
@@ -1486,33 +1486,33 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         '🍷 Adega & Bar de Vinhos',
                         '🍹 Drinks & Coquetéis'
                       ].map((cat) => (
-                        <option key={cat} value={cat} className="bg-brand-indigo-950 text-white">{cat}</option>
+                        <option key={cat} value={cat} className="bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white">{cat}</option>
                       ))}
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Faixa de Preço</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Faixa de Preço</label>
                     <select
                       value={bizPrice}
                       onChange={(e) => setBizPrice(e.target.value as any)}
-                      className="w-full h-12 rounded-2xl bg-brand-indigo-950 border border-white/10 text-white px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors cursor-pointer"
+                      className="w-full h-12 rounded-2xl form-input px-4 text-xs cursor-pointer"
                     >
                       {['$', '$$', '$$$'].map((p) => (
-                        <option key={p} value={p} className="bg-brand-indigo-950 text-white">{p} ({p === '$' ? 'Econômico' : p === '$$' ? 'Moderado' : 'Premium'})</option>
+                        <option key={p} value={p} className="bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white">{p} ({p === '$' ? 'Econômico' : p === '$$' ? 'Moderado' : 'Premium'})</option>
                       ))}
                     </select>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Descrição Curta</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Descrição Curta</label>
                   <textarea
                     placeholder="Conte o que torna o seu local incrível em poucas palavras..."
                     value={bizDescription}
                     onChange={(e) => setBizDescription(e.target.value)}
                     maxLength={150}
-                    className="w-full h-24 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 p-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors resize-none"
+                    className="w-full h-24 rounded-2xl form-input p-4 text-xs resize-none"
                   />
                   <div className="text-right text-[9px] text-slate-500 font-semibold">{bizDescription.length}/150 caracteres</div>
                 </div>
@@ -1524,7 +1524,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               <div className="space-y-3.5">
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2 space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">CEP</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">CEP</label>
                     <div className="relative">
                       <input
                         type="text"
@@ -1532,7 +1532,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         maxLength={9}
                         value={bizCep}
                         onChange={(e) => handleCepChange(e.target.value)}
-                        className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                        className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                       />
                       {cepLoading && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -1543,59 +1543,59 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Cidade</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Cidade</label>
                     <input
                       type="text"
                       value="Curitiba"
                       readOnly
-                      className="w-full h-12 rounded-2xl bg-white/5 border border-white/5 text-slate-400 px-4 text-xs cursor-not-allowed focus:outline-none"
+                      className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-400 px-4 text-xs cursor-not-allowed focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Rua / Logradouro</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Rua / Logradouro</label>
                   <input
                     type="text"
                     placeholder="Logradouro autocompletado pelo CEP"
                     value={bizStreet}
                     onChange={(e) => setBizStreet(e.target.value)}
-                    className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2 space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bairro</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Bairro</label>
                     <input
                       type="text"
                       placeholder="Bairro autocompletado"
                       value={bizNeighborhood}
                       onChange={(e) => setBizNeighborhood(e.target.value)}
-                      className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                      className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Número</label>
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Número</label>
                     <input
                       type="text"
                       placeholder="123"
                       value={bizNumber}
                       onChange={(e) => setBizNumber(e.target.value)}
-                      className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                      className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Complemento (opcional)</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Complemento (opcional)</label>
                   <input
                     type="text"
                     placeholder="Ex: Bloco A, Sala 4 / Ao lado da praça"
                     value={bizComplement}
                     onChange={(e) => setBizComplement(e.target.value)}
-                    className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                   />
                 </div>
               </div>
@@ -1604,12 +1604,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             {/* Passo 3: Contatos */}
             {businessStep === 3 && (
               <div className="space-y-4">
-                <p className="text-[10px] text-slate-400 mb-2 leading-relaxed">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-2 leading-relaxed">
                   Insira ao menos um canal de contato. Eles ficarão visíveis como botões de atalho rápido direto nos cards de estabelecimentos.
                 </p>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
                     <Phone className="w-3.5 h-3.5 text-emerald-500" /> WhatsApp Comercial
                   </label>
                   <input
@@ -1617,12 +1617,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                     placeholder="(41) 99999-9999"
                     value={bizPhone}
                     onChange={(e) => setBizPhone(formatPhone(e.target.value))}
-                    className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
                     <Instagram className="w-3.5 h-3.5 text-pink-500" /> Instagram (@usuario)
                   </label>
                   <div className="relative">
@@ -1637,13 +1637,13 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         let clean = val.replace(/(https?:\/\/)?(www\.)?instagram\.com\//i, '').replace(/\/$/, '').replace(/^@/, '');
                         setBizInstagram(clean);
                       }}
-                      className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 pl-8 pr-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                      className="w-full h-12 rounded-2xl form-input pl-8 pr-4 text-xs"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
                     <Globe className="w-3.5 h-3.5 text-brand-teal-400" /> Site / Link do Cardápio
                   </label>
                   <input
@@ -1651,7 +1651,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                     placeholder="https://linktr.ee/seunegocio"
                     value={bizWebsite}
                     onChange={(e) => setBizWebsite(e.target.value)}
-                    className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                   />
                 </div>
               </div>
@@ -1691,20 +1691,20 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             {/* Passo 5: Horários de Funcionamento */}
             {businessStep === 5 && (
               <div className="space-y-4">
-                <p className="text-[10px] text-slate-400 leading-relaxed mb-2">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
                   Escreva de forma simples os horários em que seu estabelecimento fica aberto para os clientes.
                 </p>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Horários de Funcionamento</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Horários de Funcionamento</label>
                   <input
                     type="text"
                     placeholder="Ex: Terça a Domingo, das 17h às 23h"
                     value={bizHours}
                     onChange={(e) => setBizHours(e.target.value)}
-                    className="w-full h-12 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-500 px-4 text-xs focus:outline-none focus:border-brand-coral-500/60 transition-colors"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs"
                   />
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-[10px] text-slate-400 leading-relaxed mt-4">
+                  <div className="p-4 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300/50 dark:border-white/5 text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed mt-4">
                     💡 <strong>Pronto para decolar!</strong> Ao publicar, o Giro irá incluir o seu local diretamente no feed de Swipes de todos os usuários em Curitiba. Você pode alterar as configurações ou excluir o cadastro quando quiser através deste painel.
                   </div>
                 </div>
@@ -1713,12 +1713,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
           </div>
 
           {/* Botões de Ação */}
-          <div className="flex gap-3 border-t border-white/5 pt-5">
+          <div className="flex gap-3 border-t border-slate-200 dark:border-white/5 pt-5">
             {businessStep > 1 ? (
               <button
                 type="button"
                 onClick={() => setBusinessStep(prev => prev - 1)}
-                className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold text-slate-300 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                className="flex-1 py-3.5 rounded-2xl btn-secondary text-xs flex items-center justify-center gap-1.5"
               >
                 <ArrowLeft className="w-3.5 h-3.5" /> Voltar
               </button>
@@ -1726,7 +1726,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               <button
                 type="button"
                 onClick={() => setIsCreatingBusiness(false)}
-                className="flex-1 py-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs font-bold text-rose-400/80 hover:text-rose-400 transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                className="flex-1 py-3.5 rounded-2xl btn-secondary text-xs flex items-center justify-center gap-1.5 text-rose-500 dark:text-rose-400"
               >
                 Cancelar
               </button>
@@ -1742,7 +1742,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                   (businessStep === 3 && !isStep3Valid) ||
                   (businessStep === 4 && !isStep4Valid)
                 }
-                className="flex-[2] py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 disabled:hover:bg-brand-coral-500 text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                className="flex-[2] py-3.5 rounded-2xl btn-primary disabled:opacity-40 text-xs flex items-center justify-center gap-1.5"
               >
                 Avançar <ArrowRight className="w-3.5 h-3.5" />
               </button>
@@ -1751,7 +1751,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 type="button"
                 onClick={handleFinishBusinessSignup}
                 disabled={!isStep5Valid}
-                className="flex-[2] py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 text-xs font-bold text-white transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-brand-coral-500/25 active:scale-[0.98]"
+                className="flex-[2] py-3.5 rounded-2xl btn-primary disabled:opacity-40 text-xs flex items-center justify-center gap-1.5"
               >
                 Publicar e Integrar <CheckCircle2 className="w-3.5 h-3.5" />
               </button>
@@ -2122,7 +2122,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)}
-                    className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+                    className="w-full h-12 rounded-2xl form-input pl-10 pr-4 text-sm" />
                 </div>
               </div>
               <div>
@@ -2130,7 +2130,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">@</span>
                   <input type="text" value={editNickname.replace('@', '')} onChange={(e) => setEditNickname(`@${e.target.value.replace('@', '')}`)}
-                    className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-900 dark:text-white placeholder-slate-400 pl-10 pr-4 focus:outline-none focus:border-brand-coral-500 transition-colors" />
+                    className="w-full h-12 rounded-2xl form-input pl-10 pr-4 text-sm" />
                 </div>
               </div>
               <div>
@@ -2139,12 +2139,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Lock className="absolute right-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-300" />
                   <input type="email" value={user?.email || ''} readOnly
-                    className="w-full h-12 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 text-sm text-slate-400 pl-10 pr-10 cursor-not-allowed" />
+                    className="w-full h-12 rounded-2xl form-input pl-10 pr-10 cursor-not-allowed opacity-60" />
                 </div>
               </div>
             </div>
             <button onClick={saveCadastrais}
-              className="w-full py-3.5 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold text-white active:scale-95 shadow-md shadow-brand-coral-500/20 shrink-0 flex items-center justify-center gap-2">
+              className="w-full py-3.5 rounded-2xl btn-primary text-xs shrink-0 flex items-center justify-center gap-2">
               <Save className="w-4 h-4" />Salvar Alterações
             </button>
           </div>
@@ -2169,7 +2169,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 Sim, excluir minha conta
               </button>
               <button onClick={() => setIsDeleteConfirmOpen(false)}
-                className="w-full py-3.5 rounded-2xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-slate-300 active:scale-95">
+                className="w-full py-3.5 rounded-2xl btn-secondary text-xs"
+              >
                 Cancelar
               </button>
             </div>
