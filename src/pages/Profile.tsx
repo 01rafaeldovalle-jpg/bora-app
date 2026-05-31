@@ -327,17 +327,20 @@ function OnboardingOverlay({
         {view === 'splash' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 animate-[fadeInUp_0.4s_ease-out]">
             {/* Logo Tipográfico */}
-            <div className="text-center mb-4">
-              <h1 className="text-6xl font-outfit font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-tr from-brand-coral-500 to-amber-500 select-none drop-shadow-sm">
-                GIRO
+            <div className="text-center mb-6">
+              <h1 className="text-6xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-500 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent leading-none select-none">
+                Giro
               </h1>
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal-600 dark:text-brand-teal-400 mt-1.5">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal-600 dark:text-brand-teal-400 mt-2">
                 Sua próxima parada
               </p>
             </div>
-            <div className="text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-[260px] mx-auto">
-                Descubra cafés, bares e experiências incríveis em Curitiba, do seu jeito.
+            <div className="text-center mb-4">
+              <h2 className="text-lg font-outfit font-black text-slate-800 dark:text-white">
+                Bem-vindo
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[280px] mx-auto mt-1.5 font-medium">
+                Encontre o mundo que gira em torno de você.
               </p>
             </div>
 
@@ -367,7 +370,7 @@ function OnboardingOverlay({
               {/* Email login */}
               <button
                 onClick={() => { setErr(''); setView('email-login'); }}
-                className="w-full h-14 rounded-2xl bg-slate-200/60 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white hover:bg-slate-300/60 dark:hover:bg-white/10 active:scale-[0.97] transition-all"
+                className="w-full h-14 rounded-2xl bg-slate-200/60 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white hover:bg-slate-300/60 dark:hover:bg-white/10 active:scale-[0.97] transition-all flex items-center justify-center gap-3"
               >
                 <Mail className="w-5 h-5 text-slate-500 dark:text-slate-300 shrink-0" />
                 Entrar com E-mail
