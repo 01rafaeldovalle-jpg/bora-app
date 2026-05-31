@@ -271,11 +271,11 @@ function OnboardingOverlay({
   const isSignup = currentStep > 0;
 
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col bg-brand-indigo-950 overflow-hidden">
+    <div className="fixed inset-0 z-[99999] flex flex-col bg-slate-50 dark:bg-brand-indigo-950 text-slate-900 dark:text-white transition-colors duration-300 overflow-hidden">
       {/* Background gradient blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-32 -left-32 w-80 h-80 bg-brand-coral-500/20 rounded-full blur-[80px] animate-pulse" />
-        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-brand-teal-500/15 rounded-full blur-[60px] animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-32 -left-32 w-80 h-80 bg-brand-coral-500/10 dark:bg-brand-coral-500/20 rounded-full blur-[80px] animate-pulse" />
+        <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-brand-teal-500/10 dark:bg-brand-teal-500/15 rounded-full blur-[60px] animate-pulse" style={{ animationDelay: '1s' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/5 rounded-full blur-[100px]" />
       </div>
 
@@ -326,15 +326,17 @@ function OnboardingOverlay({
         {/* ══════════ SPLASH ══════════ */}
         {view === 'splash' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 animate-[fadeInUp_0.4s_ease-out]">
-            {/* Logo */}
-            <div className="w-20 h-20 rounded-[28px] bg-gradient-to-tr from-brand-coral-500 to-amber-500 flex items-center justify-center shadow-2xl shadow-brand-coral-500/40 mb-2">
-              <Sparkles className="w-10 h-10 text-white" />
+            {/* Logo Tipográfico */}
+            <div className="text-center mb-4">
+              <h1 className="text-6xl font-outfit font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-tr from-brand-coral-500 to-amber-500 select-none drop-shadow-sm">
+                GIRO
+              </h1>
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal-600 dark:text-brand-teal-400 mt-1.5">
+                Sua próxima parada
+              </p>
             </div>
             <div className="text-center">
-              <h1 className="text-3xl font-outfit font-black text-white mb-2 tracking-tight">
-                Bem-vindo ao <span className="text-brand-coral-500">Giro</span>
-              </h1>
-              <p className="text-sm text-slate-400 leading-relaxed max-w-[260px] mx-auto">
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-[260px] mx-auto">
                 Descubra cafés, bares e experiências incríveis em Curitiba, do seu jeito.
               </p>
             </div>
@@ -344,7 +346,7 @@ function OnboardingOverlay({
               <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full h-14 rounded-2xl bg-white text-slate-800 font-bold text-sm flex items-center justify-center gap-3 hover:bg-slate-50 active:scale-[0.97] transition-all shadow-lg shadow-black/20 border border-slate-100 disabled:opacity-60"
+                className="w-full h-14 rounded-2xl bg-white text-slate-800 font-bold text-sm flex items-center justify-center gap-3 hover:bg-slate-50 active:scale-[0.97] transition-all shadow-lg shadow-black/20 border border-slate-200 dark:border-transparent disabled:opacity-60"
               >
                 <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -357,17 +359,17 @@ function OnboardingOverlay({
 
               {/* Divider */}
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-[11px] text-slate-500 font-semibold">ou</span>
-                <div className="flex-1 h-px bg-white/10" />
+                <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold">ou</span>
+                <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
               </div>
 
               {/* Email login */}
               <button
                 onClick={() => { setErr(''); setView('email-login'); }}
-                className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm flex items-center justify-center gap-3 hover:bg-white/10 active:scale-[0.97] transition-all"
+                className="w-full h-14 rounded-2xl bg-slate-200/60 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white hover:bg-slate-300/60 dark:hover:bg-white/10 active:scale-[0.97] transition-all"
               >
-                <Mail className="w-5 h-5 text-slate-300 shrink-0" />
+                <Mail className="w-5 h-5 text-slate-500 dark:text-slate-300 shrink-0" />
                 Entrar com E-mail
               </button>
 
@@ -383,7 +385,7 @@ function OnboardingOverlay({
 
             <p className="text-[11px] text-slate-600 text-center mt-2 max-w-[260px] leading-relaxed">
               Ao entrar, você concorda com nossos{' '}
-              <button onClick={() => setIsTermsOpen(true)} className="text-slate-400 underline underline-offset-2">
+              <button onClick={() => setIsTermsOpen(true)} className="text-slate-500 dark:text-slate-400 underline underline-offset-2">
                 Termos e Privacidade
               </button>
             </p>
