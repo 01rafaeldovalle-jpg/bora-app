@@ -1,16 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Compass, Moon, Sun, MapPin, ChevronDown, Search, Locate, X } from 'lucide-react';
 
-const NEIGHBORHOODS = [
-  { name: 'Centro', lat: -25.4300, lng: -49.2700 },
-  { name: 'Batel', lat: -25.4435, lng: -49.2890 },
-  { name: 'Água Verde', lat: -25.4520, lng: -49.2850 },
-  { name: 'Cabral', lat: -25.4100, lng: -49.2550 },
-  { name: 'Mercês', lat: -25.4240, lng: -49.2940 },
-  { name: 'Portão', lat: -25.4740, lng: -49.2950 },
-  { name: 'Jardim Botânico', lat: -25.4420, lng: -49.2400 },
-  { name: 'Centro Cívico', lat: -25.4180, lng: -49.2650 }
-];
+
 
 interface HeaderProps {
   title?: string;
@@ -448,40 +439,7 @@ export default function Header({
               </div>
             </div>
 
-            {/* Bairros de Curitiba Grid Fallback */}
-            <div className="space-y-2 shrink-0">
-              <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                Bairros de Curitiba
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {NEIGHBORHOODS.map((nh) => {
-                  const isActive = locationLabel.includes(nh.name);
-                  return (
-                    <button
-                      key={nh.name}
-                      onClick={() => {
-                        const label = `${nh.name} - PR`;
-                        setLocationLabel(label);
-                        setGpsDenied(false); // Escolher um bairro resolve temporariamente o aviso
-                        window.dispatchEvent(
-                          new CustomEvent('giro-location-change', {
-                            detail: { lat: nh.lat, lng: nh.lng, label }
-                          })
-                        );
-                        setIsModalOpen(false);
-                      }}
-                      className={`px-2 py-2 rounded-xl text-[10px] font-bold border transition-all text-center truncate ${
-                        isActive
-                          ? 'bg-brand-teal-500 border-brand-teal-500 text-white shadow-md shadow-brand-teal-500/10'
-                          : 'bg-white dark:bg-brand-indigo-900/30 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-teal-500/20'
-                      }`}
-                    >
-                      {nh.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+
 
             {/* Sugestões ou Lista de Espera */}
             <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
