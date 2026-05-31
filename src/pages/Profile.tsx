@@ -1238,7 +1238,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       return (
         <div className="flex flex-col gap-6 text-left animate-fadeIn">
           {/* Header Card */}
-          <div className="relative h-44 rounded-[32px] overflow-hidden border border-white/5 shadow-xl bg-brand-indigo-950/40">
+          <div className="relative h-44 rounded-[32px] overflow-hidden border border-slate-100 dark:border-white/5 shadow-xl bg-slate-100 dark:bg-brand-indigo-950/40">
             <img 
               src={merchantPlace.image_url} 
               alt={merchantPlace.name} 
@@ -1284,28 +1284,28 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: "88", label: 'Swipes' },
               { icon: <Bookmark className="w-4 h-4 text-brand-gold-400 mb-1.5" />, val: "14", label: 'Salvos' },
             ].map((m, idx) => (
-              <div key={idx} className="glass-card p-4 rounded-[24px] flex flex-col items-center justify-center border border-white/5 text-center bg-white/5">
+              <div key={idx} className="glass-card p-4 rounded-[24px] flex flex-col items-center justify-center border border-slate-100 dark:border-white/5 text-center bg-white/5">
                 {m.icon}
-                <span className="text-lg font-outfit font-black text-white">{m.val}</span>
+                <span className="text-lg font-outfit font-black text-slate-900 dark:text-white">{m.val}</span>
                 <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">{m.label}</span>
               </div>
             ))}
           </div>
 
           {/* Toggles Rápidos */}
-          <div className="glass-card rounded-[28px] border border-white/5 p-5 flex flex-col gap-4 bg-white/5">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-1 flex items-center gap-1.5">
+          <div className="glass-card rounded-[28px] border border-slate-100 dark:border-white/5 p-5 flex flex-col gap-4 bg-white/5">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-brand-coral-400" /> Painel Operacional
             </h3>
             
-            <div className="flex items-center justify-between py-2 border-b border-white/5">
+            <div className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-white/5">
               <div>
-                <h4 className="text-xs font-bold text-white">Status de Funcionamento</h4>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Status de Funcionamento</h4>
                 <p className="text-[10px] text-slate-400 mt-0.5">Controla se o local aparece aberto agora</p>
               </div>
               <button 
                 onClick={() => setIsOpenNow(!isOpenNow)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isOpenNow ? 'bg-emerald-500' : 'bg-white/10'}`}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isOpenNow ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-white/10'}`}
               >
                 <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isOpenNow ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
@@ -1313,12 +1313,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
 
             <div className="flex items-center justify-between py-2">
               <div>
-                <h4 className="text-xs font-bold text-white">Música ao Vivo Hoje?</h4>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Música ao Vivo Hoje?</h4>
                 <p className="text-[10px] text-slate-400 mt-0.5">Ativa a etiqueta de atração musical em tempo real</p>
               </div>
               <button 
                 onClick={() => setIsLiveMusicToday(!isLiveMusicToday)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isLiveMusicToday ? 'bg-brand-coral-500' : 'bg-white/10'}`}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isLiveMusicToday ? 'bg-brand-coral-500' : 'bg-slate-200 dark:bg-white/10'}`}
               >
                 <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isLiveMusicToday ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
@@ -1326,16 +1326,16 @@ export default function Profile({ favoritesCount }: ProfileProps) {
           </div>
 
           {/* Informações de Cadastro */}
-          <div className="glass-card rounded-[28px] border border-white/5 p-5 flex flex-col gap-4 bg-white/5">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-1 flex items-center gap-1.5">
+          <div className="glass-card rounded-[28px] border border-slate-100 dark:border-white/5 p-5 flex flex-col gap-4 bg-white/5">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5 text-brand-teal-400" /> Dados do Estabelecimento
             </h3>
 
-            <div className="space-y-3.5 text-xs text-slate-300">
+            <div className="space-y-3.5 text-xs text-slate-700 dark:text-slate-300">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Endereço comercial</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block uppercase">Endereço comercial</span>
                   <span>{merchantPlace.address}</span>
                 </div>
               </div>
@@ -1344,7 +1344,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 <div className="flex items-start gap-2.5">
                   <Phone className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase">WhatsApp comercial</span>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block uppercase">WhatsApp comercial</span>
                     <span>{formatPhone(merchantPlace.phone)}</span>
                   </div>
                 </div>
@@ -1354,7 +1354,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 <div className="flex items-start gap-2.5">
                   <Instagram className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase">Instagram comercial</span>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block uppercase">Instagram comercial</span>
                     <span>@{merchantPlace.instagram_handle}</span>
                   </div>
                 </div>
@@ -1375,7 +1375,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               <div className="flex items-start gap-2.5">
                 <Clock className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 block uppercase">Horário de funcionamento</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block uppercase">Horário de funcionamento</span>
                   <span>{merchantPlace.operating_hours["Seg-Dom"]}</span>
                 </div>
               </div>
@@ -1406,12 +1406,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       const isStep5Valid = bizHours.trim().length >= 5;
 
       return (
-        <div className="glass-card rounded-[32px] border border-white/5 p-6 text-left bg-white/5 flex flex-col gap-5 animate-fadeIn">
+        <div className="glass-card rounded-[32px] border border-slate-100 dark:border-white/5 p-6 text-left bg-white/5 flex flex-col gap-5 animate-fadeIn">
           {/* Progress Indicator */}
           <div className="flex items-center justify-between">
             <div>
               <span className="text-[9px] font-extrabold text-brand-coral-400 uppercase tracking-widest block">Cadastrar Estabelecimento</span>
-              <h3 className="text-sm font-bold text-white mt-0.5">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
                 {businessStep === 1 && "Informações Básicas"}
                 {businessStep === 2 && "Endereço Comercial"}
                 {businessStep === 3 && "Canais de Contato"}
@@ -1424,14 +1424,14 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 <div
                   key={s}
                   className={`h-1 w-5 rounded-full transition-all duration-300 ${
-                    s <= businessStep ? 'bg-brand-coral-500' : 'bg-white/10'
+                    s <= businessStep ? 'bg-brand-coral-500' : 'bg-slate-200 dark:bg-white/10'
                   }`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="border-t border-white/5 pt-5 min-h-[220px]">
+          <div className="border-t border-slate-100 dark:border-white/5 pt-5 min-h-[220px]">
             {/* Passo 1: Informações Básicas */}
             {businessStep === 1 && (
               <div className="space-y-4">
@@ -1826,20 +1826,20 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   }
 
   return (
-    <div className="pb-24 text-slate-100 w-full flex flex-col items-center">
+    <div className="pb-24 text-slate-900 dark:text-slate-100 w-full flex flex-col items-center">
       <div className="px-6 py-6 max-w-md mx-auto w-full flex flex-col">
         {/* Segmented Control */}
-        <div className="bg-brand-indigo-950/80 border border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6">
+        <div className="bg-slate-200/60 dark:bg-brand-indigo-950/80 border border-slate-300/40 dark:border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6">
           <button
             onClick={() => setProfileSubTab('personal')}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              profileSubTab === 'personal' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-400 hover:text-white'
+              profileSubTab === 'personal' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >Meu Perfil</button>
           <button
             onClick={() => setProfileSubTab('business')}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              profileSubTab === 'business' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-400 hover:text-white'
+              profileSubTab === 'business' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >Meu Negócio</button>
         </div>
@@ -1854,7 +1854,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               <div className="flex flex-col items-center">
                 {/* Avatar */}
                 <div className="relative group avatar-container mb-4">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-brand-coral-500/30 bg-brand-indigo-900/50 flex items-center justify-center relative transition-all duration-300 avatar-pulse">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-brand-coral-500/30 bg-slate-100 dark:bg-brand-indigo-900/50 flex items-center justify-center relative transition-all duration-300 avatar-pulse">
                     {avatarToShow ? (
                       <img src={avatarToShow} alt="Avatar" className="w-full h-full object-cover" />
                     ) : (
@@ -1863,7 +1863,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       </div>
                     )}
                   </div>
-                  <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-brand-coral-500 border-2 border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 transition-all hover:scale-110 active:scale-95 shadow-lg">
+                  <label className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-brand-coral-500 border-2 border-slate-50 dark:border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 transition-all hover:scale-110 active:scale-95 shadow-lg">
                     <Edit2 className="w-3.5 h-3.5 text-white" />
                     <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                   </label>
@@ -1875,7 +1875,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 {/* Selo */}
                 <div
                   onClick={cycleBadgeLevel}
-                  className="glass-card rounded-3xl p-4 w-full border border-white/5 flex items-center gap-4 mt-5 cursor-pointer select-none hover:border-brand-coral-500/30 transition-all"
+                  className="glass-card rounded-3xl p-4 w-full border border-slate-100 dark:border-white/5 flex items-center gap-4 mt-5 cursor-pointer select-none hover:border-brand-coral-500/30 transition-all"
                 >
                   <div className="relative shrink-0 overflow-hidden rounded-xl">
                     <svg className="w-14 h-14 drop-shadow-md" viewBox="0 0 100 100">
@@ -1909,10 +1909,10 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         {badgeLevel === 'gold' ? '85%' : badgeLevel === 'silver' ? '60%' : '30%'} ativo
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
                       Clique para ciclar selos • Nível de atividade
                     </p>
-                    <div className="w-full h-1.5 bg-brand-indigo-950 rounded-full overflow-hidden mt-2">
+                    <div className="w-full h-1.5 bg-slate-100 dark:bg-brand-indigo-950 rounded-full overflow-hidden mt-2">
                       <div className={`h-full rounded-full transition-all duration-500 ${badgeLevel === 'gold' ? 'bg-amber-500 w-[85%]' : badgeLevel === 'silver' ? 'bg-slate-300 w-[60%]' : 'bg-amber-700 w-[30%]'}`} />
                     </div>
                   </div>
@@ -1925,7 +1925,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                     { icon: <Edit3 className="w-4 h-4 text-brand-gold-400 mb-1.5" />, val: 12, label: 'Reviews' },
                     { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: 142, label: 'Ajudou' },
                   ].map((s, i) => (
-                    <div key={i} className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-white/5 shadow-inner">
+                    <div key={i} className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-white/5 shadow-inner">
                       {s.icon}
                       <span className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">{s.val}</span>
                       <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">{s.label}</span>
@@ -1934,7 +1934,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 </div>
 
                 {/* Preferências */}
-                <div className="glass-card rounded-3xl p-5 w-full border border-white/5 mt-4 text-left">
+                <div className="glass-card rounded-3xl p-5 w-full border border-slate-100 dark:border-white/5 mt-4 text-left">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-bold text-slate-900 dark:text-white">Minhas Preferências</h3>
                     {userPreferences.length > 0 && (
@@ -1952,14 +1952,14 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       ))}
                     </div>
                   ) : (
-                    <button onClick={() => setIsPrefsSheetOpen(true)} className="text-xs text-slate-400 hover:text-white mt-3 transition-colors">
+                    <button onClick={() => setIsPrefsSheetOpen(true)} className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white mt-3 transition-colors">
                       Nenhuma preferência. <span className="text-brand-coral-500">[+ Adicionar]</span>
                     </button>
                   )}
                 </div>
 
                 {/* Menu */}
-                <div className="glass-card rounded-3xl w-full border border-white/5 mt-4 overflow-hidden">
+                <div className="glass-card rounded-3xl w-full border border-slate-100 dark:border-white/5 mt-4 overflow-hidden">
                   {[
                     { icon: <User className="w-4 h-4 text-slate-400" />, label: 'Dados Cadastrais', onClick: openCadastrais, danger: false },
                     { icon: <Bell className="w-4 h-4 text-slate-400" />, label: 'Gerenciar Notificações', onClick: () => alert('Em breve!'), danger: false },
@@ -1968,11 +1968,11 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                     <button
                       key={idx}
                       onClick={item.onClick}
-                      className={`w-full flex items-center justify-between px-5 py-4 ${idx < arr.length - 1 ? 'border-b border-white/5' : ''} ${item.danger ? 'hover:bg-rose-500/10' : 'hover:bg-white/5'} transition-all text-left group`}
+                      className={`w-full flex items-center justify-between px-5 py-4 ${idx < arr.length - 1 ? 'border-b border-slate-100 dark:border-white/5' : ''} ${item.danger ? 'hover:bg-rose-500/10' : 'hover:bg-slate-100 dark:hover:bg-white/5'} transition-all text-left group`}
                     >
                       <div className="flex items-center gap-3">
                         {item.icon}
-                        <span className={`text-xs font-bold ${item.danger ? 'text-rose-400' : 'text-slate-300 group-hover:text-white'} transition-colors`}>
+                        <span className={`text-xs font-bold ${item.danger ? 'text-rose-400' : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'} transition-colors`}>
                           {item.label}
                         </span>
                       </div>

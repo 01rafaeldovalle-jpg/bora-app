@@ -31,25 +31,28 @@
 @layer components {
   /* Glassmorphism Premium Cards */
   .glass-card {
-    background: rgba(27, 14, 63, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  }
-  
-  .glass-card-light {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+  }
+  
+  .dark .glass-card {
+    background: rgba(27, 14, 63, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
 
   .glass-panel {
-    background: rgba(13, 7, 36, 0.85);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  
+  .dark .glass-panel {
+    background: rgba(13, 7, 36, 0.85);
     border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
   
