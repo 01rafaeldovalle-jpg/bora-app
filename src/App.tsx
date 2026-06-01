@@ -442,40 +442,25 @@ export default function App() {
   };
 
   const deleteCollection = async (collectionName: string) => {
-    let itemsInDeleted: string[] = [];
     setCollections(prev => {
       const next = { ...prev };
-      itemsInDeleted = next[collectionName] || [];
       delete next[collectionName];
+      return next;
+    });
+  };
 
-      // Sincronizar favoritos: qualquer item da coleção deletada que não esteja em NENHUMA outra coleção é removido de favoritos
-      setFavorites(prevFavs => {
-        let updatedFavs = [...prevFavs];
-        let changed = false;
-
-        itemsInDeleted.forEach(placeId => {
-          const existsInOther = Object.keys(next).some(
-            name => next[name]?.includes(placeId)
-          );
-          if (!existsInOther && prevFavs.includes(placeId)) {
-            updatedFavs = updatedFavs.filter(id => id !== placeId);
-            changed = true;
-          }
-        });
-
-        if (changed) {
-          localStorage.setItem('giro_favorites', JSON.stringify(updatedFavs));
-          if (supabase && session?.user) {
-            supabase.from('profiles').update({ favorites: updatedFavs }).eq('id', session.user.id)
-              .then(({ error }) => {
-                if (error) console.error('Erro ao sincronizar favoritos no Supabase:', error);
-              });
-          }
-        }
-
-        return updatedFavs;
-      });
-
+  const renameCollection = (oldName: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed || oldName === trimmed) return;
+    
+    setCollections(prev => {
+      const next = { ...prev };
+      if (next[trimmed]) {
+        next[trimmed] = Array.from(new Set([...(next[trimmed] || []), ...(next[oldName] || [])]));
+      } else {
+        next[trimmed] = next[oldName] || [];
+      }
+      delete next[oldName];
       return next;
     });
   };
@@ -530,6 +515,8 @@ export default function App() {
             searchRadius={searchRadius}
             setSearchRadius={setSearchRadius}
             collections={collections}
+            onDeleteCollection={deleteCollection}
+            onRenameCollection={renameCollection}
           />
         );
       case 'explore':
@@ -574,6 +561,8 @@ export default function App() {
             activeCoords={activeCoords}
             onPinClick={handlePinClick}
             collections={collections}
+            onDeleteCollection={deleteCollection}
+            onRenameCollection={renameCollection}
           />
         );
     }

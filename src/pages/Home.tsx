@@ -24,6 +24,8 @@ interface HomeProps {
   searchRadius?: number;
   setSearchRadius?: (radius: number) => void;
   collections: Record<string, string[]>;
+  onDeleteCollection: (name: string) => void;
+  onRenameCollection: (oldName: string, newName: string) => void;
 }
 
 // Fórmula matemática de Haversine para distâncias em km
@@ -49,12 +51,16 @@ export default function Home({
   onPinClick,
   searchRadius,
   setSearchRadius,
-  collections
+  collections,
+  onDeleteCollection,
+  onRenameCollection
 }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
 
   // Refs de Swipe Físico
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -323,6 +329,26 @@ export default function Home({
     return () => window.removeEventListener('giro-home-reset', handleReset);
   }, []);
 
+  const handleRename = () => {
+    const trimmed = tempName.trim();
+    if (!trimmed || trimmed === activeFolder) {
+      setIsEditingName(false);
+      return;
+    }
+    onRenameCollection(activeFolder!, trimmed);
+    setActiveFolder(trimmed);
+    setIsEditingName(false);
+  };
+
+  const handleDeleteClick = () => {
+    if (!activeFolder) return;
+    const confirmDelete = window.confirm("Tem certeza que deseja excluir esta pasta? Os locais salvos não serão apagados da lista geral.");
+    if (confirmDelete) {
+      onDeleteCollection(activeFolder);
+      setActiveFolder(null);
+    }
+  };
+
   const swipeQueue = filteredPlaces;
   const activePlace = swipeQueue[activeCardIndex] || null;
   const nextPlace = swipeQueue[(activeCardIndex + 1) % swipeQueue.length] || null;
@@ -573,12 +599,6 @@ export default function Home({
                           </div>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                        
-                        {/* Rótulo de Privacidade */}
-                        <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md bg-black/45 backdrop-blur-xs text-[9px] text-slate-300 font-bold uppercase tracking-wider flex items-center gap-1">
-                          <Icons.Lock className="w-2.5 h-2.5" />
-                          Privada
-                        </div>
                       </div>
 
                       {/* Textos */}
@@ -603,24 +623,83 @@ export default function Home({
             {/* Locais da Pasta Ativa */}
             <div className="py-4 px-6 max-w-6xl mx-auto w-full">
               {/* Cabeçalho com botão voltar e título */}
-              <div className="flex items-center justify-between mb-6 border-b border-slate-200/50 dark:border-white/5 pb-4">
+              <div className="flex items-center justify-between mb-6 border-b border-slate-200/50 dark:border-white/5 pb-4 gap-4 flex-wrap">
                 <button
                   onClick={() => {
                     setSearchQuery('');
                     setSelectedCategory(null);
                     setActiveFolder(null);
+                    setIsEditingName(false);
                   }}
-                  className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 transition-colors py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 active:scale-[0.98] transition-all text-slate-800 dark:text-white"
+                  className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 active:scale-[0.98] transition-all text-slate-800 dark:text-white"
                 >
                   <Icons.ArrowLeft className="w-3.5 h-3.5" />
                   Voltar para Pastas
                 </button>
-                <div className="flex items-center gap-2">
-                  <Icons.FolderHeart className="w-4 h-4 text-brand-coral-500" />
-                  <h3 className="text-sm font-outfit font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                    {activeFolder}
-                  </h3>
-                </div>
+                
+                {isEditingName ? (
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleRename();
+                    }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <input
+                      type="text"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      className="h-9 px-3 rounded-xl text-xs font-bold bg-white dark:bg-white/5 border border-slate-300 dark:border-white/20 text-slate-900 dark:text-white focus:outline-none focus:border-brand-coral-500"
+                      autoFocus
+                      maxLength={30}
+                    />
+                    <button
+                      type="submit"
+                      className="p-2 rounded-xl bg-emerald-550 text-white hover:bg-emerald-600 active:scale-95 transition-all"
+                      title="Confirmar"
+                    >
+                      <Icons.Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingName(false)}
+                      className="p-2 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-650 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
+                      title="Cancelar"
+                    >
+                      <Icons.X className="w-4 h-4" />
+                    </button>
+                  </form>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <Icons.FolderHeart className="w-4 h-4 text-brand-coral-500" />
+                      <h3 className="text-sm font-outfit font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                        {activeFolder}
+                      </h3>
+                    </div>
+                    {!(activeFolder === 'Todos os Salvos' || activeFolder === 'Salvos') && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setTempName(activeFolder || '');
+                            setIsEditingName(true);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-brand-coral-500 hover:bg-slate-100 dark:hover:bg-white/5 rounded-lg transition-all"
+                          title="Editar nome"
+                        >
+                          <Icons.Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={handleDeleteClick}
+                          className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                          title="Excluir pasta"
+                        >
+                          <Icons.Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Listagem */}
