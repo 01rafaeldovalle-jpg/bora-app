@@ -1824,6 +1824,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               localStorage.setItem('giro_mock_session', JSON.stringify(sess));
             }
             setMockSession(sess);
+            window.dispatchEvent(new CustomEvent('giro-login'));
           }
         }}
       />

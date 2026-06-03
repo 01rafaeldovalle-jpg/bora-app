@@ -11,6 +11,7 @@ import { ArrowLeft } from 'lucide-react';
 import { supabase } from './integrations/supabase/client';
 import Header from './components/common/Header';
 import CollectionModal from './components/common/CollectionModal';
+import AuthPromptModal from './components/common/AuthPromptModal';
 
 type Tab = 'home' | 'explore' | 'favorites' | 'profile';
 
@@ -27,6 +28,18 @@ export default function App() {
   const [isDesktopMapOpen, setIsDesktopMapOpen] = useState(true);
   const [searchRadius, setSearchRadius] = useState<number>(10.0);
   const [session, setSession] = useState<any>(null);
+  const [mockSession, setMockSession] = useState<any>(() => {
+    const saved = localStorage.getItem('giro_mock_session');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return null;
+  });
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
+  const isLoggedIn = !!(session || mockSession);
 
   const [collections, setCollections] = useState<Record<string, string[]>>(() => {
     const saved = localStorage.getItem('giro_collections');
@@ -90,6 +103,10 @@ export default function App() {
   useEffect(() => {
     const handleOpenCollection = (e: CustomEvent<{ placeId: string; autoSave?: boolean }>) => {
       if (e.detail && e.detail.placeId) {
+        if (!isLoggedIn) {
+          setShowAuthPrompt(true);
+          return;
+        }
         const pid = e.detail.placeId;
         setCollectionModalPlaceId(pid);
         
@@ -102,7 +119,7 @@ export default function App() {
     return () => {
       window.removeEventListener('giro-open-collection' as any, handleOpenCollection);
     };
-  }, []);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -117,6 +134,29 @@ export default function App() {
 
     return () => {
       subscription.unsubscribe();
+    };
+  }, []);
+
+  // Ouvir alterações de login/logout mockados do Profile
+  useEffect(() => {
+    const handleLogin = () => {
+      const saved = localStorage.getItem('giro_mock_session');
+      if (saved) {
+        try {
+          setMockSession(JSON.parse(saved));
+        } catch (e) {}
+      }
+    };
+    const handleLogout = () => {
+      setMockSession(null);
+    };
+
+    window.addEventListener('giro-login', handleLogin);
+    window.addEventListener('giro-logout', handleLogout);
+
+    return () => {
+      window.removeEventListener('giro-login', handleLogin);
+      window.removeEventListener('giro-logout', handleLogout);
     };
   }, []);
 
@@ -344,6 +384,10 @@ export default function App() {
 
   // Alternar favoritos (com sincronização de coleções)
   const handleFavoriteToggle = async (id: string) => {
+    if (!isLoggedIn) {
+      setShowAuthPrompt(true);
+      return;
+    }
     const isCurrentlyFav = favorites.includes(id);
     let updated = isCurrentlyFav
       ? favorites.filter((favId) => favId !== id)
@@ -611,6 +655,15 @@ export default function App() {
           onRemoveFromAll={removeFromAllCollections}
         />
       )}
+
+      <AuthPromptModal
+        isOpen={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        onAccept={() => {
+          setShowAuthPrompt(false);
+          setTab('profile');
+        }}
+      />
     </div>
   );
 }
