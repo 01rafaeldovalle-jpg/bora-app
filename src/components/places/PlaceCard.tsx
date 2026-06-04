@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
-import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X } from 'lucide-react';
+import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin } from 'lucide-react';
 
 interface PlaceCardProps {
   place: Place;
@@ -116,8 +116,21 @@ export default function PlaceCard({
               )}
             </div>
 
-            {/* Botões de Ação Inline (Compartilhar e Salvar) */}
+            {/* Botões de Ação Inline (Mapa, Compartilhar e Salvar) */}
             <div className="flex items-center gap-1 shrink-0">
+              {onSelect && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(place);
+                  }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-555 dark:text-slate-350 transition-colors"
+                  title="Ver no mapa"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-brand-teal-500 dark:text-brand-teal-400" />
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleShare}

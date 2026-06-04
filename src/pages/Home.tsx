@@ -453,7 +453,7 @@ export default function Home({
       {viewMode === 'swipe' ? (
         <div className="flex-1 flex flex-col justify-center items-center py-2 px-6 relative max-w-md mx-auto animate-fade-in w-full min-h-0">
           {swipeQueue.length > 0 && activePlace ? (
-            <div className="w-full flex-1 flex flex-col justify-between items-center min-h-0">
+            <div className="w-full flex-1 flex flex-col justify-center items-center min-h-0">
               {/* Card Container */}
               <div className="w-full flex-1 min-h-[300px] max-h-[500px] h-[60vh] relative select-none">
                 {/* Background Card (Next Card) */}
@@ -493,28 +493,6 @@ export default function Home({
                     onSelect={onSelectPlace}
                   />
                 </div>
-              </div>
-
-              {/* Swipe Control Buttons */}
-              <div className="flex items-center justify-center gap-6 mt-4 sm:mt-6 shrink-0 select-none">
-                <button 
-                  onClick={() => animateSwipe(false)}
-                  className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all shrink-0"
-                >
-                  <Icons.X className="w-6 h-6" />
-                </button>
-                <button 
-                  onClick={handlePinClick}
-                  className="w-11 h-11 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-teal-500 dark:text-brand-teal-400 shadow-md hover:bg-brand-teal-500 hover:text-white hover:border-brand-teal-500 active:scale-90 transition-all shrink-0"
-                >
-                  <Icons.MapPin className="w-5 h-5" />
-                </button>
-                <button 
-                  onClick={() => animateSwipe(true)}
-                  className="w-14 h-14 rounded-full bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/5 flex items-center justify-center text-brand-coral-500 shadow-lg hover:bg-brand-coral-500 hover:text-white hover:border-brand-coral-500 active:scale-90 transition-all shrink-0"
-                >
-                  <Icons.Heart className={`w-6 h-6 ${favorites.includes(activePlace.id) ? 'fill-brand-coral-500 text-brand-coral-500' : 'fill-transparent text-brand-coral-500'}`} />
-                </button>
               </div>
             </div>
           ) : (
