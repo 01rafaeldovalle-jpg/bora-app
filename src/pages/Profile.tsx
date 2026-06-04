@@ -524,7 +524,7 @@ function OnboardingOverlay({
                   className={`mt-0.5 w-5 h-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all ${
                     acceptTerms
                       ? 'bg-brand-coral-500 border-brand-coral-500'
-                      : 'border-white/20 bg-white/5 group-hover:border-white/40'
+                      : 'border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-white/5 group-hover:border-slate-400 dark:group-hover:border-white/40'
                   }`}
                 >
                   {acceptTerms && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
