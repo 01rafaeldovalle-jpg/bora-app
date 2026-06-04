@@ -382,8 +382,7 @@ export default function Home({
       )}
 
       {/* Switch View Selectors */}
-      <div className="px-6 py-2 flex justify-between items-center mt-2 max-w-6xl mx-auto w-full">
-        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Descoberta Reativa</span>
+      <div className="px-6 py-2 flex justify-start items-center mt-2 max-w-6xl mx-auto w-full">
         <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
           <button 
             onClick={() => {
