@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
-import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin } from 'lucide-react';
+import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin, ShoppingBag } from 'lucide-react';
 
 interface PlaceCardProps {
   place: Place;
@@ -177,7 +177,7 @@ export default function PlaceCard({
 
         {/* Ações e Rotas Integradas */}
         <div className="border-t border-slate-100 dark:border-white/5 pt-4">
-          {(place.phone || place.instagram_handle || place.website_url) && (
+          {(place.phone || place.instagram_handle || place.website_url || place.ifood_url) && (
             <div className="flex flex-wrap gap-2 mb-4">
               {place.phone && (
                 <a
@@ -213,6 +213,18 @@ export default function PlaceCard({
                 >
                   <Globe className="w-3.5 h-3.5" />
                   Site
+                </a>
+              )}
+              {place.ifood_url && (
+                <a
+                  href={place.ifood_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#EA1D2C] hover:opacity-90 active:scale-95 text-white text-[10px] font-extrabold tracking-wide uppercase transition-all shadow-md shadow-red-600/10 decoration-none no-underline"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  iFood
                 </a>
               )}
             </div>

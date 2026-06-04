@@ -14,6 +14,7 @@ export interface Place {
   phone?: string;
   instagram_handle?: string;
   website_url?: string;
+  ifood_url?: string;
   category_id: string;
   category_name?: string;
   latitude: number;
