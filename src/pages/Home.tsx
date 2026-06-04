@@ -56,11 +56,20 @@ export default function Home({
   onRenameCollection
 }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState('');
+
+  const toggleCategory = (categoryId: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(categoryId)
+        ? prev.filter(id => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
 
   // Refs de Swipe Físico
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -231,7 +240,7 @@ export default function Home({
       const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             place.address.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
+      const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
       return matchesSearch && matchesCategory && matchesRadius;
     });
@@ -240,7 +249,7 @@ export default function Home({
       filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return filtered;
-  }, [placesWithDistance, searchQuery, selectedCategory, activeCoords, searchRadius]);
+  }, [placesWithDistance, searchQuery, selectedCategories, activeCoords, searchRadius]);
 
   const featuredPlaces = React.useMemo(() => {
     const featured = placesWithDistance.filter(p => {
@@ -291,7 +300,7 @@ export default function Home({
       const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             place.address.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory ? place.category_id === selectedCategory : true;
+      const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
       return matchesSearch && matchesCategory && matchesRadius;
     });
@@ -300,7 +309,7 @@ export default function Home({
       filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return filtered;
-  }, [placesWithDistance, folderPlaceIds, activeFolder, searchQuery, selectedCategory, activeCoords, searchRadius]);
+  }, [placesWithDistance, folderPlaceIds, activeFolder, searchQuery, selectedCategories, activeCoords, searchRadius]);
 
   const getFolderCover = (placeIds: string[]) => {
     if (placeIds && placeIds.length > 0) {
@@ -313,13 +322,13 @@ export default function Home({
   // Reset active card index when filter changes
   React.useEffect(() => {
     setActiveCardIndex(0);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategories]);
 
   // Listen to home reset events (e.g. from header logo click)
   React.useEffect(() => {
     const handleReset = () => {
       setSearchQuery('');
-      setSelectedCategory(null);
+      setSelectedCategories([]);
       setViewMode('swipe');
       setActiveFolder(null);
       setActiveCardIndex(0);
@@ -382,57 +391,61 @@ export default function Home({
       )}
 
       {/* Switch View Selectors */}
-      <div className="px-6 py-2 flex justify-start items-center mt-2 max-w-6xl mx-auto w-full">
-        <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
+      {!(viewMode === 'list' && activeFolder === null) && (
+        <div className="px-6 py-2 flex justify-between items-center mt-2 max-w-6xl mx-auto w-full gap-2">
+          {/* Seletor Match / Lista */}
+          <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
+            <button 
+              onClick={() => {
+                setActiveFolder(null);
+                setViewMode('swipe');
+              }} 
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
+            >
+              <Flame className="w-3.5 h-3.5" /> Match
+            </button>
+            <button 
+              onClick={() => setViewMode('list')} 
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'list' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
+            >
+              <Icons.List className="w-3.5 h-3.5" /> Lista
+            </button>
+          </div>
+
+          {/* Botão de Categorias */}
           <button 
-            onClick={() => {
-              setActiveFolder(null);
-              setViewMode('swipe');
-            }} 
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'}`}
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all bg-white dark:bg-brand-indigo-950 border border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-brand-coral-500 active:scale-95 shadow-sm"
           >
-            <Flame className="w-3.5 h-3.5" /> Match
-          </button>
-          <button 
-            onClick={() => setViewMode('list')} 
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'list' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'}`}
-          >
-            <Icons.List className="w-3.5 h-3.5" /> Lista
+            <Icons.Filter className="w-3.5 h-3.5 text-brand-coral-500" />
+            <span>
+              {selectedCategories.length === 0 
+                ? 'Categorias' 
+                : `Categorias (${selectedCategories.length})`}
+            </span>
           </button>
         </div>
-      </div>
+      )}
 
-      {/* Categorias Horizontal Slider */}
-      {!(viewMode === 'list' && activeFolder === null) && (
-        <div className="py-4 max-w-6xl mx-auto w-full animate-fade-in">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-6 mb-3">Categorias</h3>
-          
-          <div className="flex gap-3 overflow-x-auto px-6 pb-2 scrollbar-none snap-x">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${
-                selectedCategory === null
-                  ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md'
-                  : 'bg-slate-100 dark:bg-brand-indigo-900/40 border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/10'
-              }`}
+      {(viewMode === 'list' && activeFolder === null) && (
+        <div className="px-6 py-2 flex justify-start items-center mt-2 max-w-6xl mx-auto w-full">
+          {/* Seletor Match / Lista na lista de pastas (sem filtro) */}
+          <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
+            <button 
+              onClick={() => {
+                setActiveFolder(null);
+                setViewMode('swipe');
+              }} 
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${(viewMode as string) === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <span className="text-xs">Todos</span>
+              <Flame className="w-3.5 h-3.5" /> Match
             </button>
-
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id === selectedCategory ? null : cat.id)}
-                className={`snap-start shrink-0 flex items-center gap-2 h-10 px-4 rounded-2xl border transition-all btn-premium ${
-                  selectedCategory === cat.id
-                    ? 'bg-brand-coral-500 border-brand-coral-500 text-white font-semibold shadow-md'
-                    : 'bg-slate-100 dark:bg-brand-indigo-900/40 border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/10'
-                }`}
-              >
-                <IconRenderer name={cat.icon} className={`w-4 h-4 ${selectedCategory === cat.id ? 'text-white' : 'text-brand-teal-400'}`} />
-                <span className="text-xs">{cat.name}</span>
-              </button>
-            ))}
+            <button 
+              onClick={() => setViewMode('list')} 
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${(viewMode as string) === 'list' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
+            >
+              <Icons.List className="w-3.5 h-3.5" /> Lista
+            </button>
           </div>
         </div>
       )}
@@ -442,7 +455,7 @@ export default function Home({
           {swipeQueue.length > 0 && activePlace ? (
             <div className="w-full flex-1 flex flex-col justify-between items-center min-h-0">
               {/* Card Container */}
-              <div className="w-full flex-1 min-h-[260px] max-h-[420px] relative select-none">
+              <div className="w-full flex-1 min-h-[300px] max-h-[480px] sm:max-h-[500px] relative select-none">
                 {/* Background Card (Next Card) */}
                 {swipeQueue.length > 1 && nextPlace && (
                   <div className="absolute inset-x-2 bottom-[-16px] h-full rounded-[32px] overflow-hidden border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-brand-indigo-900/40 opacity-60 scale-[0.93] translate-y-4 -z-10 pointer-events-none flex flex-col shadow-lg">
@@ -557,7 +570,7 @@ export default function Home({
               <button
                 onClick={() => {
                   setSearchQuery('');
-                  setSelectedCategory(null);
+                  setSelectedCategories([]);
                 }}
                 className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
               >
@@ -583,7 +596,7 @@ export default function Home({
                       key={folder.name}
                       onClick={() => {
                         setSearchQuery('');
-                        setSelectedCategory(null);
+                        setSelectedCategories([]);
                         setActiveFolder(folder.name);
                       }}
                       className="group cursor-pointer flex flex-col h-full rounded-[24px] overflow-hidden glass-card border border-slate-200/15 p-3 hover:border-brand-coral-500/20 dark:hover:border-white/10 transition-all duration-300 hover:scale-[1.02] active:scale-[0.99] bg-white/70 dark:bg-brand-indigo-950/40"
@@ -626,7 +639,7 @@ export default function Home({
                 <button
                   onClick={() => {
                     setSearchQuery('');
-                    setSelectedCategory(null);
+                    setSelectedCategories([]);
                     setActiveFolder(null);
                     setIsEditingName(false);
                   }}
@@ -730,7 +743,7 @@ export default function Home({
                   <button
                     onClick={() => {
                       setSearchQuery('');
-                      setSelectedCategory(null);
+                      setSelectedCategories([]);
                     }}
                     className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
                   >
@@ -741,6 +754,91 @@ export default function Home({
             </div>
           </div>
         )
+      )}
+
+      {/* Modal de Categorias (Múltipla Seleção) */}
+      {isCategoryModalOpen && (
+        <div className="fixed inset-0 z-[11000] backdrop-blur-md bg-black/60 flex items-center justify-center p-4 animate-fade-in">
+          {/* Background click to close */}
+          <div className="absolute inset-0" onClick={() => setIsCategoryModalOpen(false)} />
+          
+          {/* Modal Container */}
+          <div className="bg-white dark:bg-brand-indigo-950 w-full max-w-sm rounded-[32px] p-6 border border-slate-200 dark:border-white/10 shadow-2xl relative z-10 animate-[zoomIn_0.2s_ease-out] flex flex-col text-slate-900 dark:text-slate-100 max-h-[80vh]">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between mb-5 shrink-0">
+              <div className="flex items-center gap-2">
+                <Icons.Filter className="w-5 h-5 text-brand-coral-500" />
+                <h3 className="text-base font-outfit font-black text-slate-900 dark:text-white">Filtrar por Categorias</h3>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setIsCategoryModalOpen(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-350 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+              >
+                <Icons.X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Categories List */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2 mb-5 scrollbar-thin">
+              {CATEGORIES.map((cat) => {
+                const isSelected = selectedCategories.includes(cat.id);
+                return (
+                  <button
+                    type="button"
+                    key={cat.id}
+                    onClick={() => toggleCategory(cat.id)}
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
+                      isSelected
+                        ? 'bg-brand-coral-500/10 border-brand-coral-500 text-brand-coral-600 dark:text-brand-coral-400 font-bold'
+                        : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-xl transition-colors ${
+                        isSelected ? 'bg-brand-coral-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-450'
+                      }`}>
+                        <IconRenderer name={cat.icon} className="w-4 h-4" />
+                      </div>
+                      <span className="truncate text-xs">{cat.name}</span>
+                    </div>
+                    
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                      isSelected
+                        ? 'bg-brand-coral-500 border-brand-coral-500'
+                        : 'border-slate-300 dark:border-white/20'
+                    }`}>
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-3 border-t border-slate-100 dark:border-white/5 pt-4 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedCategories([])}
+                disabled={selectedCategories.length === 0}
+                className="flex-1 py-2.5 text-center text-xs font-bold text-slate-500 dark:text-slate-450 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
+              >
+                Limpar Filtros
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCategoryModalOpen(false)}
+                className="flex-1 py-2.5 text-center text-xs font-bold text-white bg-brand-coral-500 hover:bg-brand-coral-600 rounded-xl transition-all active:scale-[0.98] shadow-md shadow-brand-coral-500/10"
+              >
+                Aplicar
+              </button>
+            </div>
+
+          </div>
+        </div>
       )}
     </div>
   );
