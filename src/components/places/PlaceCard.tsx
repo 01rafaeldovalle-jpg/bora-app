@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
-import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe } from 'lucide-react';
+import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X } from 'lucide-react';
 
 interface PlaceCardProps {
   place: Place;
   isFavorited: boolean;
   onFavoriteToggle: (id: string) => void;
   onSelect?: (place: Place) => void;
+  onClose?: () => void;
 }
 
 export default function PlaceCard({ 
   place, 
   isFavorited, 
   onFavoriteToggle,
-  onSelect 
+  onSelect,
+  onClose
 }: PlaceCardProps) {
   const [isImgLoaded, setIsImgLoaded] = useState(false);
 
@@ -86,32 +88,60 @@ export default function PlaceCard({
           {place.price_range} · {place.avg_rating.toFixed(1)} ★
         </div>
 
-        {/* Botão de Favoritar */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: place.id, autoSave: !isFavorited } }));
-          }}
-          className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 rounded-full bg-white/80 dark:bg-brand-indigo-950/70 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white hover:bg-brand-coral-500/20 hover:border-brand-coral-500/50 transition-all btn-premium shadow-sm"
-        >
-          <Bookmark 
-            className={`w-4 h-4 transition-all ${
-              isFavorited ? 'fill-brand-coral-500 text-brand-coral-500 scale-110' : 'text-slate-400 dark:text-slate-300'
-            }`} 
-          />
-        </button>
+        {/* Botão de Fechar (X) na Imagem */}
+        {onClose && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-3 right-3 z-50 flex items-center justify-center w-8 h-8 rounded-full bg-brand-indigo-900 border border-white/10 text-slate-300 hover:bg-brand-coral-500 hover:text-white transition-all btn-premium shadow-md"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Detalhes do Local */}
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
-          <div className="flex items-start justify-between gap-1.5 mb-1.5">
-            <h3 className="text-base font-outfit font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-brand-coral-600 dark:group-hover:text-brand-coral-300 transition-colors line-clamp-1">
-              {place.name}
-            </h3>
-            {place.is_verified && (
-              <CheckCircle className="w-4 h-4 text-brand-teal-500 dark:text-brand-teal-400 fill-brand-teal-950/10 shrink-0 mt-0.5" />
-            )}
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3 className="text-base font-outfit font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-brand-coral-600 dark:group-hover:text-brand-coral-300 transition-colors truncate">
+                {place.name}
+              </h3>
+              {place.is_verified && (
+                <CheckCircle className="w-4 h-4 text-brand-teal-500 dark:text-brand-teal-400 fill-brand-teal-950/10 shrink-0" />
+              )}
+            </div>
+
+            {/* Botões de Ação Inline (Compartilhar e Salvar) */}
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={handleShare}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-350 transition-colors"
+                title="Compartilhar"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: place.id, autoSave: !isFavorited } }));
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-350 transition-colors"
+                title="Salvar"
+              >
+                <Bookmark 
+                  className={`w-3.5 h-3.5 transition-all ${
+                    isFavorited ? 'fill-brand-coral-500 text-brand-coral-500 scale-110' : 'text-slate-400 dark:text-slate-300'
+                  }`} 
+                />
+              </button>
+            </div>
           </div>
           <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-3">
             {place.description}
@@ -167,17 +197,6 @@ export default function PlaceCard({
               )}
             </div>
           )}
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">Como ir:</span>
-            
-            <button 
-              onClick={handleShare}
-              className="text-[11px] text-brand-teal-600 dark:text-brand-teal-400 hover:text-brand-coral-500 dark:hover:text-white flex items-center gap-1 transition-colors"
-            >
-              <Share2 className="w-3.5 h-3.5" /> Compartilhar
-            </button>
-          </div>
-          
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={(e) => handleDirections(e, 'google-maps')}

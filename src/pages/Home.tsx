@@ -455,7 +455,7 @@ export default function Home({
           {swipeQueue.length > 0 && activePlace ? (
             <div className="w-full flex-1 flex flex-col justify-between items-center min-h-0">
               {/* Card Container */}
-              <div className="w-full flex-1 min-h-[300px] max-h-[480px] sm:max-h-[500px] relative select-none">
+              <div className="w-full flex-1 min-h-[300px] max-h-[500px] h-[60vh] relative select-none">
                 {/* Background Card (Next Card) */}
                 {swipeQueue.length > 1 && nextPlace && (
                   <div className="absolute inset-x-2 bottom-[-16px] h-full rounded-[32px] overflow-hidden border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-brand-indigo-900/40 opacity-60 scale-[0.93] translate-y-4 -z-10 pointer-events-none flex flex-col shadow-lg">
@@ -470,13 +470,7 @@ export default function Home({
                   onTouchStart={handleDragStart}
                   onTouchMove={handleDragMove}
                   onTouchEnd={handleDragEnd}
-                  onClick={() => {
-                    const deltaX = Math.abs(currentXRef.current - startXRef.current);
-                    if (deltaX < 10) {
-                      onSelectPlace(activePlace);
-                    }
-                  }}
-                  className="w-full h-full rounded-[32px] overflow-hidden border border-slate-200 dark:border-white/5 bg-white dark:bg-brand-indigo-950 flex flex-col shadow-2xl relative cursor-grab active:cursor-grabbing select-none group active:scale-[0.99] transition-all duration-300"
+                  className="w-full h-full relative cursor-grab active:cursor-grabbing select-none"
                 >
                   {/* Swipe overlays */}
                   <div 
@@ -492,49 +486,12 @@ export default function Home({
                     Nem...
                   </div>
 
-                  <img src={activePlace.image_url} alt={activePlace.name} className="w-full h-full object-cover pointer-events-none" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-indigo-950/90 via-brand-indigo-950/20 to-black/20 pointer-events-none" />
-
-                  {/* Badges/Category */}
-                  <div className="absolute top-4 left-4 bg-white/90 dark:bg-brand-indigo-950/80 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 px-3 py-1 rounded-full uppercase tracking-wider pointer-events-none">
-                    {activePlace.price_range} · {activePlace.avg_rating.toFixed(1)} ★
-                  </div>
-
-                  {/* Botão de salvar na coleção */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      const isFavorited = favorites.includes(activePlace.id);
-                      window.dispatchEvent(new CustomEvent('giro-open-collection', { detail: { placeId: activePlace.id, autoSave: !isFavorited } }));
-                    }}
-                    className="absolute top-4 right-4 z-30 flex items-center justify-center w-9 h-9 rounded-full bg-white/80 dark:bg-brand-indigo-950/70 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-slate-700 dark:text-white hover:bg-brand-coral-500/20 hover:border-brand-coral-500/50 transition-all btn-premium shadow-sm"
-                  >
-                    <Icons.Bookmark 
-                      className={`w-4 h-4 transition-all ${
-                        favorites.includes(activePlace.id) ? 'fill-brand-coral-500 text-brand-coral-500 scale-110' : 'text-slate-400 dark:text-slate-300'
-                      }`} 
-                    />
-                  </button>
-
-                  {/* Place Info */}
-                  <div className="absolute bottom-5 left-5 right-5 sm:bottom-6 sm:left-6 sm:right-6 text-left pointer-events-none">
-                    <h3 className="text-lg sm:text-xl font-outfit font-extrabold text-white mb-1 flex items-center gap-1.5 leading-tight">
-                      {activePlace.name}
-                    </h3>
-                    <p className="text-xs text-slate-200 line-clamp-2 leading-relaxed mb-2 sm:mb-3">
-                      {activePlace.description}
-                    </p>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-300 font-medium">
-                      <Icons.MapPin className="w-3.5 h-3.5 text-brand-coral-500 shrink-0" />
-                      <span className="line-clamp-1">{activePlace.address}</span>
-                      {activePlace.distance !== undefined && (
-                        <span className="text-brand-teal-400 font-bold shrink-0">
-                          • {activePlace.distance < 1 ? `${Math.round(activePlace.distance * 1000)} m` : `${activePlace.distance.toFixed(1)} km`}
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  <PlaceCard
+                    place={activePlace}
+                    isFavorited={favorites.includes(activePlace.id)}
+                    onFavoriteToggle={onFavoriteToggle}
+                    onSelect={onSelectPlace}
+                  />
                 </div>
               </div>
 

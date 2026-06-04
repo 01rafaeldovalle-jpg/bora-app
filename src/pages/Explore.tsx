@@ -129,21 +129,12 @@ export default function Explore({
       {/* SELECIONADO PLACE DRAWER / CARD OVERLAY (Flutuando na parte inferior) */}
       {selectedPlace && (
         <div className="absolute bottom-20 left-0 right-0 z-50 px-4 pb-2 max-w-lg mx-auto animate-slide-up">
-          <div className="relative">
-            {/* Fechar botão */}
-            <button
-              onClick={() => setSelectedPlace(null)}
-              className="absolute top-[-10px] right-3 z-50 flex items-center justify-center w-8 h-8 rounded-full bg-brand-indigo-900 border border-white/10 text-slate-300 hover:bg-brand-coral-500 hover:text-white transition-all btn-premium shadow-md"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            
-            <PlaceCard
-              place={selectedPlaceWithDistance || selectedPlace}
-              isFavorited={favorites.includes(selectedPlace.id)}
-              onFavoriteToggle={onFavoriteToggle}
-            />
-          </div>
+          <PlaceCard
+            place={selectedPlaceWithDistance || selectedPlace}
+            isFavorited={favorites.includes(selectedPlace.id)}
+            onFavoriteToggle={onFavoriteToggle}
+            onClose={() => setSelectedPlace(null)}
+          />
         </div>
       )}
     </div>
