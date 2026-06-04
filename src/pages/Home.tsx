@@ -4,7 +4,7 @@ import { CATEGORIES, MOCK_PLACES, MOCK_EVENTS } from '../utils/constants';
 import PlaceCard from '../components/places/PlaceCard';
 import SearchBar from '../components/common/SearchBar';
 import * as Icons from 'lucide-react';
-import { Calendar, Clock, MapPin, Sparkles, Radar, Check } from 'lucide-react';
+import { Calendar, Clock, MapPin, Sparkles, Search, Check } from 'lucide-react';
 
 // Helper dinâmico para renderizar ícones do Lucide por nome
 const IconRenderer = ({ name, className }: { name: string; className: string }) => {
@@ -402,7 +402,7 @@ export default function Home({
               }} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Radar className="w-3.5 h-3.5" /> Radar
+              <Search className="w-3.5 h-3.5" /> Radar
             </button>
             <button 
               onClick={() => setViewMode('list')} 
@@ -438,7 +438,7 @@ export default function Home({
               }} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${(viewMode as string) === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Radar className="w-3.5 h-3.5" /> Radar
+              <Search className="w-3.5 h-3.5" /> Radar
             </button>
             <button 
               onClick={() => setViewMode('list')} 
