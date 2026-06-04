@@ -415,9 +415,9 @@ export default function Home({
           {/* Botão de Categorias */}
           <button 
             onClick={() => setIsCategoryModalOpen(true)}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all bg-white dark:bg-brand-indigo-950 border border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-brand-coral-500 active:scale-95 shadow-sm"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all bg-brand-coral-500 hover:bg-brand-coral-600 active:scale-95 text-white shadow-md shadow-brand-coral-500/20 border border-transparent"
           >
-            <Icons.Filter className="w-3.5 h-3.5 text-brand-coral-500" />
+            <Icons.Filter className="w-3.5 h-3.5 text-white" />
             <span>
               {selectedCategories.length === 0 
                 ? 'Categorias' 
