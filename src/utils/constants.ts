@@ -1,4 +1,4 @@
-import { Category, Place, Event } from '../types';
+import { Category, Place, Event, Review } from '../types';
 
 export const CATEGORIES: Category[] = [
   { id: '1', name: 'Parques e Lazer', slug: 'parques', icon: 'Trees', color: 'teal' },
@@ -181,5 +181,104 @@ export const MOCK_EVENTS: Event[] = [
     price: 25,
     image_url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80',
     category_id: '4'
+  }
+];
+
+export const MOCK_REVIEWS: Review[] = [
+  {
+    id: 'r1',
+    place_id: 'p1',
+    user_name: 'Ana Silva',
+    user_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    rating: 5,
+    comment: 'Lindo demais! A estufa de vidro é impressionante e o pôr do sol nos jardins é maravilhoso.',
+    images: [
+      'https://images.unsplash.com/photo-1599839462784-5f50a8a6ba20?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-05-15T14:30:00'
+  },
+  {
+    id: 'r2',
+    place_id: 'p1',
+    user_name: 'Bruno Lima',
+    rating: 4,
+    comment: 'Muito bem cuidado, ótimo para caminhar e tirar fotos. Estava um pouco cheio no domingo.',
+    images: [
+      'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-05-20T10:15:00'
+  },
+  {
+    id: 'r3',
+    place_id: 'p2',
+    user_name: 'Carla Souza',
+    user_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    rating: 5,
+    comment: 'Arquitetura fantástica! Vale muito a pena assistir a uma apresentação lá dentro. O local é super integrado com a natureza.',
+    images: [
+      'https://images.unsplash.com/photo-1549693578-d683be217e58?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-05-18T20:00:00'
+  },
+  {
+    id: 'r4',
+    place_id: 'p3',
+    user_name: 'Daniel Rocha',
+    rating: 5,
+    comment: 'O melhor parque da cidade para correr e relaxar. As capivaras são as verdadeiras donas do lugar!',
+    images: [
+      'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-05-22T08:45:00'
+  },
+  {
+    id: 'r5',
+    place_id: 'p4',
+    user_name: 'Elena Dias',
+    user_avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+    rating: 4,
+    comment: 'O chopp submarino é lendário! O joelho de porco é enorme e delicioso. Ambiente muito tradicional e divertido.',
+    images: [
+      'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-05-25T21:30:00'
+  },
+  {
+    id: 'r6',
+    place_id: 'p5',
+    user_name: 'Felipe Costa',
+    rating: 5,
+    comment: 'Vista espetacular de 360 graus de Curitiba! A comida estava perfeita e o atendimento foi de altíssimo nível. Ótimo para datas especiais.',
+    images: [
+      'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-05-28T22:15:00'
+  },
+  {
+    id: 'r7',
+    place_id: 'p6',
+    user_name: 'Gabriela M.',
+    user_avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    rating: 4,
+    comment: 'Cafés especiais maravilhosos. O processo de torrefação local dá um aroma incrível ao lugar. Os doces também são ótimos.',
+    images: [
+      'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-05-30T09:00:00'
+  },
+  {
+    id: 'r8',
+    place_id: 'p7',
+    user_name: 'Hugo Neves',
+    rating: 5,
+    comment: 'Arquitetura monumental de Oscar Niemeyer! O acervo e as exposições temporárias são sempre excelentes. Um clássico da cultura curitibana.',
+    images: [
+      'https://images.unsplash.com/photo-1561055657-b9e0bf0fa360?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&w=600&q=80'
+    ],
+    created_at: '2026-06-01T15:45:00'
   }
 ];

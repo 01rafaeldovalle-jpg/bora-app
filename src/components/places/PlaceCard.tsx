@@ -83,10 +83,17 @@ export default function PlaceCard({
         {/* Gradiente sutil na imagem */}
         <div className="absolute inset-0 bg-gradient-to-t from-brand-indigo-950/70 via-transparent to-black/20" />
 
-        {/* Categoria tag */}
-        <div className="absolute top-3 left-3 bg-white/90 dark:bg-brand-indigo-950/80 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 px-2.5 py-1 rounded-full uppercase tracking-wider transition-colors duration-300">
+        {/* Categoria tag (Clicável para abrir avaliações) */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent('giro-open-reviews', { detail: { place } }));
+          }}
+          className="absolute top-3 left-3 z-30 bg-white/90 dark:bg-brand-indigo-950/80 backdrop-blur-xs border border-slate-200 dark:border-white/10 text-[10px] font-semibold text-brand-teal-600 dark:text-brand-teal-400 px-2.5 py-1 rounded-full uppercase tracking-wider transition-all cursor-pointer active:scale-95 hover:opacity-85 shadow-sm"
+        >
           {place.price_range} · {place.avg_rating.toFixed(1)} ★
-        </div>
+        </button>
 
         {/* Botão de Fechar (X) na Imagem */}
         {onClose && (

@@ -12,6 +12,9 @@ import { supabase } from './integrations/supabase/client';
 import Header from './components/common/Header';
 import CollectionModal from './components/common/CollectionModal';
 import AuthPromptModal from './components/common/AuthPromptModal';
+import ReviewsModal from './components/places/ReviewsModal';
+import { Review } from './types';
+import { MOCK_REVIEWS } from './utils/constants';
 
 type Tab = 'home' | 'explore' | 'favorites' | 'profile';
 
@@ -38,6 +41,17 @@ export default function App() {
     return null;
   });
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>(() => {
+    const local = localStorage.getItem('giro_reviews');
+    if (local) {
+      try {
+        return JSON.parse(local);
+      } catch (e) {}
+    }
+    return MOCK_REVIEWS;
+  });
+  const [isReviewsOpen, setIsReviewsOpen] = useState(false);
+  const [reviewsPlace, setReviewsPlace] = useState<Place | null>(null);
 
   const isLoggedIn = !!(session || mockSession);
 
@@ -382,6 +396,51 @@ export default function App() {
     }
   }, []);
 
+  // Ouvinte para o evento de abrir avaliações
+  useEffect(() => {
+    const handleOpenReviews = (e: Event) => {
+      const customEvent = e as CustomEvent<{ place: Place }>;
+      if (customEvent.detail && customEvent.detail.place) {
+        setReviewsPlace(customEvent.detail.place);
+        setIsReviewsOpen(true);
+      }
+    };
+
+    window.addEventListener('giro-open-reviews', handleOpenReviews);
+    return () => window.removeEventListener('giro-open-reviews', handleOpenReviews);
+  }, []);
+
+  const handleSubmitReview = (placeId: string, rating: number, comment: string, images: string[]) => {
+    const newReview: Review = {
+      id: `r_user_${Date.now()}`,
+      place_id: placeId,
+      user_name: session?.user?.user_metadata?.full_name || mockSession?.user?.full_name || 'Usuário Giro',
+      user_avatar: session?.user?.user_metadata?.avatar_url || mockSession?.user?.avatar_url || undefined,
+      rating,
+      comment,
+      images: images.length > 0 ? images : undefined,
+      created_at: new Date().toISOString()
+    };
+
+    setReviews(prev => {
+      const updated = [newReview, ...prev];
+      localStorage.setItem('giro_reviews', JSON.stringify(updated));
+      return updated;
+    });
+
+    // Atualizar a média local de estrelas e a contagem de avaliações do local em tempo real
+    const targetPlace = MOCK_PLACES.find(p => p.id === placeId);
+    if (targetPlace) {
+      const localReviews = [newReview, ...reviews.filter(r => r.place_id === placeId)];
+      const sum = localReviews.reduce((acc, r) => acc + r.rating, 0);
+      targetPlace.avg_rating = sum / localReviews.length;
+      targetPlace.review_count = localReviews.length;
+      
+      // Também atualiza o state do reviewsPlace para refletir no modal imediatamente
+      setReviewsPlace(prev => prev ? { ...prev, avg_rating: targetPlace.avg_rating, review_count: targetPlace.review_count } : null);
+    }
+  };
+
   // Alternar favoritos (com sincronização de coleções)
   const handleFavoriteToggle = async (id: string) => {
     if (!isLoggedIn) {
@@ -664,6 +723,23 @@ export default function App() {
           setTab('profile');
         }}
       />
+
+      {isReviewsOpen && reviewsPlace && (
+        <ReviewsModal
+          place={reviewsPlace}
+          isLoggedIn={isLoggedIn}
+          reviews={reviews}
+          onRequireAuth={() => {
+            setIsReviewsOpen(false);
+            setShowAuthPrompt(true);
+          }}
+          onSubmitReview={handleSubmitReview}
+          onClose={() => {
+            setIsReviewsOpen(false);
+            setReviewsPlace(null);
+          }}
+        />
+      )}
     </div>
   );
 }

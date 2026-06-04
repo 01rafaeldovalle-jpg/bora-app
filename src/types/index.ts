@@ -60,5 +60,6 @@ export interface Review {
   user_avatar?: string;
   rating: number;
   comment: string;
+  images?: string[]; // Array de URLs de fotos tiradas pelos clientes
   created_at: string;
 }
