@@ -4,7 +4,7 @@ import { CATEGORIES, MOCK_PLACES, MOCK_EVENTS } from '../utils/constants';
 import PlaceCard from '../components/places/PlaceCard';
 import SearchBar from '../components/common/SearchBar';
 import * as Icons from 'lucide-react';
-import { Calendar, Clock, MapPin, Sparkles, Flame, Check } from 'lucide-react';
+import { Calendar, Clock, MapPin, Sparkles, Radar, Check } from 'lucide-react';
 
 // Helper dinâmico para renderizar ícones do Lucide por nome
 const IconRenderer = ({ name, className }: { name: string; className: string }) => {
@@ -393,7 +393,7 @@ export default function Home({
       {/* Switch View Selectors */}
       {!(viewMode === 'list' && activeFolder === null) && (
         <div className="px-6 py-2 flex justify-between items-center mt-2 max-w-6xl mx-auto w-full gap-2">
-          {/* Seletor Match / Lista */}
+          {/* Seletor Radar / Lista */}
           <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
             <button 
               onClick={() => {
@@ -402,7 +402,7 @@ export default function Home({
               }} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Flame className="w-3.5 h-3.5" /> Match
+              <Radar className="w-3.5 h-3.5" /> Radar
             </button>
             <button 
               onClick={() => setViewMode('list')} 
@@ -429,7 +429,7 @@ export default function Home({
 
       {(viewMode === 'list' && activeFolder === null) && (
         <div className="px-6 py-2 flex justify-start items-center mt-2 max-w-6xl mx-auto w-full">
-          {/* Seletor Match / Lista na lista de pastas (sem filtro) */}
+          {/* Seletor Radar / Lista na lista de pastas (sem filtro) */}
           <div className="bg-slate-100 dark:bg-brand-indigo-950/85 border border-slate-200/60 dark:border-white/5 p-1 rounded-xl flex gap-1 shadow-inner transition-colors duration-300">
             <button 
               onClick={() => {
@@ -438,7 +438,7 @@ export default function Home({
               }} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${(viewMode as string) === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Flame className="w-3.5 h-3.5" /> Match
+              <Radar className="w-3.5 h-3.5" /> Radar
             </button>
             <button 
               onClick={() => setViewMode('list')} 
