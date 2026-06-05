@@ -231,24 +231,30 @@ export default function App() {
 
   // Early theme initialization
   useEffect(() => {
-    let savedTheme = localStorage.getItem('giro_theme');
-    if (!savedTheme) {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-      if (prefersDark) {
-        savedTheme = 'dark';
-      } else if (prefersLight) {
-        savedTheme = 'light';
+    const checkTheme = () => {
+      const manualTheme = localStorage.getItem('giro_theme_manual');
+      
+      let targetTheme: 'light' | 'dark';
+      if (manualTheme === 'light' || manualTheme === 'dark') {
+        targetTheme = manualTheme;
       } else {
         const hour = new Date().getHours();
-        savedTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
+        targetTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
       }
-    }
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+
+      if (targetTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+
+      window.dispatchEvent(new CustomEvent('giro-theme-change', { detail: { theme: targetTheme } }));
+    };
+
+    checkTheme();
+
+    const interval = setInterval(checkTheme, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   // Reset filter when changing tabs to anything other than home or explore

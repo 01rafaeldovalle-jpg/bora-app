@@ -71,24 +71,24 @@ export default function Header({
 
   useEffect(() => {
     // 1. Detectar o tema inicial
-    let initialTheme = localStorage.getItem('giro_theme') as 'light' | 'dark' | null;
-    if (!initialTheme) {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-      if (prefersDark) {
-        initialTheme = 'dark';
-      } else if (prefersLight) {
-        initialTheme = 'light';
-      } else {
-        const hour = new Date().getHours();
-        initialTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
-      }
+    const manualTheme = localStorage.getItem('giro_theme_manual');
+    let initialTheme: 'light' | 'dark';
+    if (manualTheme === 'light' || manualTheme === 'dark') {
+      initialTheme = manualTheme;
+    } else {
+      const hour = new Date().getHours();
+      initialTheme = hour >= 6 && hour < 18 ? 'light' : 'dark';
     }
-    applyTheme(initialTheme);
+    applyTheme(initialTheme, false);
 
     // Escutar eventos externos de mudança de tema
     const handleThemeChange = (e: any) => {
       setThemeState(e.detail.theme);
+      if (e.detail.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     };
     window.addEventListener('giro-theme-change', handleThemeChange);
 
@@ -134,20 +134,22 @@ export default function Header({
     };
   }, []);
 
-  const applyTheme = (t: 'light' | 'dark') => {
+  const applyTheme = (t: 'light' | 'dark', isManual = true) => {
     setThemeState(t);
     if (t === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-    localStorage.setItem('giro_theme', t);
+    if (isManual) {
+      localStorage.setItem('giro_theme_manual', t);
+    }
     window.dispatchEvent(new CustomEvent('giro-theme-change', { detail: { theme: t } }));
   };
 
   const handleToggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    applyTheme(nextTheme);
+    applyTheme(nextTheme, true);
   };
 
   // Buscar localização no Nominatim OSM
