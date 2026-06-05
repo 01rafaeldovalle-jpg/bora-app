@@ -41,6 +41,55 @@ const getHaversineDistance = (lat1: number, lon1: number, lat2: number, lon2: nu
   return R * c; // Distância em km
 };
 
+const SYNONYM_MAP: Record<string, string[]> = {
+  // ── Preferências e Vibes Globais (Tags do Perfil) ─────────
+  pet: ['cachorro', 'dog', 'pet', 'pets', 'animais', 'animal', 'gato', 'gatinho', 'filhote', 'cão', 'cães', 'petfriendly', 'pet-friendly'],
+  outdoor: ['sol', 'calor', 'ar livre', 'externa', 'externo', 'rua', 'gramado', 'ceu aberto', 'ventilado', 'sombra', 'dia bonito', 'ensaolarado', 'varanda', 'quintal'],
+  'live-music': ['musica', 'show', 'ao vivo', 'musica ao vivo', 'banda', 'cantor', 'acustico', 'sertanejo', 'rock', 'samba', 'jazz'],
+  work: ['trabalhar', 'estudar', 'wifi', 'internet', 'tomada', 'tomadas', 'notebook', 'computador', 'calmo', 'silencioso', 'co-working', 'coworking'],
+  date: ['encontro', 'romantico', 'romantica', 'namorado', 'namorada', 'casal', 'casais', 'luz de velas', 'intimista', 'clima'],
+  kids: ['crianca', 'criancas', 'filho', 'filhos', 'kids', 'infantil', 'brinquedo', 'brinquedos', 'playground', 'recreação', 'familia'],
+  vegan: ['vegan', 'vegano', 'vegana', 'vegetariano', 'fit', 'saudavel', 'salada', 'sem carne'],
+
+  // ── Gastronomia (ID '2') ──────────────────────────────────
+  massas_italiana: ['pizza', 'pizzaria', 'massa', 'massas', 'italiana', 'italiano', 'macarrao', 'lasanha', 'nhoque', 'risoto', 'cantina'],
+  hamburgueres: ['hamburguer', 'hamburgueria', 'lanche', 'lanches', 'burger', 'burgers', 'hotdog', 'pastel', 'porcao', 'batata', 'fritas'],
+  asiatica: ['japa', 'sushi', 'temaki', 'sashimi', 'japonesa', 'japones', 'yakisoba', 'hot-roll', 'oriental', 'chinesa', 'tailandesa', 'poke', 'lamen'],
+  carnes_churrasco: ['churrasco', 'churrascaria', 'espetinho', 'espeto', 'carne', 'carnes', 'churrasqueira', 'picanha', 'costela', 'grelhado'],
+  arabe: ['arabe', 'esfiha', 'kibe', 'shawarma', 'hummus', 'falafel', 'coalhada', 'cafta', 'quibe'],
+  mexicana: ['mexicana', 'mexicano', 'taco', 'burrito', 'nacho', 'guacamole', 'quesadilla', 'chilli'],
+  brasileira: ['brasileira', 'brasileiro', 'prato feito', 'pf', 'feijoada', 'caseira', 'marmita', 'virado', 'arroz', 'feijao'],
+  frutos_do_mar: ['frutos do mar', 'mar', 'peixe', 'peixes', 'camarao', 'ostra', 'siri', 'lagosta', 'paella'],
+  saudavel_vegana: ['fit', 'saudavel', 'funcional', 'salada', 'saladas', 'suco', 'sucos', 'leve', 'sem gluten'],
+
+  // ── Cafés e Doces (ID '3') ────────────────────────────────
+  cafeterias: ['cafe', 'cafes', 'espresso', 'cafeteria', 'coado', 'cappuccino', 'mocha', 'grao', 'filtrado', 'prensa', 'infusao'],
+  padarias: ['padaria', 'panificadora', 'pao', 'croissant', 'brunch', 'cafe-da-manha', 'salgados', 'coxinha', 'folhado', 'pao de queijo'],
+  docerias: ['doce', 'doces', 'bolo', 'bolos', 'torta', 'tortas', 'confeitaria', 'chocolate', 'brownie', 'sobremesa', 'brigadeiro', 'macaron'],
+  sorveterias: ['sorvete', 'sorvetes', 'gelato', 'gelateria', 'acai', 'milkshake', 'picole', 'sorveteria'],
+
+  // ── Vida Noturna (ID '4') ─────────────────────────────────
+  bar_pub: ['chope', 'chopp', 'cerveja', 'cervejas', 'breja', 'choperia', 'bar', 'bares', 'pub', 'pubs', 'boteco', 'bera', 'beras', 'gelada'],
+  adegas_drinks: ['vinho', 'vinhos', 'adega', 'coquetel', 'coqueteis', 'drinks', 'drink', 'gin', 'espumante', 'lounge', 'whisky', 'bartender'],
+  karaokes: ['karaoke', 'cantoria', 'cantar', 'microfone', 'videoke', 'musica', 'palco'],
+  baladas: ['balada', 'baladas', 'clube', 'club', 'shows', 'show', 'pista', 'dancar', 'boate', 'festa', 'baladinha'],
+
+  // ── Parques e Lazer (ID '1') ──────────────────────────────
+  parques: ['parque', 'parques', 'bosque', 'bosques', 'floresta', 'verde', 'natureza', 'lago', 'lagos', 'capivara'],
+  jardins: ['jardim', 'jardins', 'botanico', 'flores', 'estufa', 'jardim botanico'],
+  pracas: ['praca', 'praça', 'pracinha', 'pracinhas', 'praças', 'largo', 'parquinho', 'balanco', 'skate', 'pista de skate'],
+  turismo: ['turismo', 'turistico', 'ponto turistico', 'monumento', 'mirante', 'vista', 'torre', 'cartao postal', 'atracao'],
+  lazer_privado: ['boliche', 'kart', 'escape', 'diversao', 'jogos', 'entretenimento', 'fliperama', 'parque de trampolim'],
+  mercados_feiras: ['mercado', 'mercados', 'feira', 'feiras', 'feirinha', 'municipal', 'mercado municipal', 'foodhall', 'food hall', 'gastronomico', 'pastel de feira'],
+  shoppings: ['shopping', 'shoppings', 'mall', 'malls', 'shopping center', 'shopping-center', 'galeria de compras'],
+
+  // ── Cultura & Arte (ID '5') ───────────────────────────────
+  museus: ['museu', 'museus', 'galeria de arte', 'exposicao', 'exposicoes', 'quadros', 'esculturas', 'mon', 'monumentos'],
+  teatros: ['teatro', 'teatros', 'opera', 'peca', 'pecas', 'cultura', 'cultural', 'auditório', 'sala de concerto'],
+  historia: ['historia', 'historico', 'historica', 'ruinas', 'casarao', 'antigo', 'monumento', 'centro historico', 'largo da ordem'],
+  shows_eventos: ['show', 'shows', 'evento', 'eventos', 'festival', 'festivais', 'concerto', 'concertos', 'temporario', 'temporarios', 'festa', 'festas']
+};
+
 export default function Home({ 
   viewMode,
   setViewMode,
@@ -261,9 +310,39 @@ export default function Home({
   // Filtrar locais com base na busca e categoria selecionada e ordenar por proximidade
   const filteredPlaces = React.useMemo(() => {
     const filtered = placesWithDistance.filter(place => {
-      const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            place.address.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = (() => {
+        const query = searchQuery.toLowerCase().trim();
+        if (!query) return true;
+
+        // 1. Matches direct text (name, description, address)
+        if (place.name.toLowerCase().includes(query) || 
+            place.description.toLowerCase().includes(query) ||
+            place.address.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // 2. Matches synonyms mapping
+        for (const [key, synonyms] of Object.entries(SYNONYM_MAP)) {
+          const matchesSynonym = synonyms.some(syn => syn.includes(query) || query.includes(syn));
+          if (matchesSynonym) {
+            // Se for uma subcategoria e o place pertence a ela
+            if (place.sub_category_id === key) {
+              return true;
+            }
+            // Se for uma tag/vibe (ex: pet, outdoor, etc.), verificamos se o nome ou descrição a descreve
+            if (['pet', 'outdoor', 'live-music', 'work', 'date', 'kids', 'vegan'].includes(key)) {
+              const matchesVibe = synonyms.some(keyword => 
+                place.name.toLowerCase().includes(keyword) || 
+                place.description.toLowerCase().includes(keyword)
+              );
+              if (matchesVibe) return true;
+            }
+          }
+        }
+        
+        return false;
+      })();
+
       const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
       const matchesSubCategory = selectedSubCategories.length > 0 ? selectedSubCategories.includes(place.sub_category_id || '') : true;
@@ -322,9 +401,39 @@ export default function Home({
     
     const basePlaces = placesWithDistance.filter(place => folderPlaceIds.includes(place.id));
     const filtered = basePlaces.filter(place => {
-      const matchesSearch = place.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            place.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            place.address.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = (() => {
+        const query = searchQuery.toLowerCase().trim();
+        if (!query) return true;
+
+        // 1. Matches direct text (name, description, address)
+        if (place.name.toLowerCase().includes(query) || 
+            place.description.toLowerCase().includes(query) ||
+            place.address.toLowerCase().includes(query)) {
+          return true;
+        }
+
+        // 2. Matches synonyms mapping
+        for (const [key, synonyms] of Object.entries(SYNONYM_MAP)) {
+          const matchesSynonym = synonyms.some(syn => syn.includes(query) || query.includes(syn));
+          if (matchesSynonym) {
+            // Se for uma subcategoria e o place pertence a ela
+            if (place.sub_category_id === key) {
+              return true;
+            }
+            // Se for uma tag/vibe (ex: pet, outdoor, etc.), verificamos se o nome ou descrição a descreve
+            if (['pet', 'outdoor', 'live-music', 'work', 'date', 'kids', 'vegan'].includes(key)) {
+              const matchesVibe = synonyms.some(keyword => 
+                place.name.toLowerCase().includes(keyword) || 
+                place.description.toLowerCase().includes(keyword)
+              );
+              if (matchesVibe) return true;
+            }
+          }
+        }
+        
+        return false;
+      })();
+
       const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
       const matchesSubCategory = selectedSubCategories.length > 0 ? selectedSubCategories.includes(place.sub_category_id || '') : true;
