@@ -770,11 +770,15 @@ export default function Home({
                     {cat.id === '2' && isSelected && (
                       <div className="pl-6 pr-2 py-1.5 space-y-1.5 animate-[fadeInUp_0.2s_ease-out] border-l-2 border-brand-coral-500/30 ml-5 my-1">
                         {[
-                          { id: 'massas_italiana', name: 'Massas & Italiana', emoji: '🍕' },
-                          { id: 'japonesa', name: 'Japonesa (Sushi)', emoji: '🍣' },
+                          { id: 'massas_italiana', name: 'Pizzas & Massas', emoji: '🍕' },
                           { id: 'hamburgueres', name: 'Hambúrgueres & Lanches', emoji: '🍔' },
+                          { id: 'japonesa', name: 'Japonesa (Sushi)', emoji: '🍣' },
                           { id: 'carnes_churrasco', name: 'Carnes & Churrasco', emoji: '🥩' },
-                          { id: 'saudavel_vegana', name: 'Saudável & Vegano', emoji: '🥗' }
+                          { id: 'arabe', name: 'Comida Árabe', emoji: '🧆' },
+                          { id: 'mexicana', name: 'Comida Mexicana', emoji: '🌮' },
+                          { id: 'brasileira', name: 'Brasileira & Caseira', emoji: '🥘' },
+                          { id: 'frutos_do_mar', name: 'Frutos do Mar', emoji: '🍤' },
+                          { id: 'saudavel_vegana', name: 'Saudável & Vegana', emoji: '🥗' }
                         ].map((sub) => {
                           const isSubSelected = selectedSubCategories.includes(sub.id);
                           return (

@@ -996,6 +996,20 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     return '2'; // Gastronomia (default fallback)
   };
 
+  const getSubCategoryId = (cat: string) => {
+    const norm = cat.toLowerCase();
+    if (norm.includes('pizzaria') || norm.includes('italiana') || norm.includes('massas')) return 'massas_italiana';
+    if (norm.includes('hamburgueria') || norm.includes('lanches') || norm.includes('pastelaria') || norm.includes('cachorro-quente') || norm.includes('sanduiche')) return 'hamburgueres';
+    if (norm.includes('japonesa') || norm.includes('asiatica') || norm.includes('chinesa')) return 'japonesa';
+    if (norm.includes('churrascaria') || norm.includes('carnes')) return 'carnes_churrasco';
+    if (norm.includes('arabe')) return 'arabe';
+    if (norm.includes('mexicana')) return 'mexicana';
+    if (norm.includes('brasileira')) return 'brasileira';
+    if (norm.includes('mar') || norm.includes('peixes') || norm.includes('frutos')) return 'frutos_do_mar';
+    if (norm.includes('saudavel') || norm.includes('vegana') || norm.includes('vegetariana')) return 'saudavel_vegana';
+    return undefined;
+  };
+
   const handleFinishBusinessSignup = async () => {
     const id = `biz_${Date.now()}`;
     const newPlace = {
@@ -1007,6 +1021,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       instagram_handle: bizInstagram || undefined,
       website_url: bizWebsite || undefined,
       category_id: getCategoryId(bizCategory),
+      sub_category_id: getSubCategoryId(bizCategory),
       category_name: bizCategory,
       latitude: bizLat,
       longitude: bizLng,
@@ -1040,6 +1055,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
           instagram_handle: newPlace.instagram_handle,
           website_url: newPlace.website_url,
           category_id: newPlace.category_id,
+          sub_category_id: newPlace.sub_category_id,
           latitude: newPlace.latitude,
           longitude: newPlace.longitude,
           image_url: newPlace.image_url,

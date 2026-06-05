@@ -295,11 +295,15 @@ export const SUB_CATEGORIES: Record<string, { id: string; name: string; icon: st
     { id: 'mirantes', name: 'Mirantes', icon: 'Eye' }
   ],
   '2': [ // Gastronomia
-    { id: 'massas_italiana', name: 'Massas & Italiana', icon: 'ChefHat' },
-    { id: 'japonesa', name: 'Japonesa (Sushi)', icon: 'Fish' },
+    { id: 'massas_italiana', name: 'Pizzas & Massas', icon: 'ChefHat' },
     { id: 'hamburgueres', name: 'Hambúrgueres & Lanches', icon: 'Pizza' },
+    { id: 'japonesa', name: 'Japonesa (Sushi)', icon: 'Fish' },
     { id: 'carnes_churrasco', name: 'Carnes & Churrasco', icon: 'Flame' },
-    { id: 'saudavel_vegana', name: 'Saudável & Vegano', icon: 'Leaf' }
+    { id: 'arabe', name: 'Comida Árabe', icon: 'Utensils' },
+    { id: 'mexicana', name: 'Comida Mexicana', icon: 'Flame' },
+    { id: 'brasileira', name: 'Brasileira & Caseira', icon: 'Utensils' },
+    { id: 'frutos_do_mar', name: 'Frutos do Mar', icon: 'Fish' },
+    { id: 'saudavel_vegana', name: 'Saudável & Vegana', icon: 'Leaf' }
   ],
   '3': [ // Cafés e Doces
     { id: 'cafeterias', name: 'Cafeterias', icon: 'Coffee' },
