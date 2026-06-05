@@ -981,6 +981,17 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       return '1'; // Parques e Lazer
     }
     if (
+      normalized.includes('museu') ||
+      normalized.includes('galeria') ||
+      normalized.includes('exposicao') ||
+      normalized.includes('cultura') ||
+      normalized.includes('teatro') ||
+      normalized.includes('espaco') ||
+      normalized.includes('art')
+    ) {
+      return '5'; // Cultura & Arte
+    }
+    if (
       normalized.includes('cafeteria') ||
       normalized.includes('cafe') ||
       normalized.includes('doces') ||
@@ -1039,6 +1050,10 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     // Parques e Lazer (Mapeamentos)
     if (norm.includes('turistico') || norm.includes('turismo') || norm.includes('atracao')) return 'turismo';
     if (norm.includes('boliche') || norm.includes('kart') || norm.includes('escape') || norm.includes('lazer')) return 'lazer_privado';
+    
+    // Cultura & Arte (Mapeamentos)
+    if (norm.includes('museu') || norm.includes('galeria') || norm.includes('exposição') || norm.includes('exposicao') || norm.includes('cultura')) return 'museus';
+    if (norm.includes('teatro') || norm.includes('espaço cultural') || norm.includes('espaco cultural')) return 'teatros';
     
     return undefined;
   };
@@ -1537,7 +1552,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         '🕺 Balada & Casa de Show',
                         '🎤 Karaokê',
                         '🗺️ Ponto Turístico ou Atração de Turismo',
-                        '🎡 Boliche, Kart & Escape (Lazer)'
+                        '🎡 Boliche, Kart & Escape (Lazer)',
+                        '🎨 Museu, Galeria ou Exposição (Cultura)',
+                        '🎭 Teatro ou Espaço Cultural'
                       ].map((cat) => (
                         <option key={cat} value={cat} className="bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white">{cat}</option>
                       ))}
