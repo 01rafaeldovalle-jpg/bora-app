@@ -412,7 +412,7 @@ export default function Home({
             </button>
           </div>
 
-          {/* Botão de Categorias */}
+          {/* Botão de Filtros */}
           <button 
             onClick={() => setIsCategoryModalOpen(true)}
             className="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all bg-brand-coral-500 hover:bg-brand-coral-600 active:scale-95 text-white shadow-md shadow-brand-coral-500/20 border border-transparent"
@@ -420,8 +420,8 @@ export default function Home({
             <Icons.Filter className="w-3.5 h-3.5 text-white" />
             <span>
               {selectedCategories.length === 0 
-                ? 'Categorias' 
-                : `Categorias (${selectedCategories.length})`}
+                ? 'Filtros' 
+                : `Filtros (${selectedCategories.length})`}
             </span>
           </button>
         </div>
@@ -704,7 +704,7 @@ export default function Home({
             <div className="flex items-center justify-between mb-5 shrink-0">
               <div className="flex items-center gap-2">
                 <Icons.Filter className="w-5 h-5 text-brand-coral-500" />
-                <h3 className="text-base font-outfit font-black text-slate-900 dark:text-white">Filtrar por Categorias</h3>
+                <h3 className="text-base font-outfit font-black text-slate-900 dark:text-white">Filtros</h3>
               </div>
               <button 
                 type="button"
