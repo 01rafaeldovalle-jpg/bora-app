@@ -594,7 +594,13 @@ function OnboardingOverlay({
                   placeholder="username"
                   value={username.replace(/^@/, '')}
                   onChange={(e) => {
-                    const clean = e.target.value.replace(/^@/, '').replace(/\s+/g, '_').toLowerCase();
+                    const clean = e.target.value
+                      .replace(/^@/, '') // Remove @ duplicado no início
+                      .normalize("NFD") // Decompõe caracteres acentuados (ex: "ã" vira "a" + "~")
+                      .replace(/[\u0300-\u036f]/g, "") // Remove os acentos/til isolados
+                      .toLowerCase() // Converte tudo para minúsculas
+                      .replace(/\s+/g, '_') // Substitui espaços por underline
+                      .replace(/[^a-z0-9_]/g, ''); // Remove qualquer caractere que não seja letra, número ou underline
                     setUsername(`@${clean}`);
                   }}
                   className="w-full h-14 rounded-2xl form-input pl-11 pr-4 text-sm"
