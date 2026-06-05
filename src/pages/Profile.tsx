@@ -1874,7 +1874,11 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                       { id: 'jazz_blues', name: 'Jazz & Blues', icon: '🎷' },
                       { id: 'romantico', name: 'Romântico', icon: '🕯️' },
                       { id: 'alternativo', name: 'Alternativo/Indie', icon: '🌿' },
-                      { id: 'sofisticado', name: 'Sofisticado', icon: '💎' }
+                      { id: 'sofisticado', name: 'Sofisticado', icon: '💎' },
+                      { id: 'forro', name: 'Forró', icon: '🪗' },
+                      { id: 'pop_funk', name: 'Pop & Funk', icon: '🎤' },
+                      { id: 'acustico_mpb', name: 'Acústico & MPB', icon: '🎸' },
+                      { id: 'descontraido', name: 'Descontraído', icon: '🍻' }
                     ].map((tag) => {
                       const isSelected = bizTags.includes(tag.id);
                       return (

@@ -87,7 +87,11 @@ const SYNONYM_MAP: Record<string, string[]> = {
   museus: ['museu', 'museus', 'galeria de arte', 'exposicao', 'exposicoes', 'quadros', 'esculturas', 'mon', 'monumentos'],
   teatros: ['teatro', 'teatros', 'opera', 'peca', 'pecas', 'cultura', 'cultural', 'auditório', 'sala de concerto'],
   historia: ['historia', 'historico', 'historica', 'ruinas', 'casarao', 'antigo', 'monumento', 'centro historico', 'largo da ordem'],
-  shows_eventos: ['show', 'shows', 'evento', 'eventos', 'festival', 'festivais', 'concerto', 'concertos', 'temporario', 'temporarios', 'festa', 'festas']
+  shows_eventos: ['show', 'shows', 'evento', 'eventos', 'festival', 'festivais', 'concerto', 'concertos', 'temporario', 'temporarios', 'festa', 'festas'],
+  forro: ['forro', 'xote', 'baiao', 'xaxado', 'sanfona', 'rastape', 'pe-de-serra', 'arrasta-pe'],
+  pop_funk: ['pop', 'funk', 'funk rj', 'funks', 'hits', 'reggaeton', 'pop-rock', 'anitta', 'pop/funk'],
+  acustico_mpb: ['mpb', 'acustico', 'acústica', 'voz e violao', 'violao', 'cover', 'covers', 'pop rock nacional'],
+  descontraido: ['descontraido', 'descontraida', 'casual', 'simples', 'boteco', 'chinelo', 'cerveja de garrafa', 'pao na chapa', 'sem frescura', 'raiz']
 };
 
 export default function Home({ 
@@ -1204,7 +1208,11 @@ export default function Home({
                     { id: 'jazz_blues', name: 'Jazz & Blues', icon: '🎷' },
                     { id: 'romantico', name: 'Romântico', icon: '🕯️' },
                     { id: 'alternativo', name: 'Alternativo/Indie', icon: '🌿' },
-                    { id: 'sofisticado', name: 'Sofisticado', icon: '💎' }
+                    { id: 'sofisticado', name: 'Sofisticado', icon: '💎' },
+                    { id: 'forro', name: 'Forró', icon: '🪗' },
+                    { id: 'pop_funk', name: 'Pop & Funk', icon: '🎤' },
+                    { id: 'acustico_mpb', name: 'Acústico & MPB', icon: '🎸' },
+                    { id: 'descontraido', name: 'Descontraído', icon: '🍻' }
                   ].map((tag) => {
                     const isSelected = selectedTags.includes(tag.id);
                     return (
