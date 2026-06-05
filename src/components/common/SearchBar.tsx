@@ -12,7 +12,7 @@ export default function SearchBar({
   value, 
   onChange, 
   onFilterClick, 
-  placeholder = "Buscar restaurantes, parques, eventos..." 
+  placeholder = "Escreva como quiser, o Giro acha..." 
 }: SearchBarProps) {
   return (
     <div className="flex items-center gap-3 w-full px-4 py-2">
