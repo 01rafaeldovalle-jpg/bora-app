@@ -57,6 +57,7 @@ export default function Home({
 }: HomeProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
@@ -64,10 +65,22 @@ export default function Home({
   const [tempName, setTempName] = useState('');
 
   const toggleCategory = (categoryId: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(categoryId)
+    setSelectedCategories(prev => {
+      const exists = prev.includes(categoryId);
+      if (exists && categoryId === '2') {
+        setSelectedSubCategories([]);
+      }
+      return exists
         ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
+        : [...prev, categoryId];
+    });
+  };
+
+  const toggleSubCategory = (subId: string) => {
+    setSelectedSubCategories(prev =>
+      prev.includes(subId)
+        ? prev.filter(id => id !== subId)
+        : [...prev, subId]
     );
   };
 
@@ -242,14 +255,15 @@ export default function Home({
                             place.address.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
-      return matchesSearch && matchesCategory && matchesRadius;
+      const matchesSubCategory = selectedSubCategories.length > 0 ? selectedSubCategories.includes(place.sub_category_id || '') : true;
+      return matchesSearch && matchesCategory && matchesRadius && matchesSubCategory;
     });
 
     if (activeCoords) {
       filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return filtered;
-  }, [placesWithDistance, searchQuery, selectedCategories, activeCoords, searchRadius]);
+  }, [placesWithDistance, searchQuery, selectedCategories, selectedSubCategories, activeCoords, searchRadius]);
 
   const featuredPlaces = React.useMemo(() => {
     const featured = placesWithDistance.filter(p => {
@@ -302,14 +316,15 @@ export default function Home({
                             place.address.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
-      return matchesSearch && matchesCategory && matchesRadius;
+      const matchesSubCategory = selectedSubCategories.length > 0 ? selectedSubCategories.includes(place.sub_category_id || '') : true;
+      return matchesSearch && matchesCategory && matchesRadius && matchesSubCategory;
     });
 
     if (activeCoords) {
       filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return filtered;
-  }, [placesWithDistance, folderPlaceIds, activeFolder, searchQuery, selectedCategories, activeCoords, searchRadius]);
+  }, [placesWithDistance, folderPlaceIds, activeFolder, searchQuery, selectedCategories, selectedSubCategories, activeCoords, searchRadius]);
 
   const getFolderCover = (placeIds: string[]) => {
     if (placeIds && placeIds.length > 0) {
@@ -322,13 +337,14 @@ export default function Home({
   // Reset active card index when filter changes
   React.useEffect(() => {
     setActiveCardIndex(0);
-  }, [searchQuery, selectedCategories]);
+  }, [searchQuery, selectedCategories, selectedSubCategories]);
 
   // Listen to home reset events (e.g. from header logo click)
   React.useEffect(() => {
     const handleReset = () => {
       setSearchQuery('');
       setSelectedCategories([]);
+      setSelectedSubCategories([]);
       setViewMode('swipe');
       setActiveFolder(null);
       setActiveCardIndex(0);
@@ -720,35 +736,77 @@ export default function Home({
               {CATEGORIES.map((cat) => {
                 const isSelected = selectedCategories.includes(cat.id);
                 return (
-                  <button
-                    type="button"
-                    key={cat.id}
-                    onClick={() => toggleCategory(cat.id)}
-                    className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
-                      isSelected
-                        ? 'bg-brand-coral-500/10 border-brand-coral-500 text-brand-coral-600 dark:text-brand-coral-400 font-bold'
-                        : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-xl transition-colors ${
-                        isSelected ? 'bg-brand-coral-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-450'
-                      }`}>
-                        <IconRenderer name={cat.icon} className="w-4 h-4" />
+                  <React.Fragment key={cat.id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(cat.id)}
+                      className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
+                        isSelected
+                          ? 'bg-brand-coral-500/10 border-brand-coral-500 text-brand-coral-600 dark:text-brand-coral-400 font-bold'
+                          : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-xl transition-colors ${
+                          isSelected ? 'bg-brand-coral-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-450'
+                        }`}>
+                          <IconRenderer name={cat.icon} className="w-4 h-4" />
+                        </div>
+                        <span className="truncate text-xs">{cat.name}</span>
                       </div>
-                      <span className="truncate text-xs">{cat.name}</span>
-                    </div>
-                    
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                      isSelected
-                        ? 'bg-brand-coral-500 border-brand-coral-500'
-                        : 'border-slate-300 dark:border-white/20'
-                    }`}>
-                      {isSelected && (
-                        <Check className="w-3.5 h-3.5 text-white" />
-                      )}
-                    </div>
-                  </button>
+                      
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+                        isSelected
+                          ? 'bg-brand-coral-500 border-brand-coral-500'
+                          : 'border-slate-300 dark:border-white/20'
+                      }`}>
+                        {isSelected && (
+                          <Check className="w-3.5 h-3.5 text-white" />
+                        )}
+                      </div>
+                    </button>
+
+                    {/* Subcategorias de Gastronomia (Apenas ID '2' por enquanto) */}
+                    {cat.id === '2' && isSelected && (
+                      <div className="pl-6 pr-2 py-1.5 space-y-1.5 animate-[fadeInUp_0.2s_ease-out] border-l-2 border-brand-coral-500/30 ml-5 my-1">
+                        {[
+                          { id: 'massas_italiana', name: 'Massas & Italiana', emoji: '🍕' },
+                          { id: 'japonesa', name: 'Japonesa (Sushi)', emoji: '🍣' },
+                          { id: 'hamburgueres', name: 'Hambúrgueres & Lanches', emoji: '🍔' },
+                          { id: 'carnes_churrasco', name: 'Carnes & Churrasco', emoji: '🥩' },
+                          { id: 'saudavel_vegana', name: 'Saudável & Vegano', emoji: '🥗' }
+                        ].map((sub) => {
+                          const isSubSelected = selectedSubCategories.includes(sub.id);
+                          return (
+                            <button
+                              type="button"
+                              key={sub.id}
+                              onClick={() => toggleSubCategory(sub.id)}
+                              className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-left transition-all ${
+                                isSubSelected
+                                  ? 'bg-brand-coral-500/5 border-brand-coral-500/60 text-brand-coral-600 dark:text-brand-coral-400 font-semibold'
+                                  : 'bg-slate-50/50 dark:bg-white/3 border-slate-200/40 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100/55 dark:hover:bg-white/8'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm">{sub.emoji}</span>
+                                <span className="text-xs">{sub.name}</span>
+                              </div>
+                              <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                                isSubSelected
+                                  ? 'bg-brand-coral-500 border-brand-coral-500 text-white'
+                                  : 'border-slate-300 dark:border-white/20'
+                              }`}>
+                                {isSubSelected && (
+                                  <Check className="w-2.5 h-2.5 text-white" />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </div>
@@ -757,8 +815,11 @@ export default function Home({
             <div className="flex items-center gap-3 border-t border-slate-100 dark:border-white/5 pt-4 shrink-0">
               <button
                 type="button"
-                onClick={() => setSelectedCategories([])}
-                disabled={selectedCategories.length === 0}
+                onClick={() => {
+                  setSelectedCategories([]);
+                  setSelectedSubCategories([]);
+                }}
+                disabled={selectedCategories.length === 0 && selectedSubCategories.length === 0}
                 className="flex-1 py-2.5 text-center text-xs font-bold text-slate-500 dark:text-slate-450 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
               >
                 Limpar Filtros
