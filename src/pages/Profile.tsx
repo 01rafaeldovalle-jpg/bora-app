@@ -777,27 +777,57 @@ function OnboardingOverlay({
             </button>
             <h3 className="text-base font-outfit font-bold text-slate-900 dark:text-white mb-1 text-center">Termos e Privacidade</h3>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-4 text-center">Sua privacidade e conformidade com a LGPD ⚖️</p>
-            <div className="flex-1 overflow-y-auto text-xs text-slate-650 dark:text-slate-400 space-y-4 leading-relaxed pr-1 mb-5">
+            <div className="flex-1 overflow-y-auto text-xs text-slate-650 dark:text-slate-400 space-y-4 leading-relaxed pr-1 mb-5 scrollbar-thin">
+              
               <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Coleta de Dados</h4>
-                <p>O Giro coleta seu nome, e-mail e foto de perfil para criar sua conta e personalizar recomendações.</p>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Aceitação dos Termos e Legislação</h4>
+                <p>Ao criar uma conta ou utilizar os serviços do Giro, você declara estar ciente e concordar integralmente com este Termo de Uso e Política de Privacidade, regidos pelo Marco Civil da Internet (Lei nº 12.965/14) e pela LGPD (Lei nº 13.709/18).</p>
               </div>
+
               <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Geolocalização</h4>
-                <p>Solicitamos permissão de GPS para mostrar locais próximos. Você pode recusar e usar busca manual por bairro.</p>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Elegibilidade e Faixa Etária</h4>
+                <p>O aplicativo Giro possui curadoria de locais e eventos voltados ao público geral, incluindo vida noturna e consumo de bebidas alcoólicas por terceiros. O cadastro é permitido apenas para usuários com capacidade civil plena (maiores de 18 anos ou menores emancipados conforme a lei civil brasileira).</p>
               </div>
+
               <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Favoritos e Sincronização</h4>
-                <p>Seus favoritos e preferências são armazenados de forma segura no Supabase e sincronizados entre dispositivos.</p>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Coleta e Finalidade do Tratamento de Dados</h4>
+                <p>Sob a base legal do consentimento e execução de contrato, coletamos: nome completo, endereço de e-mail, fotografia de perfil e dados de geolocalização. Estes dados são utilizados exclusivamente para criação de conta, prevenção de fraudes, customização do perfil e funcionamento do radar dinâmico do app. Não comercializamos dados pessoais com terceiros.</p>
               </div>
+
               <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Direito ao Esquecimento (LGPD)</h4>
-                <p>A qualquer momento você pode excluir sua conta e todos os dados associados permanentemente via configurações do perfil.</p>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Uso de Serviços de Geolocalização</h4>
+                <p>O Giro requer acesso aos dados de GPS do dispositivo para mapear e indicar estabelecimentos e eventos próximos. Você pode revogar essa permissão a qualquer momento nas configurações do seu aparelho, ciente de que algumas funções de radar serão limitadas à busca manual.</p>
               </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">5. Isenção Total de Responsabilidade</h4>
+                <p>O Giro funciona unicamente como plataforma de facilitação e curadoria de informações de entretenimento. Não garantimos a veracidade de preços, horários de funcionamento, segurança, lotação, integridade física ou qualidade dos serviços prestados pelos locais parceiros ou indicados no app. O usuário isenta o Giro de qualquer dano, perda ou acidente ocorrido em eventos e estabelecimentos listados.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">6. Responsabilidade pelo Conteúdo e Avaliações</h4>
+                <p>Você é civil e penalmente responsável por qualquer conteúdo (texto, fotos ou notas) que publicar no Giro. É terminantemente proibido publicar conteúdo difamatório, ofensivo, ilícito ou mentiroso. O Giro se reserva o direito de excluir postagens e banir contas de usuários que violarem as diretrizes de comunidade, sem aviso prévio.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">7. Segurança de Armazenamento</h4>
+                <p>Seus dados são criptografados e hospedados em servidores de banco de dados em nuvem de alta segurança. Embora adotemos rígidos padrões técnicos de segurança, não há garantia absoluta contra invasões, e o Giro não será responsável por vazamentos decorrentes de ataques de terceiros fora do nosso controle razoável.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">8. Seus Direitos de Titular e Exclusão</h4>
+                <p>Em conformidade com o Art. 18 da LGPD, você possui direito de acesso, retificação e portabilidade de dados. A exclusão definitiva de sua conta, com a eliminação permanente de todos os seus dados coletados e preferências dos nossos servidores ativos, pode ser solicitada diretamente no seu perfil ou pelo e-mail: suporte@giroapp.com.br.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">9. Foro de Eleição</h4>
+                <p>Para dirimir quaisquer controvérsias oriundas deste contrato, fica eleito o Foro da Comarca de Curitiba, Estado do Paraná, com renúncia expressa a qualquer outro, por mais privilegiado que seja.</p>
+              </div>
+
             </div>
             <button
               onClick={() => setIsTermsOpen(false)}
-              className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm active:scale-95 transition-all"
+              className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm active:scale-95 transition-all shrink-0"
             >
               Entendido
             </button>
