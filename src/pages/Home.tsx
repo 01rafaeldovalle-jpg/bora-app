@@ -58,6 +58,7 @@ export default function Home({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
@@ -348,6 +349,7 @@ export default function Home({
       setSearchQuery('');
       setSelectedCategories([]);
       setSelectedSubCategories([]);
+      setExpandedCategory(null);
       setViewMode('swipe');
       setActiveFolder(null);
       setActiveCardIndex(0);
@@ -740,10 +742,37 @@ export default function Home({
                 const isSelected = selectedCategories.includes(cat.id);
                 return (
                   <React.Fragment key={cat.id}>
-                    <button
-                      type="button"
-                      onClick={() => toggleCategory(cat.id)}
-                      className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => {
+                        const hasSubcategories = cat.id === '2' || cat.id === '3';
+                        if (hasSubcategories) {
+                          const isOpening = expandedCategory !== cat.id;
+                          setExpandedCategory(isOpening ? cat.id : null);
+                          if (isOpening && !isSelected) {
+                            toggleCategory(cat.id);
+                          }
+                        } else {
+                          toggleCategory(cat.id);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          const hasSubcategories = cat.id === '2' || cat.id === '3';
+                          if (hasSubcategories) {
+                            const isOpening = expandedCategory !== cat.id;
+                            setExpandedCategory(isOpening ? cat.id : null);
+                            if (isOpening && !isSelected) {
+                              toggleCategory(cat.id);
+                            }
+                          } else {
+                            toggleCategory(cat.id);
+                          }
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-brand-coral-500/40 ${
                         isSelected
                           ? 'bg-brand-coral-500/10 border-brand-coral-500 text-brand-coral-600 dark:text-brand-coral-400 font-bold'
                           : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'
@@ -758,19 +787,56 @@ export default function Home({
                         <span className="truncate text-xs">{cat.name}</span>
                       </div>
                       
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-                        isSelected
-                          ? 'bg-brand-coral-500 border-brand-coral-500'
-                          : 'border-slate-300 dark:border-white/20'
-                      }`}>
-                        {isSelected && (
-                          <Check className="w-3.5 h-3.5 text-white" />
+                      <div className="flex items-center gap-2">
+                        {(cat.id === '2' || cat.id === '3') && (
+                          <div className="text-slate-400 dark:text-slate-500">
+                            {expandedCategory === cat.id ? (
+                              <Icons.ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <Icons.ChevronDown className="w-4 h-4" />
+                            )}
+                          </div>
                         )}
+                        <div 
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          tabIndex={0}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleCategory(cat.id);
+                            if (!isSelected) {
+                              setExpandedCategory(cat.id);
+                            } else {
+                              setExpandedCategory(null);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              toggleCategory(cat.id);
+                              if (!isSelected) {
+                                setExpandedCategory(cat.id);
+                              } else {
+                                setExpandedCategory(null);
+                              }
+                            }
+                          }}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-coral-500 ${
+                            isSelected
+                              ? 'bg-brand-coral-500 border-brand-coral-500'
+                              : 'border-slate-300 dark:border-white/20'
+                          }`}
+                        >
+                          {isSelected && (
+                            <Check className="w-3.5 h-3.5 text-white" />
+                          )}
+                        </div>
                       </div>
-                    </button>
+                    </div>
 
                     {/* Subcategorias de Gastronomia (Apenas ID '2' por enquanto) */}
-                    {cat.id === '2' && isSelected && (
+                    {cat.id === '2' && expandedCategory === '2' && (
                       <div className="pl-6 pr-2 py-1.5 space-y-1.5 animate-[fadeInUp_0.2s_ease-out] border-l-2 border-brand-coral-500/30 ml-5 my-1">
                         {[
                           { id: 'massas_italiana', name: 'Pizzas & Massas', emoji: '🍕' },
@@ -815,7 +881,7 @@ export default function Home({
                     )}
 
                     {/* Subcategorias de Cafés e Doces (ID '3') */}
-                    {cat.id === '3' && isSelected && (
+                    {cat.id === '3' && expandedCategory === '3' && (
                       <div className="pl-6 pr-2 py-1.5 space-y-1.5 animate-[fadeInUp_0.2s_ease-out] border-l-2 border-brand-coral-500/30 ml-5 my-1">
                         {[
                           { id: 'cafeterias', name: 'Cafés', emoji: '☕' },
@@ -865,6 +931,7 @@ export default function Home({
                 onClick={() => {
                   setSelectedCategories([]);
                   setSelectedSubCategories([]);
+                  setExpandedCategory(null);
                 }}
                 disabled={selectedCategories.length === 0 && selectedSubCategories.length === 0}
                 className="flex-1 py-2.5 text-center text-xs font-bold text-slate-500 dark:text-slate-450 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
