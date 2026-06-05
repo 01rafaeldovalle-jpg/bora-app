@@ -989,7 +989,10 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       normalized.includes('vinhos') ||
       normalized.includes('drinks') ||
       normalized.includes('coqueteis') ||
-      normalized.includes('bar')
+      normalized.includes('bar') ||
+      normalized.includes('balada') ||
+      normalized.includes('show') ||
+      normalized.includes('karaoke')
     ) {
       return '4'; // Vida Noturna
     }
@@ -1015,6 +1018,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     if (norm.includes('padaria') || norm.includes('panificadora')) return 'padarias';
     if (norm.includes('doces') || norm.includes('bolos') || norm.includes('confeitaria')) return 'docerias';
     if (norm.includes('sorveteria') || norm.includes('gelateria') || norm.includes('acai')) return 'sorveterias';
+    
+    // Vida Noturna (Mapeamentos)
+    if (norm.includes('cervejaria') || norm.includes('pub') || norm.includes('bar_pub')) return 'bar_pub';
+    if (norm.includes('adega') || norm.includes('vinho') || norm.includes('drinks') || norm.includes('coquetel')) return 'adegas_drinks';
+    if (norm.includes('karaoke')) return 'karaokes';
+    if (norm.includes('balada') || norm.includes('show') || norm.includes('clube')) return 'baladas';
     
     return undefined;
   };
@@ -1509,7 +1518,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         '🥗 Saudável & Fit',
                         '🍺 Cervejaria & Pub',
                         '🍷 Adega & Bar de Vinhos',
-                        '🍹 Drinks & Coquetéis'
+                        '🍹 Drinks & Coquetéis',
+                        '🕺 Balada & Casa de Show',
+                        '🎤 Karaokê'
                       ].map((cat) => (
                         <option key={cat} value={cat} className="bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white">{cat}</option>
                       ))}

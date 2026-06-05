@@ -79,7 +79,7 @@ export const MOCK_PLACES: Place[] = [
     website_url: 'https://bardoalemao.com.br',
     ifood_url: 'https://ifood.com.br',
     category_id: '4',
-    sub_category_id: 'carnes_churrasco',
+    sub_category_id: 'bar_pub',
     latitude: -25.4267,
     longitude: -49.2721,
     image_url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=800&q=80',
@@ -313,6 +313,8 @@ export const SUB_CATEGORIES: Record<string, { id: string; name: string; icon: st
   ],
   '4': [ // Vida Noturna
     { id: 'bar_pub', name: 'Bares & Pubs', icon: 'Beer' },
+    { id: 'adegas_drinks', name: 'Adega & Drinks', icon: 'Wine' },
+    { id: 'karaokes', name: 'Karaokê', icon: 'Mic' },
     { id: 'baladas', name: 'Baladas & Shows', icon: 'Music' }
   ],
   '5': [ // Cultura & Arte
