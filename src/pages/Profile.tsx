@@ -998,6 +998,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
 
   const getSubCategoryId = (cat: string) => {
     const norm = cat.toLowerCase();
+    
+    // Gastronomia
     if (norm.includes('pizzaria') || norm.includes('italiana') || norm.includes('massas')) return 'massas_italiana';
     if (norm.includes('hamburgueria') || norm.includes('lanches') || norm.includes('pastelaria') || norm.includes('cachorro-quente') || norm.includes('sanduiche')) return 'hamburgueres';
     if (norm.includes('japonesa') || norm.includes('asiatica') || norm.includes('chinesa')) return 'japonesa';
@@ -1007,6 +1009,13 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     if (norm.includes('brasileira')) return 'brasileira';
     if (norm.includes('mar') || norm.includes('peixes') || norm.includes('frutos')) return 'frutos_do_mar';
     if (norm.includes('saudavel') || norm.includes('vegana') || norm.includes('vegetariana')) return 'saudavel_vegana';
+    
+    // Cafés e Doces (Novos Mapeamentos)
+    if (norm.includes('cafeteria') || norm.includes('cafe')) return 'cafeterias';
+    if (norm.includes('padaria') || norm.includes('panificadora')) return 'padarias';
+    if (norm.includes('doces') || norm.includes('bolos') || norm.includes('confeitaria')) return 'docerias';
+    if (norm.includes('sorveteria') || norm.includes('gelateria') || norm.includes('acai')) return 'sorveterias';
+    
     return undefined;
   };
 

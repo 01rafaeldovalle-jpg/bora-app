@@ -306,8 +306,10 @@ export const SUB_CATEGORIES: Record<string, { id: string; name: string; icon: st
     { id: 'saudavel_vegana', name: 'Saudável & Vegana', icon: 'Leaf' }
   ],
   '3': [ // Cafés e Doces
-    { id: 'cafeterias', name: 'Cafeterias', icon: 'Coffee' },
-    { id: 'docerias', name: 'Docerias & Confeitarias', icon: 'Cake' }
+    { id: 'cafeterias', name: 'Cafés', icon: 'Coffee' },
+    { id: 'padarias', name: 'Padarias', icon: 'Cupcake' },
+    { id: 'docerias', name: 'Confeitarias', icon: 'Cake' },
+    { id: 'sorveterias', name: 'Sorveterias', icon: 'IceCream' }
   ],
   '4': [ // Vida Noturna
     { id: 'bar_pub', name: 'Bares & Pubs', icon: 'Beer' },

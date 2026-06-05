@@ -67,8 +67,11 @@ export default function Home({
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories(prev => {
       const exists = prev.includes(categoryId);
-      if (exists && categoryId === '2') {
-        setSelectedSubCategories([]);
+      if (exists && (categoryId === '2' || categoryId === '3')) {
+        const subcategoriesToClear = categoryId === '2' 
+          ? ['massas_italiana', 'hamburgueres', 'japonesa', 'carnes_churrasco', 'arabe', 'mexicana', 'brasileira', 'frutos_do_mar', 'saudavel_vegana']
+          : ['cafeterias', 'padarias', 'docerias', 'sorveterias'];
+        setSelectedSubCategories(subPrev => subPrev.filter(id => !subcategoriesToClear.includes(id)));
       }
       return exists
         ? prev.filter(id => id !== categoryId)
@@ -779,6 +782,46 @@ export default function Home({
                           { id: 'brasileira', name: 'Brasileira & Caseira', emoji: '🥘' },
                           { id: 'frutos_do_mar', name: 'Frutos do Mar', emoji: '🍤' },
                           { id: 'saudavel_vegana', name: 'Saudável & Vegana', emoji: '🥗' }
+                        ].map((sub) => {
+                          const isSubSelected = selectedSubCategories.includes(sub.id);
+                          return (
+                            <button
+                              type="button"
+                              key={sub.id}
+                              onClick={() => toggleSubCategory(sub.id)}
+                              className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-left transition-all ${
+                                isSubSelected
+                                  ? 'bg-brand-coral-500/5 border-brand-coral-500/60 text-brand-coral-600 dark:text-brand-coral-400 font-semibold'
+                                  : 'bg-slate-50/50 dark:bg-white/3 border-slate-200/40 dark:border-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100/55 dark:hover:bg-white/8'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm">{sub.emoji}</span>
+                                <span className="text-xs">{sub.name}</span>
+                              </div>
+                              <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                                isSubSelected
+                                  ? 'bg-brand-coral-500 border-brand-coral-500 text-white'
+                                  : 'border-slate-300 dark:border-white/20'
+                              }`}>
+                                {isSubSelected && (
+                                  <Check className="w-2.5 h-2.5 text-white" />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Subcategorias de Cafés e Doces (ID '3') */}
+                    {cat.id === '3' && isSelected && (
+                      <div className="pl-6 pr-2 py-1.5 space-y-1.5 animate-[fadeInUp_0.2s_ease-out] border-l-2 border-brand-coral-500/30 ml-5 my-1">
+                        {[
+                          { id: 'cafeterias', name: 'Cafés', emoji: '☕' },
+                          { id: 'padarias', name: 'Padarias', emoji: '🥐' },
+                          { id: 'docerias', name: 'Confeitarias', emoji: '🍰' },
+                          { id: 'sorveterias', name: 'Sorveterias', emoji: '🍨' }
                         ].map((sub) => {
                           const isSubSelected = selectedSubCategories.includes(sub.id);
                           return (
