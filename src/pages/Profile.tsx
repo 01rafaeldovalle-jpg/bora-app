@@ -924,6 +924,12 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   const [bizWebsite, setBizWebsite] = useState('');
   const [bizImage, setBizImage] = useState<string | null>(null);
   const [bizHours, setBizHours] = useState('Diariamente, das 09h às 22h');
+  
+  // Event-specific fields
+  const [bizEventDate, setBizEventDate] = useState('Sáb, 13 Jun');
+  const [bizEventTime, setBizEventTime] = useState('20:00');
+  const [bizTicketPrice, setBizTicketPrice] = useState<number>(0);
+  const [bizTicketUrl, setBizTicketUrl] = useState('');
 
   // Toggles de simulação no Dashboard
   const [isOpenNow, setIsOpenNow] = useState(true);
@@ -1084,7 +1090,11 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       is_verified: true,
       operating_hours: {
         "Seg-Dom": bizHours
-      }
+      },
+      event_date: getSubCategoryId(bizCategory) === 'shows_eventos' ? bizEventDate : undefined,
+      event_time: getSubCategoryId(bizCategory) === 'shows_eventos' ? bizEventTime : undefined,
+      ticket_price: getSubCategoryId(bizCategory) === 'shows_eventos' ? bizTicketPrice : undefined,
+      ticket_url: getSubCategoryId(bizCategory) === 'shows_eventos' ? bizTicketUrl : undefined,
     };
 
     localStorage.setItem('giro_merchant_place', JSON.stringify(newPlace));
@@ -1116,6 +1126,10 @@ export default function Profile({ favoritesCount }: ProfileProps) {
           is_featured: newPlace.is_featured,
           is_verified: newPlace.is_verified,
           operating_hours: newPlace.operating_hours,
+          event_date: newPlace.event_date,
+          event_time: newPlace.event_time,
+          ticket_price: newPlace.ticket_price,
+          ticket_url: newPlace.ticket_url,
         });
       } catch (e) {
         console.error("Erro ao salvar negócio no Supabase:", e);
@@ -1762,25 +1776,81 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               </div>
             )}
 
-            {/* Passo 5: Horários de Funcionamento */}
+            {/* Passo 5: Horários / Detalhes do Evento */}
             {businessStep === 5 && (
               <div className="space-y-4">
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
-                  Escreva de forma simples os horários em que seu estabelecimento fica aberto para os clientes.
-                </p>
+                {getSubCategoryId(bizCategory) === 'shows_eventos' ? (
+                  <>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
+                      Preencha os detalhes da data, hora e ingressos para o seu show, festival ou evento.
+                    </p>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Horários de Funcionamento</label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Terça a Domingo, das 17h às 23h"
-                    value={bizHours}
-                    onChange={(e) => setBizHours(e.target.value)}
-                    className="w-full h-12 rounded-2xl form-input px-4 text-xs"
-                  />
-                  <div className="p-4 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300/50 dark:border-white/5 text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed mt-4">
-                    💡 <strong>Pronto para decolar!</strong> Ao publicar, o Giro irá incluir o seu local diretamente no feed de Swipes de todos os usuários em Curitiba. Você pode alterar as configurações ou excluir o cadastro quando quiser através deste painel.
-                  </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Data do Evento</label>
+                        <input
+                          type="text"
+                          placeholder="Ex: Sáb, 13 Jun"
+                          value={bizEventDate}
+                          onChange={(e) => setBizEventDate(e.target.value)}
+                          className="w-full h-12 rounded-2xl form-input px-4 text-xs"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Horário de Início</label>
+                        <input
+                          type="text"
+                          placeholder="Ex: 20:00"
+                          value={bizEventTime}
+                          onChange={(e) => setBizEventTime(e.target.value)}
+                          className="w-full h-12 rounded-2xl form-input px-4 text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Preço do Ingresso (R$)</label>
+                      <input
+                        type="number"
+                        placeholder="Ex: 50 (digite 0 se gratuito)"
+                        value={bizTicketPrice || ''}
+                        onChange={(e) => setBizTicketPrice(Number(e.target.value))}
+                        className="w-full h-12 rounded-2xl form-input px-4 text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Link para Comprar Ingressos</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: https://sympla.com.br/meu-evento"
+                        value={bizTicketUrl}
+                        onChange={(e) => setBizTicketUrl(e.target.value)}
+                        className="w-full h-12 rounded-2xl form-input px-4 text-xs"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mb-2">
+                      Escreva de forma simples os horários em que seu estabelecimento fica aberto para os clientes.
+                    </p>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Horários de Funcionamento</label>
+                      <input
+                        type="text"
+                        placeholder="Ex: Terça a Domingo, das 17h às 23h"
+                        value={bizHours}
+                        onChange={(e) => setBizHours(e.target.value)}
+                        className="w-full h-12 rounded-2xl form-input px-4 text-xs"
+                      />
+                    </div>
+                  </>
+                )}
+                
+                <div className="p-4 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300/50 dark:border-white/5 text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed mt-4">
+                  💡 <strong>Pronto para decolar!</strong> Ao publicar, o Giro irá incluir o seu local diretamente no feed de Swipes de todos os usuários em Curitiba. Você pode alterar as configurações ou excluir o cadastro quando quiser através deste painel.
                 </div>
               </div>
             )}

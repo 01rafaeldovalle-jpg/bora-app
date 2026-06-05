@@ -30,6 +30,10 @@ export interface Place {
     [key: string]: string;
   };
   distance?: number; // Distância calculada em km
+  event_date?: string;    // Data do evento (ex: "Sáb, 13 Jun")
+  event_time?: string;    // Horário do evento (ex: "20:00")
+  ticket_price?: number;   // Preço do ingresso em reais (0 se gratuito)
+  ticket_url?: string;     // Link para compra de ingressos (Sympla, Eventim, etc.)
 }
 
 export interface Event {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
-import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin, ShoppingBag } from 'lucide-react';
+import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin, ShoppingBag, Calendar, Clock, Ticket } from 'lucide-react';
 
 interface PlaceCardProps {
   place: Place;
@@ -166,6 +166,24 @@ export default function PlaceCard({
           <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-3">
             {place.description}
           </p>
+          {place.event_date && (
+            <div className="flex items-center gap-3 mb-3 p-2.5 rounded-2xl bg-brand-coral-500/5 dark:bg-brand-coral-500/10 border border-brand-coral-500/20 text-[10px] font-bold text-brand-coral-600 dark:text-brand-coral-400 uppercase tracking-wider">
+              <span className="flex items-center gap-1 shrink-0">
+                <Calendar className="w-3.5 h-3.5 text-brand-coral-500" />
+                {place.event_date}
+              </span>
+              {place.event_time && (
+                <span className="flex items-center gap-1 border-l border-slate-200 dark:border-white/10 pl-3">
+                  <Clock className="w-3.5 h-3.5 text-brand-coral-500" />
+                  {place.event_time}h
+                </span>
+              )}
+              <span className="flex items-center gap-1 border-l border-slate-200 dark:border-white/10 pl-3">
+                <Ticket className="w-3.5 h-3.5 text-brand-coral-500" />
+                {place.ticket_price === 0 || place.ticket_price === undefined ? 'Grátis' : `R$ ${place.ticket_price}`}
+              </span>
+            </div>
+          )}
           <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mb-4 flex items-center gap-1 flex-wrap">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500" />
             <span>{place.address}</span>
@@ -225,6 +243,18 @@ export default function PlaceCard({
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
                   iFood
+                </a>
+              )}
+              {place.ticket_url && (
+                <a
+                  href={place.ticket_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-brand-coral-500 hover:bg-brand-coral-600 active:scale-95 text-white text-[10px] font-extrabold tracking-wide uppercase transition-all shadow-md shadow-brand-coral-500/10 decoration-none no-underline"
+                >
+                  <Ticket className="w-3.5 h-3.5" />
+                  Ingressos
                 </a>
               )}
             </div>
