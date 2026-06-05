@@ -298,12 +298,14 @@ export const SUB_CATEGORIES: Record<string, { id: string; name: string; icon: st
     { id: 'pracas', name: 'Praças', icon: 'Flower' },
     { id: 'mirantes', name: 'Mirantes', icon: 'Eye' },
     { id: 'turismo', name: 'Pontos Turísticos', icon: 'Map' },
-    { id: 'lazer_privado', name: 'Lazer & Diversão', icon: 'Compass' }
+    { id: 'lazer_privado', name: 'Lazer & Diversão', icon: 'Compass' },
+    { id: 'mercados_feiras', name: 'Mercados & Feiras', icon: 'Store' },
+    { id: 'shoppings', name: 'Shoppings', icon: 'ShoppingBag' }
   ],
   '2': [ // Gastronomia
     { id: 'massas_italiana', name: 'Pizzas & Massas', icon: 'ChefHat' },
     { id: 'hamburgueres', name: 'Hambúrgueres & Lanches', icon: 'Pizza' },
-    { id: 'japonesa', name: 'Japonesa (Sushi)', icon: 'Fish' },
+    { id: 'asiatica', name: 'Asiática', icon: 'Fish' },
     { id: 'carnes_churrasco', name: 'Carnes & Churrasco', icon: 'Flame' },
     { id: 'arabe', name: 'Comida Árabe', icon: 'Utensils' },
     { id: 'mexicana', name: 'Comida Mexicana', icon: 'Flame' },

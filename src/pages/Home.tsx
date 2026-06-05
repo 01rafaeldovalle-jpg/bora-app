@@ -71,9 +71,9 @@ export default function Home({
       if (exists && (categoryId === '1' || categoryId === '2' || categoryId === '3' || categoryId === '4' || categoryId === '5')) {
         const subcategoriesToClear = 
           categoryId === '1'
-            ? ['parques', 'pracas', 'mirantes', 'turismo', 'lazer_privado']
+            ? ['parques', 'pracas', 'mirantes', 'turismo', 'lazer_privado', 'mercados_feiras', 'shoppings']
             : categoryId === '2' 
-            ? ['massas_italiana', 'hamburgueres', 'japonesa', 'carnes_churrasco', 'arabe', 'mexicana', 'brasileira', 'frutos_do_mar', 'saudavel_vegana']
+            ? ['massas_italiana', 'hamburgueres', 'asiatica', 'carnes_churrasco', 'arabe', 'mexicana', 'brasileira', 'frutos_do_mar', 'saudavel_vegana']
             : categoryId === '3'
             ? ['cafeterias', 'padarias', 'docerias', 'sorveterias']
             : categoryId === '4'
@@ -850,7 +850,9 @@ export default function Home({
                           { id: 'pracas', name: 'Praças', emoji: '🌸' },
                           { id: 'mirantes', name: 'Mirantes', emoji: '👁️' },
                           { id: 'turismo', name: 'Pontos Turísticos', emoji: '🗺️' },
-                          { id: 'lazer_privado', name: 'Lazer & Diversão', emoji: '🎡' }
+                          { id: 'lazer_privado', name: 'Lazer & Diversão', emoji: '🎡' },
+                          { id: 'mercados_feiras', name: 'Mercados & Feiras', emoji: '🏛️' },
+                          { id: 'shoppings', name: 'Shoppings', emoji: '🛍️' }
                         ].map((sub) => {
                           const isSubSelected = selectedSubCategories.includes(sub.id);
                           return (
@@ -889,7 +891,7 @@ export default function Home({
                         {[
                           { id: 'massas_italiana', name: 'Pizzas & Massas', emoji: '🍕' },
                           { id: 'hamburgueres', name: 'Hambúrgueres & Lanches', emoji: '🍔' },
-                          { id: 'japonesa', name: 'Japonesa (Sushi)', emoji: '🍣' },
+                          { id: 'asiatica', name: 'Asiática', emoji: '🍣' },
                           { id: 'carnes_churrasco', name: 'Carnes & Churrasco', emoji: '🥩' },
                           { id: 'arabe', name: 'Comida Árabe', emoji: '🧆' },
                           { id: 'mexicana', name: 'Comida Mexicana', emoji: '🌮' },

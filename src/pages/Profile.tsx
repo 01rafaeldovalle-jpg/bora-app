@@ -982,7 +982,11 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       normalized.includes('boliche') ||
       normalized.includes('kart') ||
       normalized.includes('escape') ||
-      normalized.includes('lazer')
+      normalized.includes('lazer') ||
+      normalized.includes('mercado') ||
+      normalized.includes('feira') ||
+      normalized.includes('shopping') ||
+      normalized.includes('mall')
     ) {
       return '1'; // Parques e Lazer
     }
@@ -1035,7 +1039,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     // Gastronomia
     if (norm.includes('pizzaria') || norm.includes('italiana') || norm.includes('massas')) return 'massas_italiana';
     if (norm.includes('hamburgueria') || norm.includes('lanches') || norm.includes('pastelaria') || norm.includes('cachorro-quente') || norm.includes('sanduiche')) return 'hamburgueres';
-    if (norm.includes('japonesa') || norm.includes('asiatica') || norm.includes('chinesa')) return 'japonesa';
+    if (norm.includes('japonesa') || norm.includes('asiatica') || norm.includes('chinesa') || norm.includes('oriental') || norm.includes('sushi') || norm.includes('poke')) return 'asiatica';
     if (norm.includes('churrascaria') || norm.includes('carnes')) return 'carnes_churrasco';
     if (norm.includes('arabe')) return 'arabe';
     if (norm.includes('mexicana')) return 'mexicana';
@@ -1058,6 +1062,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     // Parques e Lazer (Mapeamentos)
     if (norm.includes('turistico') || norm.includes('turismo') || norm.includes('atracao')) return 'turismo';
     if (norm.includes('boliche') || norm.includes('kart') || norm.includes('escape') || norm.includes('lazer')) return 'lazer_privado';
+    if (norm.includes('mercado') || norm.includes('feira') || norm.includes('food hall') || norm.includes('foodhall')) return 'mercados_feiras';
+    if (norm.includes('shopping') || norm.includes('mall')) return 'shoppings';
     
     // Cultura & Arte (Mapeamentos)
     if (norm.includes('museu') || norm.includes('galeria') || norm.includes('exposição') || norm.includes('exposicao') || norm.includes('cultura')) return 'museus';
@@ -1545,7 +1551,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         '🍔 Hamburgueria',
                         '🥩 Carnes & Churrascaria',
                         '🍝 Italiana & Massas',
-                        '🍣 Japonesa',
+                        '🍣 Japonesa & Asiática',
                         '🌮 Mexicana',
                         '🥙 Árabe',
                         '🥡 Asiática & Chinesa',
@@ -1572,7 +1578,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         '🎡 Boliche, Kart & Escape (Lazer)',
                         '🎨 Museu, Galeria ou Exposição (Cultura)',
                         '🎭 Teatro ou Espaço Cultural',
-                        '📅 Show, Festival ou Evento'
+                        '📅 Show, Festival ou Evento',
+                        '🏛️ Mercado Gastronômico, Municipal ou Feira',
+                        '🛍️ Shopping Center / Mall'
                       ].map((cat) => (
                         <option key={cat} value={cat} className="bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white">{cat}</option>
                       ))}
