@@ -285,3 +285,31 @@ export const MOCK_REVIEWS: Review[] = [
     created_at: '2026-06-01T15:45:00'
   }
 ];
+
+export const SUB_CATEGORIES: Record<string, { id: string; name: string; icon: string }[]> = {
+  '1': [ // Parques e Lazer
+    { id: 'parques', name: 'Parques', icon: 'Trees' },
+    { id: 'pracas', name: 'Praças', icon: 'Flower' },
+    { id: 'mirantes', name: 'Mirantes', icon: 'Eye' }
+  ],
+  '2': [ // Gastronomia
+    { id: 'massas_italiana', name: 'Massas & Italiana', icon: 'ChefHat' },
+    { id: 'japonesa', name: 'Japonesa (Sushi)', icon: 'Fish' },
+    { id: 'hamburgueres', name: 'Hambúrgueres & Lanches', icon: 'Pizza' },
+    { id: 'carnes_churrasco', name: 'Carnes & Churrasco', icon: 'Flame' },
+    { id: 'saudavel_vegana', name: 'Saudável & Vegano', icon: 'Leaf' }
+  ],
+  '3': [ // Cafés e Doces
+    { id: 'cafeterias', name: 'Cafeterias', icon: 'Coffee' },
+    { id: 'docerias', name: 'Docerias & Confeitarias', icon: 'Cake' }
+  ],
+  '4': [ // Vida Noturna
+    { id: 'bar_pub', name: 'Bares & Pubs', icon: 'Beer' },
+    { id: 'baladas', name: 'Baladas & Shows', icon: 'Music' }
+  ],
+  '5': [ // Cultura & Arte
+    { id: 'museus', name: 'Museus & Galerias', icon: 'Palette' },
+    { id: 'teatros', name: 'Teatros & Shows', icon: 'Ticket' }
+  ]
+};
+

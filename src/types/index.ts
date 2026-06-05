@@ -16,6 +16,7 @@ export interface Place {
   website_url?: string;
   ifood_url?: string;
   category_id: string;
+  sub_category_id?: string;
   category_name?: string;
   latitude: number;
   longitude: number;
