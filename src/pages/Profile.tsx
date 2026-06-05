@@ -970,6 +970,17 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   const getCategoryId = (cat: string) => {
     const normalized = cat.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     if (
+      normalized.includes('turistico') ||
+      normalized.includes('turismo') ||
+      normalized.includes('atracao') ||
+      normalized.includes('boliche') ||
+      normalized.includes('kart') ||
+      normalized.includes('escape') ||
+      normalized.includes('lazer')
+    ) {
+      return '1'; // Parques e Lazer
+    }
+    if (
       normalized.includes('cafeteria') ||
       normalized.includes('cafe') ||
       normalized.includes('doces') ||
@@ -1024,6 +1035,10 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     if (norm.includes('adega') || norm.includes('vinho') || norm.includes('drinks') || norm.includes('coquetel')) return 'adegas_drinks';
     if (norm.includes('karaoke')) return 'karaokes';
     if (norm.includes('balada') || norm.includes('show') || norm.includes('clube')) return 'baladas';
+    
+    // Parques e Lazer (Mapeamentos)
+    if (norm.includes('turistico') || norm.includes('turismo') || norm.includes('atracao')) return 'turismo';
+    if (norm.includes('boliche') || norm.includes('kart') || norm.includes('escape') || norm.includes('lazer')) return 'lazer_privado';
     
     return undefined;
   };
@@ -1520,7 +1535,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         '🍷 Adega & Bar de Vinhos',
                         '🍹 Drinks & Coquetéis',
                         '🕺 Balada & Casa de Show',
-                        '🎤 Karaokê'
+                        '🎤 Karaokê',
+                        '🗺️ Ponto Turístico ou Atração de Turismo',
+                        '🎡 Boliche, Kart & Escape (Lazer)'
                       ].map((cat) => (
                         <option key={cat} value={cat} className="bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white">{cat}</option>
                       ))}

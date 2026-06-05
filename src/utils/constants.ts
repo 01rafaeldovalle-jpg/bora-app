@@ -18,6 +18,7 @@ export const MOCK_PLACES: Place[] = [
     instagram_handle: 'jardimbotanicocuritiba',
     website_url: 'https://www.curitiba.pr.gov.br',
     category_id: '1',
+    sub_category_id: 'turismo',
     latitude: -25.4431,
     longitude: -49.2397,
     image_url: 'https://images.unsplash.com/photo-1599839462784-5f50a8a6ba20?auto=format&fit=crop&w=800&q=80',
@@ -57,6 +58,7 @@ export const MOCK_PLACES: Place[] = [
     description: 'O maior e mais frequentado parque de Curitiba. Conta com pistas de corrida, churrasqueiras, lagos imensos e as famosas capivaras residentes da cidade.',
     address: 'Av. Cândido Hartmann, s/n - Bigorrilho, Curitiba - PR',
     category_id: '1',
+    sub_category_id: 'parques',
     latitude: -25.4248,
     longitude: -49.3075,
     image_url: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=800&q=80',
@@ -292,7 +294,9 @@ export const SUB_CATEGORIES: Record<string, { id: string; name: string; icon: st
   '1': [ // Parques e Lazer
     { id: 'parques', name: 'Parques', icon: 'Trees' },
     { id: 'pracas', name: 'Praças', icon: 'Flower' },
-    { id: 'mirantes', name: 'Mirantes', icon: 'Eye' }
+    { id: 'mirantes', name: 'Mirantes', icon: 'Eye' },
+    { id: 'turismo', name: 'Pontos Turísticos', icon: 'Map' },
+    { id: 'lazer_privado', name: 'Lazer & Diversão', icon: 'Compass' }
   ],
   '2': [ // Gastronomia
     { id: 'massas_italiana', name: 'Pizzas & Massas', icon: 'ChefHat' },
