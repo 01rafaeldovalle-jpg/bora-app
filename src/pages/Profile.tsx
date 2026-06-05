@@ -768,30 +768,30 @@ function OnboardingOverlay({
       {/* ══════════ TERMS MODAL ══════════ */}
       {isTermsOpen && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-sm bg-brand-indigo-950 border border-white/10 rounded-[28px] p-6 shadow-2xl flex flex-col" style={{ maxHeight: '80vh' }}>
+          <div className="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[28px] p-6 shadow-2xl flex flex-col text-slate-900 dark:text-slate-100" style={{ maxHeight: '80vh' }}>
             <button
               onClick={() => setIsTermsOpen(false)}
-              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-outfit font-bold text-white mb-1 text-center">Termos e Privacidade</h3>
-            <p className="text-[10px] text-slate-400 mb-4 text-center">Sua privacidade e conformidade com a LGPD ⚖️</p>
-            <div className="flex-1 overflow-y-auto text-xs text-slate-400 space-y-4 leading-relaxed pr-1 mb-5">
+            <h3 className="text-base font-outfit font-bold text-slate-900 dark:text-white mb-1 text-center">Termos e Privacidade</h3>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-4 text-center">Sua privacidade e conformidade com a LGPD ⚖️</p>
+            <div className="flex-1 overflow-y-auto text-xs text-slate-650 dark:text-slate-400 space-y-4 leading-relaxed pr-1 mb-5">
               <div>
-                <h4 className="font-bold text-white mb-1">1. Coleta de Dados</h4>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Coleta de Dados</h4>
                 <p>O Giro coleta seu nome, e-mail e foto de perfil para criar sua conta e personalizar recomendações.</p>
               </div>
               <div>
-                <h4 className="font-bold text-white mb-1">2. Geolocalização</h4>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Geolocalização</h4>
                 <p>Solicitamos permissão de GPS para mostrar locais próximos. Você pode recusar e usar busca manual por bairro.</p>
               </div>
               <div>
-                <h4 className="font-bold text-white mb-1">3. Favoritos e Sincronização</h4>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Favoritos e Sincronização</h4>
                 <p>Seus favoritos e preferências são armazenados de forma segura no Supabase e sincronizados entre dispositivos.</p>
               </div>
               <div>
-                <h4 className="font-bold text-white mb-1">4. Direito ao Esquecimento (LGPD)</h4>
+                <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Direito ao Esquecimento (LGPD)</h4>
                 <p>A qualquer momento você pode excluir sua conta e todos os dados associados permanentemente via configurações do perfil.</p>
               </div>
             </div>
