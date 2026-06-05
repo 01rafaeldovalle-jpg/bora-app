@@ -749,7 +749,7 @@ export default function Home({
                       role="button"
                       tabIndex={0}
                       onClick={() => {
-                        const hasSubcategories = cat.id === '2' || cat.id === '3';
+                        const hasSubcategories = cat.id === '2' || cat.id === '3' || cat.id === '4';
                         if (hasSubcategories) {
                           const isOpening = expandedCategory !== cat.id;
                           setExpandedCategory(isOpening ? cat.id : null);
@@ -763,7 +763,7 @@ export default function Home({
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          const hasSubcategories = cat.id === '2' || cat.id === '3';
+                          const hasSubcategories = cat.id === '2' || cat.id === '3' || cat.id === '4';
                           if (hasSubcategories) {
                             const isOpening = expandedCategory !== cat.id;
                             setExpandedCategory(isOpening ? cat.id : null);
@@ -791,7 +791,7 @@ export default function Home({
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        {(cat.id === '2' || cat.id === '3') && (
+                        {(cat.id === '2' || cat.id === '3' || cat.id === '4') && (
                           <div className="text-slate-400 dark:text-slate-500">
                             {expandedCategory === cat.id ? (
                               <Icons.ChevronUp className="w-4 h-4" />
