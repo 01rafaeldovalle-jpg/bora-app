@@ -34,6 +34,7 @@ export interface Place {
   event_time?: string;    // Horário do evento (ex: "20:00")
   ticket_price?: number;   // Preço do ingresso em reais (0 se gratuito)
   ticket_url?: string;     // Link para compra de ingressos (Sympla, Eventim, etc.)
+  tags?: string[];         // Array de tags de vibe/estilo (ex: ['rock', 'romantico'])
 }
 
 export interface Event {

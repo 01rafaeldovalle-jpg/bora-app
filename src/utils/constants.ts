@@ -51,7 +51,8 @@ export const MOCK_PLACES: Place[] = [
     is_verified: true,
     operating_hours: {
       'Ter - Dom': '10:00 - 18:00'
-    }
+    },
+    tags: ['alternativo', 'rock']
   },
   {
     id: 'p3',
@@ -93,7 +94,8 @@ export const MOCK_PLACES: Place[] = [
     is_verified: true,
     operating_hours: {
       'Seg - Dom': '11:00 - 02:00'
-    }
+    },
+    tags: ['rock', 'samba_pagode']
   },
   {
     id: 'p5',
@@ -117,7 +119,8 @@ export const MOCK_PLACES: Place[] = [
     operating_hours: {
       'Seg - Sáb': '12:00 - 16:00, 19:00 - 23:30',
       'Dom': '12:00 - 17:00'
-    }
+    },
+    tags: ['romantico', 'sofisticado']
   },
   {
     id: 'p6',
@@ -139,7 +142,8 @@ export const MOCK_PLACES: Place[] = [
     operating_hours: {
       'Seg - Sáb': '09:00 - 20:00',
       'Dom': '10:00 - 20:00'
-    }
+    },
+    tags: ['sofisticado', 'alternativo']
   },
   {
     id: 'p7',

@@ -930,6 +930,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   const [bizEventTime, setBizEventTime] = useState('20:00');
   const [bizTicketPrice, setBizTicketPrice] = useState<number>(0);
   const [bizTicketUrl, setBizTicketUrl] = useState('');
+  const [bizTags, setBizTags] = useState<string[]>([]);
 
   // Toggles de simulação no Dashboard
   const [isOpenNow, setIsOpenNow] = useState(true);
@@ -1101,6 +1102,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       event_time: getSubCategoryId(bizCategory) === 'shows_eventos' ? bizEventTime : undefined,
       ticket_price: getSubCategoryId(bizCategory) === 'shows_eventos' ? bizTicketPrice : undefined,
       ticket_url: getSubCategoryId(bizCategory) === 'shows_eventos' ? bizTicketUrl : undefined,
+      tags: bizTags,
     };
 
     localStorage.setItem('giro_merchant_place', JSON.stringify(newPlace));
@@ -1136,6 +1138,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
           event_time: newPlace.event_time,
           ticket_price: newPlace.ticket_price,
           ticket_url: newPlace.ticket_url,
+          tags: newPlace.tags,
         });
       } catch (e) {
         console.error("Erro ao salvar negócio no Supabase:", e);
@@ -1856,7 +1859,49 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                     </div>
                   </>
                 )}
-                
+
+                {/* Seleção de Tags de Vibe */}
+                <div className="space-y-2 mt-4 pt-4 border-t border-slate-200 dark:border-white/5">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                    Selecione o estilo/vibe do seu local
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: 'rock', name: 'Rock', icon: '🎸' },
+                      { id: 'eletronica', name: 'Eletrônica', icon: '⚡' },
+                      { id: 'sertanejo', name: 'Sertanejo', icon: '🤠' },
+                      { id: 'samba_pagode', name: 'Samba & Pagode', icon: '🥁' },
+                      { id: 'jazz_blues', name: 'Jazz & Blues', icon: '🎷' },
+                      { id: 'romantico', name: 'Romântico', icon: '🕯️' },
+                      { id: 'alternativo', name: 'Alternativo/Indie', icon: '🌿' },
+                      { id: 'sofisticado', name: 'Sofisticado', icon: '💎' }
+                    ].map((tag) => {
+                      const isSelected = bizTags.includes(tag.id);
+                      return (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => {
+                            setBizTags(prev => 
+                              prev.includes(tag.id) 
+                                ? prev.filter(t => t !== tag.id) 
+                                : [...prev, tag.id]
+                            );
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-all ${
+                            isSelected
+                              ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-sm'
+                              : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-655 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-white/8'
+                          }`}
+                        >
+                          <span>{tag.icon}</span>
+                          <span>{tag.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="p-4 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300/50 dark:border-white/5 text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed mt-4">
                   💡 <strong>Pronto para decolar!</strong> Ao publicar, o Giro irá incluir o seu local diretamente no feed de Swipes de todos os usuários em Curitiba. Você pode alterar as configurações ou excluir o cadastro quando quiser através deste painel.
                 </div>
@@ -1952,6 +1997,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             onClick={() => {
               setIsCreatingBusiness(true);
               setBusinessStep(1);
+              setBizTags([]);
             }}
             className="w-full py-4 mt-6 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-xs font-bold text-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/25 active:scale-[0.98]"
           >

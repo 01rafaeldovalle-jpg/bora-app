@@ -109,6 +109,7 @@ export default function Home({
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -339,6 +340,14 @@ export default function Home({
             }
           }
         }
+
+        // 3. Matches place tags (vibe / music style)
+        if (place.tags?.some(tag => {
+          const normTag = tag.toLowerCase();
+          return query.includes(normTag) || normTag.includes(query);
+        })) {
+          return true;
+        }
         
         return false;
       })();
@@ -346,14 +355,19 @@ export default function Home({
       const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
       const matchesSubCategory = selectedSubCategories.length > 0 ? selectedSubCategories.includes(place.sub_category_id || '') : true;
-      return matchesSearch && matchesCategory && matchesRadius && matchesSubCategory;
+      
+      const matchesTags = selectedTags.length > 0 
+        ? selectedTags.some(tag => place.tags?.includes(tag))
+        : true;
+
+      return matchesSearch && matchesCategory && matchesRadius && matchesSubCategory && matchesTags;
     });
 
     if (activeCoords) {
       filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return filtered;
-  }, [placesWithDistance, searchQuery, selectedCategories, selectedSubCategories, activeCoords, searchRadius]);
+  }, [placesWithDistance, searchQuery, selectedCategories, selectedSubCategories, selectedTags, activeCoords, searchRadius]);
 
   const featuredPlaces = React.useMemo(() => {
     const featured = placesWithDistance.filter(p => {
@@ -430,6 +444,14 @@ export default function Home({
             }
           }
         }
+
+        // 3. Matches place tags (vibe / music style)
+        if (place.tags?.some(tag => {
+          const normTag = tag.toLowerCase();
+          return query.includes(normTag) || normTag.includes(query);
+        })) {
+          return true;
+        }
         
         return false;
       })();
@@ -437,14 +459,19 @@ export default function Home({
       const matchesCategory = selectedCategories.length > 0 ? selectedCategories.includes(place.category_id) : true;
       const matchesRadius = (!activeCoords || searchRadius === undefined || searchRadius === Infinity) ? true : (place.distance || 0) <= searchRadius;
       const matchesSubCategory = selectedSubCategories.length > 0 ? selectedSubCategories.includes(place.sub_category_id || '') : true;
-      return matchesSearch && matchesCategory && matchesRadius && matchesSubCategory;
+      
+      const matchesTags = selectedTags.length > 0 
+        ? selectedTags.some(tag => place.tags?.includes(tag))
+        : true;
+
+      return matchesSearch && matchesCategory && matchesRadius && matchesSubCategory && matchesTags;
     });
 
     if (activeCoords) {
       filtered.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
     return filtered;
-  }, [placesWithDistance, folderPlaceIds, activeFolder, searchQuery, selectedCategories, selectedSubCategories, activeCoords, searchRadius]);
+  }, [placesWithDistance, folderPlaceIds, activeFolder, searchQuery, selectedCategories, selectedSubCategories, selectedTags, activeCoords, searchRadius]);
 
   const getFolderCover = (placeIds: string[]) => {
     if (placeIds && placeIds.length > 0) {
@@ -643,6 +670,8 @@ export default function Home({
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedCategories([]);
+                  setSelectedSubCategories([]);
+                  setSelectedTags([]);
                 }}
                 className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
               >
@@ -816,6 +845,8 @@ export default function Home({
                     onClick={() => {
                       setSearchQuery('');
                       setSelectedCategories([]);
+                      setSelectedSubCategories([]);
+                      setSelectedTags([]);
                     }}
                     className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
                   >
@@ -1160,6 +1191,46 @@ export default function Home({
                   </React.Fragment>
                 );
               })}
+
+              {/* Estilo & Vibe Section */}
+              <div className="mt-4 pt-4 border-t border-slate-150 dark:border-white/5">
+                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Estilo & Vibe</h4>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'rock', name: 'Rock', icon: '🎸' },
+                    { id: 'eletronica', name: 'Eletrônica', icon: '⚡' },
+                    { id: 'sertanejo', name: 'Sertanejo', icon: '🤠' },
+                    { id: 'samba_pagode', name: 'Samba & Pagode', icon: '🥁' },
+                    { id: 'jazz_blues', name: 'Jazz & Blues', icon: '🎷' },
+                    { id: 'romantico', name: 'Romântico', icon: '🕯️' },
+                    { id: 'alternativo', name: 'Alternativo/Indie', icon: '🌿' },
+                    { id: 'sofisticado', name: 'Sofisticado', icon: '💎' }
+                  ].map((tag) => {
+                    const isSelected = selectedTags.includes(tag.id);
+                    return (
+                      <button
+                        key={tag.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTags(prev => 
+                            prev.includes(tag.id) 
+                              ? prev.filter(t => t !== tag.id) 
+                              : [...prev, tag.id]
+                          );
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-all ${
+                          isSelected
+                            ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-sm'
+                            : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-655 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-white/8'
+                        }`}
+                      >
+                        <span>{tag.icon}</span>
+                        <span>{tag.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* Actions */}
@@ -1170,8 +1241,9 @@ export default function Home({
                   setSelectedCategories([]);
                   setSelectedSubCategories([]);
                   setExpandedCategory(null);
+                  setSelectedTags([]);
                 }}
-                disabled={selectedCategories.length === 0 && selectedSubCategories.length === 0}
+                disabled={selectedCategories.length === 0 && selectedSubCategories.length === 0 && selectedTags.length === 0}
                 className="flex-1 py-2.5 text-center text-xs font-bold text-slate-500 dark:text-slate-450 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
               >
                 Limpar Filtros
