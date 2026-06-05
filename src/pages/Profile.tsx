@@ -987,7 +987,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
       normalized.includes('cultura') ||
       normalized.includes('teatro') ||
       normalized.includes('espaco') ||
-      normalized.includes('art')
+      normalized.includes('art') ||
+      normalized.includes('festival') ||
+      normalized.includes('evento')
     ) {
       return '5'; // Cultura & Arte
     }
@@ -1054,6 +1056,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     // Cultura & Arte (Mapeamentos)
     if (norm.includes('museu') || norm.includes('galeria') || norm.includes('exposição') || norm.includes('exposicao') || norm.includes('cultura')) return 'museus';
     if (norm.includes('teatro') || norm.includes('espaço cultural') || norm.includes('espaco cultural')) return 'teatros';
+    if (norm.includes('show') || norm.includes('festival') || norm.includes('evento')) return 'shows_eventos';
     
     return undefined;
   };
@@ -1554,7 +1557,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         '🗺️ Ponto Turístico ou Atração de Turismo',
                         '🎡 Boliche, Kart & Escape (Lazer)',
                         '🎨 Museu, Galeria ou Exposição (Cultura)',
-                        '🎭 Teatro ou Espaço Cultural'
+                        '🎭 Teatro ou Espaço Cultural',
+                        '📅 Show, Festival ou Evento'
                       ].map((cat) => (
                         <option key={cat} value={cat} className="bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white">{cat}</option>
                       ))}

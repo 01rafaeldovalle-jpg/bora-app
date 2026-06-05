@@ -78,7 +78,7 @@ export default function Home({
             ? ['cafeterias', 'padarias', 'docerias', 'sorveterias']
             : categoryId === '4'
             ? ['bar_pub', 'adegas_drinks', 'karaokes', 'baladas']
-            : ['museus', 'teatros'];
+            : ['museus', 'teatros', 'shows_eventos'];
         setSelectedSubCategories(subPrev => subPrev.filter(id => !subcategoriesToClear.includes(id)));
       }
       return exists
@@ -1013,7 +1013,8 @@ export default function Home({
                       <div className="pl-6 pr-2 py-1.5 space-y-1.5 animate-[fadeInUp_0.2s_ease-out] border-l-2 border-brand-coral-500/30 ml-5 my-1">
                         {[
                           { id: 'museus', name: 'Museus & Galerias', emoji: '🎨' },
-                          { id: 'teatros', name: 'Teatros & Shows', emoji: '🎭' }
+                          { id: 'teatros', name: 'Teatros & Shows', emoji: '🎭' },
+                          { id: 'shows_eventos', name: 'Shows & Eventos', emoji: '📅' }
                         ].map((sub) => {
                           const isSubSelected = selectedSubCategories.includes(sub.id);
                           return (

@@ -325,7 +325,8 @@ export const SUB_CATEGORIES: Record<string, { id: string; name: string; icon: st
   ],
   '5': [ // Cultura & Arte
     { id: 'museus', name: 'Museus & Galerias', icon: 'Palette' },
-    { id: 'teatros', name: 'Teatros & Shows', icon: 'Ticket' }
+    { id: 'teatros', name: 'Teatros & Shows', icon: 'Ticket' },
+    { id: 'shows_eventos', name: 'Shows & Eventos', icon: 'Calendar' }
   ]
 };
 
