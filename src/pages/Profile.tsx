@@ -9,6 +9,8 @@ import { supabase } from '../integrations/supabase/client';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../utils/cropImage';
 import { MOCK_PLACES } from '../utils/constants';
+import { getLanguage, setLanguage, t } from '../utils/i18n';
+
 
 interface ProfileProps {
   favoritesCount: number;
@@ -26,6 +28,13 @@ function OnboardingOverlay({
   onComplete: (session: any) => void;
 }) {
   const [view, setView] = useState<OnboardingView>(initialView);
+  const [lang, setLangState] = useState(getLanguage());
+  useEffect(() => {
+    const handleLangChange = (e: any) => setLangState(e.detail.lang);
+    window.addEventListener('giro-language-change', handleLangChange);
+    return () => window.removeEventListener('giro-language-change', handleLangChange);
+  }, []);
+
 
   // Fields
   const [email, setEmail] = useState('');
@@ -332,15 +341,15 @@ function OnboardingOverlay({
                 Giro
               </h1>
               <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-teal-600 dark:text-brand-teal-400 mt-2">
-                Tudo ao seu redor
+                {t('welcome_tagline')}
               </p>
             </div>
             <div className="text-center mb-4">
               <h2 className="text-lg font-outfit font-black text-slate-800 dark:text-white">
-                Bem-vindo
+                {t('welcome_title')}
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[280px] mx-auto mt-1.5 font-medium">
-                Encontre o que procura, rápido e preciso.
+                {t('welcome_subtitle')}
               </p>
             </div>
 
@@ -357,7 +366,7 @@ function OnboardingOverlay({
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Continuar com o Google
+                {t('continue_google')}
               </button>
 
               {/* Divider */}
@@ -373,7 +382,7 @@ function OnboardingOverlay({
                 className="w-full h-14 rounded-2xl bg-slate-200/60 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white hover:bg-slate-300/60 dark:hover:bg-white/10 active:scale-[0.97] transition-all flex items-center justify-center gap-3"
               >
                 <Mail className="w-5 h-5 text-slate-500 dark:text-slate-300 shrink-0" />
-                Entrar com E-mail
+                {t('enter_email')}
               </button>
 
               {/* Create account */}
@@ -381,7 +390,7 @@ function OnboardingOverlay({
                 onClick={() => { setErr(''); setView('signup-1'); }}
                 className="w-full h-14 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/30 active:scale-[0.97] transition-all"
               >
-                Criar Conta Grátis
+                {t('create_account_btn')}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -901,6 +910,13 @@ function OnboardingOverlay({
 
 export default function Profile({ favoritesCount }: ProfileProps) {
   const [profileSubTab, setProfileSubTab] = useState<'personal' | 'business'>('personal');
+  const [lang, setLangState] = useState(getLanguage());
+  useEffect(() => {
+    const handleLangChange = (e: any) => setLangState(e.detail.lang);
+    window.addEventListener('giro-language-change', handleLangChange);
+    return () => window.removeEventListener('giro-language-change', handleLangChange);
+  }, []);
+
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [badgeLevel, setBadgeLevel] = useState<'gold' | 'silver' | 'bronze'>('gold');
   const [userPreferences, setUserPreferences] = useState<string[]>(() => {

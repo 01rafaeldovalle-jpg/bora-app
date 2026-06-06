@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Compass, Moon, Sun, MapPin, ChevronDown, Search, Locate, X } from 'lucide-react';
+import { getLanguage, setLanguage } from '../../utils/i18n';
+
 
 
 
@@ -57,6 +59,13 @@ export default function Header({
   setSearchRadius
 }: HeaderProps) {
   const [theme, setThemeState] = useState<'light' | 'dark'>('dark');
+  const [lang, setLangState] = useState(getLanguage());
+  useEffect(() => {
+    const handleLangChange = (e: any) => setLangState(e.detail.lang);
+    window.addEventListener('giro-language-change', handleLangChange);
+    return () => window.removeEventListener('giro-language-change', handleLangChange);
+  }, []);
+
   const [locationLabel, setLocationLabel] = useState('Curitiba - PR');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -331,7 +340,14 @@ export default function Header({
             <div className="flex-1" />
           )}
 
-          {/* TEMA (Direita) */}
+          {/* IDIOMA & TEMA (Direita) */}
+          <button 
+            onClick={() => setLanguage(lang === 'pt' ? 'en' : 'pt')} 
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-[10px] font-bold text-slate-600 dark:text-slate-350 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all mr-1"
+          >
+            {lang.toUpperCase()}
+          </button>
+
           <button 
             onClick={handleToggleTheme} 
             className="theme-toggle-btn w-10 h-10 flex items-center justify-center rounded-full relative focus:outline-none shrink-0" 
