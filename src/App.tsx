@@ -665,6 +665,7 @@ export default function App() {
         return (
           <Profile 
             favoritesCount={favorites.length}
+            setTab={setTab}
           />
         );
       default:

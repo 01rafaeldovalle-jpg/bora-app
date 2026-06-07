@@ -14,6 +14,7 @@ import { getLanguage, setLanguage, t } from '../utils/i18n';
 
 interface ProfileProps {
   favoritesCount: number;
+  setTab?: (tab: 'home' | 'explore' | 'favorites' | 'profile') => void;
 }
 
 export const PREFERENCES_LIST = [
@@ -1048,8 +1049,11 @@ function OnboardingOverlay({
 
 // ─── Main Profile Page ──────────────────────────────────────────────────────────
 
-export default function Profile({ favoritesCount }: ProfileProps) {
+export default function Profile({ favoritesCount, setTab }: ProfileProps) {
   const [profileSubTab, setProfileSubTab] = useState<'personal' | 'business'>('personal');
+  const [isMyReviewsOpen, setIsMyReviewsOpen] = useState(false);
+  const [isHelpedLogOpen, setIsHelpedLogOpen] = useState(false);
+  const [isRewardsWalletOpen, setIsRewardsWalletOpen] = useState(false);
   const [lang, setLangState] = useState(getLanguage());
   useEffect(() => {
     const handleLangChange = (e: any) => setLangState(e.detail.lang);
@@ -2464,12 +2468,16 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 {/* Stats */}
                 <div className="grid grid-cols-4 gap-2 w-full mt-4">
                   {[
-                    { icon: <Bookmark className="w-4 h-4 text-brand-teal-400 mb-1.5" />, val: favoritesCount, label: t('salvos') },
-                    { icon: <Edit3 className="w-4 h-4 text-brand-gold-400 mb-1.5" />, val: 12, label: t('reviews') },
-                    { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: helpedCount, label: t('ajudou') },
-                    { icon: <Sparkles className="w-4 h-4 text-amber-500 mb-1.5" />, val: wazePoints, label: lang === 'en' ? 'POINTS' : lang === 'es' ? 'PUNTOS' : 'PONTOS' },
+                    { icon: <Bookmark className="w-4 h-4 text-brand-teal-400 mb-1.5" />, val: favoritesCount, label: t('salvos'), onClick: () => setTab?.('favorites') },
+                    { icon: <Edit3 className="w-4 h-4 text-brand-gold-400 mb-1.5" />, val: 12, label: t('reviews'), onClick: () => setIsMyReviewsOpen(true) },
+                    { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: helpedCount, label: t('ajudou'), onClick: () => setIsHelpedLogOpen(true) },
+                    { icon: <Sparkles className="w-4 h-4 text-amber-500 mb-1.5" />, val: wazePoints, label: lang === 'en' ? 'POINTS' : lang === 'es' ? 'PUNTOS' : 'PONTOS', onClick: () => setIsRewardsWalletOpen(true) },
                   ].map((s, i) => (
-                    <div key={i} className="glass-card p-2.5 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-white/5 shadow-inner text-center">
+                    <div 
+                      key={i} 
+                      onClick={s.onClick}
+                      className="glass-card p-2.5 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-white/5 shadow-inner text-center cursor-pointer active:scale-95 transition-all hover:border-brand-coral-500/20"
+                    >
                       {s.icon}
                       <span className="text-sm font-outfit font-extrabold text-slate-900 dark:text-white transition-all duration-300">{s.val}</span>
                       <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 whitespace-nowrap">{s.label}</span>
@@ -2771,6 +2779,176 @@ export default function Profile({ favoritesCount }: ProfileProps) {
               >
                 Cancelar
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Minhas Reviews */}
+      {isMyReviewsOpen && (
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px]">
+          <div className="absolute inset-0" onClick={() => setIsMyReviewsOpen(false)} />
+          <div className="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[32px] p-6 shadow-2xl z-10 animate-[slideUp_0.3s_ease-out] flex flex-col max-h-[75vh]">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-outfit font-extrabold">{lang === 'en' ? 'My Reviews' : lang === 'es' ? 'Mis Reseñas' : 'Minhas Avaliações'}</h3>
+              <button onClick={() => setIsMyReviewsOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="overflow-y-auto space-y-3.5 pr-1 text-left">
+              {[
+                { 
+                  place: "Sheridan's Irish Pub", 
+                  rating: 3, 
+                  date: lang === 'en' ? '2 days ago' : 'há 2 dias', 
+                  text: lang === 'en' ? 'Great atmosphere, but the line was huge on Saturday and service was slow.' : 'O local é muito legal, mas a fila estava gigante no sábado e o atendimento demorou bastante.',
+                  reply: lang === 'en' ? 'Owner: Hello! We apologize for the delay. We had a record crowd on Saturday due to a special concert, but we are already reinforcing our bar staff for the next weekends. We hope to see you again!' : 'Resposta do Estabelecimento: Olá! Lamentamos pela demora no sábado. Tivemos uma lotação recorde devido ao show especial, mas já estamos reforçando nossa equipe de bar para os próximos fins de semana para agilizar o atendimento. Esperamos sua visita de novo!'
+                },
+                { 
+                  place: "Paco Cafeteria", 
+                  rating: 5, 
+                  date: lang === 'en' ? '1 week ago' : 'há 1 semana', 
+                  text: lang === 'en' ? 'Espresso was amazing, pistachio cookie is divine.' : 'Café expresso estava maravilhoso e o cookie de pistache é divino!',
+                  reply: lang === 'en' ? 'Owner: Thank you so much! It is always a pleasure to serve you our specialty coffee.' : 'Resposta do Estabelecimento: Muito obrigado pela avaliação! É sempre um prazer servir nosso café especial para você, volte sempre!'
+                },
+                { 
+                  place: "Barigui Café", 
+                  rating: 5, 
+                  date: lang === 'en' ? '2 weeks ago' : 'há 2 semanas', 
+                  text: lang === 'en' ? 'Cozy place, nice staff and rib sandwich is spectacular.' : 'Local muito gostoso, atendimento atencioso e o sanduíche de costela é sensacional.',
+                  reply: null
+                }
+              ].map((rev, i) => (
+                <div key={i} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex flex-col gap-1.5">
+                  <div>
+                    <div className="flex justify-between items-start gap-1">
+                      <span className="text-xs font-bold text-slate-800 dark:text-white truncate">{rev.place}</span>
+                      <span className="text-[9px] text-slate-450 shrink-0">{rev.date}</span>
+                    </div>
+                    <div className="flex gap-0.5 text-brand-gold-400 my-1">
+                      {Array.from({ length: 5 }).map((_, idx) => (
+                        <Star key={idx} className={`w-3 h-3 ${idx < rev.rating ? 'fill-brand-gold-400 text-brand-gold-400' : 'text-slate-355 dark:text-slate-600'}`} />
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{rev.text}</p>
+                  </div>
+                  
+                  {rev.reply && (
+                    <div className="mt-1.5 p-2.5 rounded-xl bg-slate-200/50 dark:bg-brand-indigo-950/60 border-l-2 border-brand-coral-500 text-[9px] text-slate-705 dark:text-slate-355 leading-relaxed font-semibold">
+                      <span className="text-[9px] font-black text-brand-coral-500 block mb-0.5">💬 {rev.reply.split(': ')[0]}</span>
+                      {rev.reply.split(': ').slice(1).join(': ')}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Histórico Waze Social */}
+      {isHelpedLogOpen && (
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px]">
+          <div className="absolute inset-0" onClick={() => setIsHelpedLogOpen(false)} />
+          <div className="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[32px] p-6 shadow-2xl z-10 animate-[slideUp_0.3s_ease-out] flex flex-col max-h-[70vh]">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-outfit font-extrabold">{lang === 'en' ? 'Waze Social Activity' : lang === 'es' ? 'Actividad Waze Social' : 'Histórico de Ajuda (Waze)'}</h3>
+              <button onClick={() => setIsHelpedLogOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="overflow-y-auto space-y-3 pr-1 text-left">
+              {[
+                { type: 'status', place: "Sheridan's Irish Pub", detail: lang === 'en' ? "Answered: 'Chill'" : "Informou: 'Tranquilo'", pts: "+10 pts", time: lang === 'en' ? '10m ago' : 'há 10 min' },
+                { type: 'status', place: "Barigui Café", detail: lang === 'en' ? "Answered: 'Busy / No Line'" : "Informou: 'Cheio / Sem Fila'", pts: "+10 pts", time: lang === 'en' ? '2d ago' : 'há 2 dias' },
+                { type: 'thanks', place: "@joaoalves", detail: lang === 'en' ? "Sent you a thank you note!" : "Te enviou um agradecimento!", pts: "+5 pts", time: lang === 'en' ? '3d ago' : 'há 3 dias' },
+                { type: 'status', place: "Paco Cafeteria", detail: lang === 'en' ? "Answered: 'Packed / Long Line'" : "Informou: 'Lotado / Fila Longa'", pts: "+10 pts", time: lang === 'en' ? '5d ago' : 'há 5 dias' }
+              ].map((log, i) => (
+                <div key={i} className="p-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-slate-800 dark:text-slate-200 block truncate">
+                      {log.type === 'thanks' ? '💬 ' : '📍 '} {log.place}
+                    </span>
+                    <span className="text-[9px] text-slate-500 dark:text-slate-400 mt-0.5 block truncate">{log.detail}</span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-[10px] font-black text-brand-teal-500 block">{log.pts}</span>
+                    <span className="text-[8px] text-slate-450 mt-0.5 block">{log.time}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Carteira de Recompensas */}
+      {isRewardsWalletOpen && (
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-[4px]">
+          <div className="absolute inset-0" onClick={() => setIsRewardsWalletOpen(false)} />
+          <div className="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[32px] p-6 shadow-2xl z-10 animate-[slideUp_0.3s_ease-out] flex flex-col max-h-[80vh]">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-outfit font-extrabold">{lang === 'en' ? 'Loyalty Rewards' : lang === 'es' ? 'Recompensas de Fidelidad' : 'Carteira de Recompensas'}</h3>
+              <button onClick={() => setIsRewardsWalletOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-white"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="overflow-y-auto space-y-4 pr-1 text-left flex-1 min-h-0">
+              
+              {/* Pontos Atuais */}
+              <div className="p-4 rounded-3xl bg-gradient-to-tr from-brand-coral-500 to-amber-500 text-white flex items-center justify-between shadow-lg shadow-brand-coral-500/15">
+                <div>
+                  <span className="text-[8px] font-black uppercase tracking-widest opacity-80">{lang === 'en' ? 'Waze Points Balance' : 'Seus Pontos Acumulados'}</span>
+                  <h4 className="text-2xl font-outfit font-black mt-1">{wazePoints} <span className="text-sm font-bold">pts</span></h4>
+                </div>
+                <Sparkles className="w-8 h-8 opacity-45 animate-pulse" />
+              </div>
+
+              {/* Seus Cupons Ativos */}
+              <div>
+                <h5 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{lang === 'en' ? 'Active Coupons' : 'Cupons Ativos'}</h5>
+                <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block truncate">🎟️ Café Expresso Cortesia</span>
+                    <span className="text-[9px] text-slate-500 dark:text-slate-455 mt-0.5 block">{lang === 'en' ? 'Sent by Giro Café & Co.' : 'Enviado por Giro Café & Co.'}</span>
+                  </div>
+                  <span className="px-2 py-1 rounded bg-emerald-500 text-white text-[8px] font-black uppercase shrink-0">Ativo</span>
+                </div>
+              </div>
+
+              {/* Troca de Pontos */}
+              <div>
+                <h5 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{lang === 'en' ? 'Redeem Points' : 'Resgatar Benefícios'}</h5>
+                <div className="space-y-2">
+                  {[
+                    { item: lang === 'en' ? 'Free Draft Beer' : '1 Chopp Cortesia', place: "Sheridan's", cost: 100 },
+                    { item: lang === 'en' ? 'Free Espresso' : '1 Espresso Cortesia', place: "Barigui Café", cost: 50 },
+                    { item: lang === 'en' ? 'Free French Fries' : '1 Batata Rápida Cortesia', place: "Sheridan's", cost: 150 }
+                  ].map((reward, i) => {
+                    const canRedeem = wazePoints >= reward.cost;
+                    return (
+                      <div key={i} className="p-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate">{reward.item}</span>
+                          <span className="text-[9px] text-slate-500 mt-0.5 block">{reward.place}</span>
+                        </div>
+                        <button
+                          disabled={!canRedeem}
+                          onClick={() => {
+                            setWazePoints(prev => prev - reward.cost);
+                            triggerNotification(
+                              lang === 'en' 
+                                ? `Redeemed ${reward.item}! Coupon added.` 
+                                : `Resgatado: ${reward.item}! Cupom adicionado à carteira.`
+                            );
+                          }}
+                          className={`py-1.5 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all shrink-0 cursor-pointer ${
+                            canRedeem 
+                              ? 'bg-brand-coral-500 text-white shadow-md shadow-brand-coral-500/10' 
+                              : 'bg-slate-200 dark:bg-white/10 text-slate-400 cursor-not-allowed'
+                          }`}
+                        >
+                          {reward.cost} pts
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </div>
