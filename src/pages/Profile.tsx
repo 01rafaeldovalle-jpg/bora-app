@@ -733,10 +733,23 @@ function OnboardingOverlay({
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Data de Nascimento</label>
                 <input
-                  type="date"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="DD/MM/AAAA"
+                  maxLength={10}
                   value={birthday}
-                  onChange={(e) => setBirthday(e.target.value)}
-                  className="w-full h-14 rounded-2xl form-input px-4 text-sm"
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/\D/g, '');
+                    let formatted = clean;
+                    if (clean.length > 2) {
+                      formatted = `${clean.slice(0, 2)}/${clean.slice(2)}`;
+                    }
+                    if (clean.length > 4) {
+                      formatted = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4, 8)}`;
+                    }
+                    setBirthday(formatted);
+                  }}
+                  className="w-full h-14 rounded-2xl form-input px-4 text-sm bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
                 />
               </div>
 
@@ -2964,8 +2977,25 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Aniversário</label>
-                  <input type="date" value={editBirthday} onChange={(e) => setEditBirthday(e.target.value)}
-                    className="w-full h-12 rounded-2xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
+                  <input 
+                    type="text" 
+                    inputMode="numeric" 
+                    placeholder="DD/MM/AAAA"
+                    maxLength={10}
+                    value={editBirthday} 
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/\D/g, '');
+                      let formatted = clean;
+                      if (clean.length > 2) {
+                        formatted = `${clean.slice(0, 2)}/${clean.slice(2)}`;
+                      }
+                      if (clean.length > 4) {
+                        formatted = `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4, 8)}`;
+                      }
+                      setEditBirthday(formatted);
+                    }}
+                    className="w-full h-12 rounded-2xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" 
+                  />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Gênero</label>
