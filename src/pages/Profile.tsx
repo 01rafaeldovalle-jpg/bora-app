@@ -1054,8 +1054,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   }, []);
 
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
-  const [badgeLevel, setBadgeLevel] = useState<'gold' | 'silver' | 'bronze'>('gold');
   const [badgeProgress, setBadgeProgress] = useState(65);
+  const badgeLevel = badgeProgress >= 80 ? 'gold' : badgeProgress >= 40 ? 'silver' : 'bronze';
   const [wazePoints, setWazePoints] = useState(80);
   const [helpedCount, setHelpedCount] = useState(142);
   const [pendingWazeQuestion, setPendingWazeQuestion] = useState(true);
@@ -1447,11 +1447,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     { id: 'accessible', label: '♿ Acessível' },
   ];
 
-  const cycleBadgeLevel = () => {
-    if (badgeLevel === 'gold') setBadgeLevel('silver');
-    else if (badgeLevel === 'silver') setBadgeLevel('bronze');
-    else setBadgeLevel('gold');
-  };
+
 
   const openCadastrais = () => {
     setEditName(userName);
@@ -2433,8 +2429,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
 
                 {/* Selo */}
                 <div
-                  onClick={cycleBadgeLevel}
-                  className="glass-card rounded-3xl p-4 w-full border border-slate-100 dark:border-white/5 flex items-center gap-4 mt-4 cursor-pointer select-none hover:border-brand-coral-500/30 transition-all"
+                  className="glass-card rounded-3xl p-4 w-full border border-slate-100 dark:border-white/5 flex items-center gap-4 mt-4 select-none hover:border-brand-coral-500/30 transition-all"
                 >
                   <div className="relative shrink-0 overflow-hidden rounded-xl">
                     <svg className="w-14 h-14 drop-shadow-md" viewBox="0 0 100 100">

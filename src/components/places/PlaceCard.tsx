@@ -392,7 +392,13 @@ export default function PlaceCard({
               <div className="py-8 flex flex-col items-center justify-center space-y-4 text-center">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-brand-coral-500 border-r-2" />
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t('pergunta_enviada_desc')}</h4>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white px-2">
+                    {getLanguage() === 'en' 
+                      ? 'Searching GPS signal and asking whoever is at the location...' 
+                      : getLanguage() === 'es' 
+                        ? 'Buscando señal GPS y preguntando a quien está en el local...' 
+                        : 'Buscando sinal GPS e perguntando a quem está no local...'}
+                  </h4>
                   <p className="text-[10px] text-slate-500 mt-1">
                     {getLanguage() === 'en' ? 'Querying nearby contributors via GPS...' : getLanguage() === 'es' ? 'Consultando colaboradores cercanos vía GPS...' : 'Consultando colaboradores próximos via GPS...'}
                   </p>
@@ -412,23 +418,29 @@ export default function PlaceCard({
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-left space-y-1">
-                  <span className="text-[10px] font-bold text-brand-coral-500 block">@renatomoreira</span>
-                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
+                    <span className="font-bold text-brand-coral-500">@renatomoreira </span>
+                    {getLanguage() === 'en' ? 'replied: ' : getLanguage() === 'es' ? 'respondió: ' : 'respondeu: '}
                     {selectedQuestion === 'crowd' ? (
-                      getLanguage() === 'en' ? 'Crowded, but no line!' : getLanguage() === 'es' ? '¡Lleno, pero sin fila!' : 'Cheio, mas sem fila!'
+                      getLanguage() === 'en' ? 'Está tranquilo, com mesas livres!' : getLanguage() === 'es' ? 'Está tranquilo, con mesas libres!' : 'Está tranquilo, com mesas livres!'
                     ) : selectedQuestion === 'line' ? (
-                      getLanguage() === 'en' ? 'Fast line, about 10 mins.' : getLanguage() === 'es' ? 'Fila rápida, unos 10 min.' : 'Fila rápida, cerca de 10 min.'
+                      getLanguage() === 'en' ? 'Fila super rápida, menos de 5 minutos.' : getLanguage() === 'es' ? 'Fila súper rápida, menos de 5 minutos.' : 'Fila super rápida, menos de 5 minutos.'
                     ) : (
-                      getLanguage() === 'en' ? 'Great vibe, acoustic rock playing!' : getLanguage() === 'es' ? '¡Excelente vibra, tocando rock acústico!' : 'Vibe ótima, tocando rock acústico!'
+                      getLanguage() === 'en' ? 'Música ao vivo incrível e chopp trincando!' : getLanguage() === 'es' ? '¡Música en vivo increíble y cerveza fría!' : 'Música ao vivo incrível e chopp trincando!'
                     )}
                   </p>
                 </div>
 
                 <button
-                  onClick={() => setWazeStep('thanked')}
+                  onClick={() => {
+                    setWazeStep('thanked');
+                    setTimeout(() => {
+                      setIsWazeOpen(false);
+                    }, 2000);
+                  }}
                   className="w-full h-12 rounded-2xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-teal-500/20 active:scale-95 transition-all cursor-pointer"
                 >
-                  {t('agradecer_contribuinte')} (+10 pts)
+                  {getLanguage() === 'en' ? 'Agradecer e Dar +10 Pontos' : getLanguage() === 'es' ? 'Agradecer y Dar +10 Puntos' : 'Agradecer e Dar +10 Pontos'}
                 </button>
               </div>
             )}
@@ -439,19 +451,14 @@ export default function PlaceCard({
                   ✓
                 </div>
                 <div>
-                  <h4 className="text-base font-outfit font-black text-slate-900 dark:text-white">
-                    {getLanguage() === 'en' ? 'Thank You Sent!' : getLanguage() === 'es' ? '¡Agradecimiento Enviado!' : 'Agradecimento enviado!'}
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-relaxed px-4">
+                    {getLanguage() === 'en' 
+                      ? 'Você agradeceu! Pontos de fidelidade enviados para @renatomoreira.' 
+                      : getLanguage() === 'es' 
+                        ? 'Você agradeceu! Pontos de fidelidade enviados para @renatomoreira.' 
+                        : 'Você agradeceu! Pontos de fidelidade enviados para @renatomoreira.'}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {getLanguage() === 'en' ? '+10 points added to the contributor.' : getLanguage() === 'es' ? '+10 puntos sumados al colaborador.' : '+10 pontos somados ao colaborador.'}
-                  </p>
                 </div>
-                <button
-                  onClick={() => setIsWazeOpen(false)}
-                  className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-white font-bold text-xs active:scale-95 transition-all cursor-pointer"
-                >
-                  {getLanguage() === 'en' ? 'Close' : getLanguage() === 'es' ? 'Cerrar' : 'Fechar'}
-                </button>
               </div>
             )}
           </div>
