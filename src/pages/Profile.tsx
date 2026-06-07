@@ -67,6 +67,8 @@ function OnboardingOverlay({
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [birthday, setBirthday] = useState('');
   const [gender, setGender] = useState('');
+  const [genderDetails, setGenderDetails] = useState('');
+  const [pronouns, setPronouns] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
@@ -256,6 +258,8 @@ function OnboardingOverlay({
             favorites: [],
             birthday: birthday,
             gender: gender,
+            gender_details: genderDetails,
+            pronouns: pronouns,
             neighborhood: neighborhood,
           });
           onComplete(authData.session || { user: authData.user });
@@ -285,6 +289,8 @@ function OnboardingOverlay({
           preferences: prefs,
           birthday,
           gender,
+          genderDetails,
+          pronouns,
           neighborhood 
         })
       );
@@ -296,6 +302,8 @@ function OnboardingOverlay({
             avatar_url: finalAvatar,
             birthday,
             gender,
+            gender_details: genderDetails,
+            pronouns,
             neighborhood 
           } 
         },
@@ -755,13 +763,16 @@ function OnboardingOverlay({
 
               {/* Gênero */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Como você se identifica?</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {['Feminino', 'Masculino', 'Outro'].map((g) => (
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gênero</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Feminino', 'Masculino', 'Não-binário', 'Prefiro não dizer'].map((g) => (
                     <button
                       key={g}
                       type="button"
-                      onClick={() => setGender(g)}
+                      onClick={() => {
+                        setGender(g);
+                        if (g !== 'Não-binário') setGenderDetails('');
+                      }}
                       className={`h-11 rounded-xl text-xs font-bold border active:scale-95 transition-all select-none ${
                         gender === g
                           ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md'
@@ -772,6 +783,36 @@ function OnboardingOverlay({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Detalhes de Gênero (Apenas se Não-binário/Outro) */}
+              {gender === 'Não-binário' && (
+                <div className="space-y-1.5 animate-fadeIn">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Como você se descreve? (Opcional)</label>
+                  <input
+                    type="text"
+                    placeholder="Ex: Trans, Gênero Fluido, Agênero"
+                    value={genderDetails}
+                    onChange={(e) => setGenderDetails(e.target.value)}
+                    className="w-full h-12 rounded-xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                  />
+                </div>
+              )}
+
+              {/* Pronomes */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Pronomes (Exibido no perfil)</label>
+                <select
+                  value={pronouns}
+                  onChange={(e) => setPronouns(e.target.value)}
+                  className="w-full h-14 rounded-2xl form-input px-4 text-sm cursor-pointer bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                >
+                  <option value="">Selecione seus pronomes...</option>
+                  <option value="ela/dela">Ela / Dela (She/Her)</option>
+                  <option value="ele/dele">Ele / Dele (He/Him)</option>
+                  <option value="elu/delu">Elu / Delu (Neutro)</option>
+                  <option value="não-exibir">Prefiro não exibir pronomes</option>
+                </select>
               </div>
 
               {/* Bairro */}
@@ -1542,6 +1583,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
   const [editNickname, setEditNickname] = useState('');
   const [editBirthday, setEditBirthday] = useState('');
   const [editGender, setEditGender] = useState('');
+  const [editGenderDetails, setEditGenderDetails] = useState('');
+  const [editPronouns, setEditPronouns] = useState('');
   const [editNeighborhood, setEditNeighborhood] = useState('');
   const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -1592,6 +1635,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
 
   const userBirthday = metadata?.birthday || '';
   const userGender = metadata?.gender || '';
+  const userGenderDetails = metadata?.gender_details || '';
+  const userPronouns = metadata?.pronouns || '';
   const userNeighborhood = metadata?.neighborhood || '';
 
   const openCadastrais = () => {
@@ -1599,6 +1644,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
     setEditNickname(userNickname);
     setEditBirthday(userBirthday);
     setEditGender(userGender);
+    setEditGenderDetails(userGenderDetails);
+    setEditPronouns(userPronouns);
     setEditNeighborhood(userNeighborhood);
     setIsPasswordSectionOpen(false);
     setCurrentPassword('');
@@ -1614,6 +1661,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
           full_name: editName,
           birthday: editBirthday,
           gender: editGender,
+          gender_details: editGenderDetails,
+          pronouns: editPronouns,
           neighborhood: editNeighborhood
         } 
       });
@@ -1622,6 +1671,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
         nickname: editNickname,
         birthday: editBirthday,
         gender: editGender,
+        gender_details: editGenderDetails,
+        pronouns: editPronouns,
         neighborhood: editNeighborhood
       }).eq('id', session.user.id);
     }
@@ -1632,6 +1683,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
       u.username = editNickname;
       u.birthday = editBirthday;
       u.gender = editGender;
+      u.gender_details = editGenderDetails;
+      u.pronouns = editPronouns;
       u.neighborhood = editNeighborhood;
       localStorage.setItem('giro_mock_user', JSON.stringify(u));
     }
@@ -1645,6 +1698,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
             full_name: editName,
             birthday: editBirthday,
             gender: editGender,
+            gender_details: editGenderDetails,
+            pronouns: editPronouns,
             neighborhood: editNeighborhood
           } 
         } 
@@ -2622,7 +2677,11 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                   </label>
                 </div>
 
-                <h2 className="text-xl font-outfit font-extrabold text-slate-900 dark:text-white">{userName}</h2>
+                <h2 className="text-xl font-outfit font-extrabold text-slate-900 dark:text-white">
+                  {userName} {userPronouns && userPronouns !== 'não-exibir' && (
+                    <span className="text-xs font-normal text-slate-450 dark:text-slate-400">({userPronouns})</span>
+                  )}
+                </h2>
                 <p className="text-xs text-slate-400 mt-0.5">{userNickname}</p>
 
                 {/* Warning Alert if gold badge progress is < 100% */}
@@ -2997,18 +3056,52 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                     className="w-full h-12 rounded-2xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" 
                   />
                 </div>
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Gênero</label>
-                  <select value={editGender} onChange={(e) => setEditGender(e.target.value)}
-                    className="w-full h-12 rounded-2xl form-input px-3 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="Feminino">Feminino</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Outro">Outro</option>
-                  </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-550 dark:text-slate-450 uppercase block">Como você se identifica? (Gênero)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Feminino', 'Masculino', 'Não-binário', 'Prefiro não dizer'].map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => {
+                        setEditGender(g);
+                        if (g !== 'Não-binário') setEditGenderDetails('');
+                      }}
+                      className={`h-9 rounded-xl text-xs font-bold border active:scale-95 transition-all select-none ${
+                        editGender === g
+                          ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md'
+                          : 'bg-white dark:bg-brand-indigo-950 border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-slate-350'
+                      }`}
+                    >
+                      {g}
+                    </button>
+                  ))}
                 </div>
               </div>
+
+              {editGender === 'Não-binário' && (
+                <div className="space-y-1.5 animate-fadeIn">
+                  <label className="text-[10px] font-bold text-slate-550 dark:text-slate-450 uppercase block">Descreva seu gênero (Opcional)</label>
+                  <input type="text" value={editGenderDetails} onChange={(e) => setEditGenderDetails(e.target.value)} placeholder="Ex: Transgênero, Gênero Fluido"
+                    className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
+                </div>
+              )}
+
+              <div>
+                <label className="text-[10px] font-bold text-slate-550 dark:text-slate-455 uppercase block mb-1.5">Pronomes no Perfil</label>
+                <select value={editPronouns} onChange={(e) => setEditPronouns(e.target.value)}
+                  className="w-full h-11 rounded-xl form-input px-3 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                >
+                  <option value="">Selecione seus pronomes...</option>
+                  <option value="ela/dela">Ela / Dela (She/Her)</option>
+                  <option value="ele/dele">Ele / Dele (He/Him)</option>
+                  <option value="elu/delu">Elu / Delu (Neutro)</option>
+                  <option value="não-exibir">Prefiro não exibir</option>
+                </select>
+              </div>
+
               <div>
                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Bairro de Residência</label>
                 <select value={editNeighborhood} onChange={(e) => setEditNeighborhood(e.target.value)}
