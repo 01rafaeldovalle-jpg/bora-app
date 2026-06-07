@@ -450,7 +450,10 @@ function OnboardingOverlay({
 
         {/* ══════════ EMAIL LOGIN ══════════ */}
         {view === 'email-login' && (
-          <div className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]">
+          <form 
+            onSubmit={(e) => { e.preventDefault(); handleEmailLogin(); }}
+            className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]"
+          >
             <div className="text-center mt-4">
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <Mail className="w-7 h-7 text-brand-coral-500" />
@@ -464,6 +467,9 @@ function OnboardingOverlay({
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="email"
+                  id="login-email"
+                  name="email"
+                  autoComplete="username"
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -475,6 +481,9 @@ function OnboardingOverlay({
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type={showPwd ? 'text' : 'password'}
+                  id="login-password"
+                  name="password"
+                  autoComplete="current-password"
                   placeholder="Senha"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -494,7 +503,7 @@ function OnboardingOverlay({
             {err && <p className="text-xs text-rose-400 font-semibold text-center">{err}</p>}
 
             <button
-              onClick={handleEmailLogin}
+              type="submit"
               disabled={loading}
               className="w-full h-14 rounded-2xl btn-primary disabled:opacity-50 text-sm flex items-center justify-center gap-2"
             >
@@ -505,18 +514,22 @@ function OnboardingOverlay({
             <p className="text-xs text-center text-slate-500">
               Não tem conta?{' '}
               <button
+                type="button"
                 onClick={() => { setErr(''); setView('signup-1'); }}
                 className="text-brand-coral-500 font-bold hover:text-brand-coral-400 transition-colors"
               >
                 Cadastre-se grátis
               </button>
             </p>
-          </div>
+          </form>
         )}
 
         {/* ══════════ SIGNUP STEP 1 – Acesso ══════════ */}
         {view === 'signup-1' && (
-          <div className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]">
+          <form 
+            onSubmit={(e) => { e.preventDefault(); handleSignupStep1(); }}
+            className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]"
+          >
             <div className="text-center mt-2">
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-7 h-7 text-brand-coral-500" />
@@ -530,6 +543,9 @@ function OnboardingOverlay({
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="email"
+                  id="signup-email"
+                  name="email"
+                  autoComplete="email"
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -540,6 +556,9 @@ function OnboardingOverlay({
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type={showPwd ? 'text' : 'password'}
+                  id="signup-password"
+                  name="password"
+                  autoComplete="new-password"
                   placeholder={t('senha_min')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -598,7 +617,7 @@ function OnboardingOverlay({
             {err && <p className="text-xs text-rose-400 font-semibold text-center">{err}</p>}
 
             <button
-              onClick={handleSignupStep1}
+              type="submit"
               disabled={!email || password.length < 6 || !acceptTerms}
               className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
@@ -609,13 +628,14 @@ function OnboardingOverlay({
             <p className="text-xs text-center text-slate-500">
               {t('ja_tem_conta')}{' '}
               <button
+                type="button"
                 onClick={() => { setErr(''); setView('email-login'); }}
                 className="text-brand-coral-500 font-bold"
               >
                 {t('fazer_login')}
               </button>
             </p>
-          </div>
+          </form>
         )}
 
         {/* ══════════ SIGNUP STEP 2 – Identidade ══════════ */}
