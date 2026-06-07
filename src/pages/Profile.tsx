@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut,
   ChevronRight, Mail, Lock, Eye, EyeOff, Save, X, Trash2,
-  MapPin, ArrowRight, ArrowLeft, Camera, Sparkles, CheckCircle2,
+  MapPin, ArrowRight, ArrowLeft, Camera, Sparkles, CheckCircle2, Navigation,
   Instagram, Globe, Building2, Building, BarChart3, Star, Clock, Phone, Image
 } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -1055,6 +1055,18 @@ export default function Profile({ favoritesCount }: ProfileProps) {
 
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [badgeLevel, setBadgeLevel] = useState<'gold' | 'silver' | 'bronze'>('gold');
+  const [badgeProgress, setBadgeProgress] = useState(65);
+  const [wazePoints, setWazePoints] = useState(80);
+  const [helpedCount, setHelpedCount] = useState(142);
+  const [pendingWazeQuestion, setPendingWazeQuestion] = useState(true);
+  const [wazeNotification, setWazeNotification] = useState<string | null>(null);
+
+  const triggerNotification = (msg: string) => {
+    setWazeNotification(msg);
+    setTimeout(() => {
+      setWazeNotification(null);
+    }, 4000);
+  };
   const [userPreferences, setUserPreferences] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('giro_preferences');
@@ -1665,6 +1677,86 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             </div>
           </div>
 
+          {/* Painel de Analytics & Interações Waze */}
+          <div className="glass-card rounded-[28px] border border-slate-100 dark:border-white/5 p-5 flex flex-col gap-5 bg-white/5 text-left animate-[fadeIn_0.35s_ease-out]">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+              <BarChart3 className="w-3.5 h-3.5 text-brand-coral-400" />
+              {lang === 'en' ? 'Advanced Analytics & Crowdsourcing' : lang === 'es' ? 'Análisis Avanzado y Crowdsourcing' : 'Analytics Avançado & Crowdsourcing'}
+            </h3>
+
+            {/* Swipes ratio progress bar */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                <span>{lang === 'en' ? 'Liked (Swipe Right) • 82%' : lang === 'es' ? 'Gustó (Derecha) • 82%' : 'Gostaram (Swipe Direita) • 82%'}</span>
+                <span>{lang === 'en' ? 'Ignored • 18%' : lang === 'es' ? 'Ignorado • 18%' : 'Ignoraram • 18%'}</span>
+              </div>
+              <div className="w-full h-3 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden flex">
+                <div className="h-full bg-gradient-to-r from-brand-teal-500 to-emerald-400" style={{ width: '82%' }} />
+                <div className="h-full bg-rose-500" style={{ width: '18%' }} />
+              </div>
+            </div>
+
+            {/* Click stats grid */}
+            <div className="space-y-2.5">
+              <h4 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {lang === 'en' ? 'Detailed Clicks Grid' : lang === 'es' ? 'Matriz de Clics Detallados' : 'Métricas de Cliques no Perfil'}
+              </h4>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { key: 'metric_instagram', val: '765', icon: <Instagram className="w-3.5 h-3.5 text-pink-500" /> },
+                  { key: 'metric_whatsapp', val: '342', icon: <Phone className="w-3.5 h-3.5 text-emerald-500" /> },
+                  { key: 'metric_maps', val: '210', icon: <MapPin className="w-3.5 h-3.5 text-brand-teal-400" /> },
+                  { key: 'metric_uber99', val: '154', icon: <Navigation className="w-3.5 h-3.5 text-brand-coral-400" /> },
+                  { key: 'metric_website', val: '98', icon: <Globe className="w-3.5 h-3.5 text-blue-400" /> }
+                ].map((item) => (
+                  <div key={item.key} className="p-3 rounded-2xl bg-slate-100/60 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 flex items-center justify-between animate-fadeIn">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {item.icon}
+                      <span className="text-[10px] font-bold text-slate-750 dark:text-slate-350 truncate">{t(item.key as any)}</span>
+                    </div>
+                    <span className="text-xs font-black text-slate-900 dark:text-white shrink-0 ml-1">{item.val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Loyalty and Waze Crowd Social Reward */}
+            <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-white/5">
+              <h4 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                {lang === 'en' ? 'Customer Loyalty & Waze Collaborators' : lang === 'es' ? 'Fidelidad y Colaboradores Waze' : 'Fidelidade & Colaboradores Waze'}
+              </h4>
+
+              <div className="space-y-2.5">
+                {[
+                  { username: '@renatomoreira', answers: 8, points: 80, coupon: 'Chopp Grátis', couponEn: 'Free Beer', couponEs: 'Cerveza Gratis' },
+                  { username: '@joaoalves', answers: 3, points: 30, coupon: 'Café Cortesia', couponEn: 'Complimentary Coffee', couponEs: 'Café Cortesia' }
+                ].map((user) => (
+                  <div key={user.username} className="p-3.5 rounded-2xl bg-slate-100/60 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-brand-coral-500">{user.username}</span>
+                        <span className="px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/25 text-[8px] font-bold text-amber-500 uppercase">Top Contributor</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                        {lang === 'en' ? `${user.answers} answers • ${user.points} pts accumulated` : lang === 'es' ? `${user.answers} respuestas • ${user.points} pts acumulados` : `${user.answers} respostas • ${user.points} pts acumulados`}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const couponName = lang === 'en' ? user.couponEn : lang === 'es' ? user.couponEs : user.coupon;
+                        const sentCouponMsg = lang === 'en' ? 'Coupon successfully sent to' : lang === 'es' ? '¡Cupón enviado con éxito a' : 'Cupom enviado com sucesso para';
+                        triggerNotification(`${sentCouponMsg} ${user.username}! (${couponName})`);
+                      }}
+                      className="py-2 px-3.5 rounded-xl bg-brand-coral-500 hover:bg-brand-coral-600 text-[10px] font-extrabold text-white active:scale-95 transition-all text-center shrink-0 cursor-pointer shadow-md shadow-brand-coral-500/15"
+                    >
+                      {lang === 'en' ? `Send ${user.couponEn} Coupon` : lang === 'es' ? `Enviar Cupón ${user.couponEs}` : `Enviar Cupom ${user.coupon}`}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Excluir Registro */}
           <button
             onClick={() => {
@@ -2270,6 +2362,18 @@ export default function Profile({ favoritesCount }: ProfileProps) {
 
   return (
     <div className="pb-24 text-slate-900 dark:text-slate-100 w-full flex flex-col items-center">
+      {/* Toast Notification */}
+      {wazeNotification && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100000] w-full max-w-xs p-4 rounded-2xl bg-emerald-500 text-white font-bold text-xs shadow-2xl flex items-center justify-between animate-[fadeInDown_0.3s_ease-out]">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">✓</span>
+            <span>{wazeNotification}</span>
+          </div>
+          <button onClick={() => setWazeNotification(null)} className="text-white hover:text-slate-200">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
       <div className="px-6 py-6 max-w-md mx-auto w-full flex flex-col">
         {/* Segmented Control */}
         <div className="flex bg-slate-100 dark:bg-brand-indigo-950/85 p-1 rounded-2xl w-full gap-1 border border-slate-200/60 dark:border-white/5 transition-colors duration-300 shrink-0">
@@ -2319,10 +2423,18 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 <h2 className="text-xl font-outfit font-extrabold text-slate-900 dark:text-white">{userName}</h2>
                 <p className="text-xs text-slate-400 mt-0.5">{userNickname}</p>
 
+                {/* Warning Alert if gold badge progress is < 100% */}
+                {badgeLevel === 'gold' && badgeProgress < 100 && (
+                  <div className="w-full mb-3 mt-4 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-start gap-2.5 animate-[fadeIn_0.3s_ease-out]">
+                    <span className="shrink-0 text-base">⚠️</span>
+                    <p className="text-left leading-relaxed">{t('selo_decaindo_aviso')}</p>
+                  </div>
+                )}
+
                 {/* Selo */}
                 <div
                   onClick={cycleBadgeLevel}
-                  className="glass-card rounded-3xl p-4 w-full border border-slate-100 dark:border-white/5 flex items-center gap-4 mt-5 cursor-pointer select-none hover:border-brand-coral-500/30 transition-all"
+                  className="glass-card rounded-3xl p-4 w-full border border-slate-100 dark:border-white/5 flex items-center gap-4 mt-4 cursor-pointer select-none hover:border-brand-coral-500/30 transition-all"
                 >
                   <div className="relative shrink-0 overflow-hidden rounded-xl">
                     <svg className="w-14 h-14 drop-shadow-md" viewBox="0 0 100 100">
@@ -2353,32 +2465,75 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         {t('selo')} {badgeLevel === 'gold' ? t('selo_ouro') : badgeLevel === 'silver' ? t('selo_prata') : t('selo_bronze')}
                       </h3>
                       <span className="text-[10px] font-semibold text-slate-400">
-                        {badgeLevel === 'gold' ? '85%' : badgeLevel === 'silver' ? '60%' : '30%'} {t('ativo')}
+                        {badgeLevel === 'gold' ? `${badgeProgress}%` : badgeLevel === 'silver' ? '60%' : '30%'} {t('ativo')}
                       </span>
                     </div>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
                       {t('ciclar_selos')}
                     </p>
                     <div className="w-full h-1.5 bg-slate-100 dark:bg-brand-indigo-950 rounded-full overflow-hidden mt-2">
-                      <div className={`h-full rounded-full transition-all duration-500 ${badgeLevel === 'gold' ? 'bg-amber-500 w-[85%]' : badgeLevel === 'silver' ? 'bg-slate-300 w-[60%]' : 'bg-amber-700 w-[30%]'}`} />
+                      <div className={`h-full rounded-full transition-all duration-500 ${badgeLevel === 'gold' ? 'bg-amber-500' : badgeLevel === 'silver' ? 'bg-slate-300' : 'bg-amber-700'}`} style={{ width: badgeLevel === 'gold' ? `${badgeProgress}%` : badgeLevel === 'silver' ? '60%' : '30%' }} />
                     </div>
                   </div>
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-3 w-full mt-4">
+                <div className="grid grid-cols-4 gap-2 w-full mt-4">
                   {[
                     { icon: <Bookmark className="w-4 h-4 text-brand-teal-400 mb-1.5" />, val: favoritesCount, label: t('salvos') },
                     { icon: <Edit3 className="w-4 h-4 text-brand-gold-400 mb-1.5" />, val: 12, label: t('reviews') },
-                    { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: 142, label: t('ajudou') },
+                    { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: helpedCount, label: t('ajudou') },
+                    { icon: <Sparkles className="w-4 h-4 text-amber-500 mb-1.5" />, val: wazePoints, label: lang === 'en' ? 'POINTS' : lang === 'es' ? 'PUNTOS' : 'PONTOS' },
                   ].map((s, i) => (
-                    <div key={i} className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-white/5 shadow-inner">
+                    <div key={i} className="glass-card p-2.5 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-white/5 shadow-inner text-center">
                       {s.icon}
-                      <span className="text-base font-outfit font-extrabold text-slate-900 dark:text-white">{s.val}</span>
-                      <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-0.5">{s.label}</span>
+                      <span className="text-sm font-outfit font-extrabold text-slate-900 dark:text-white transition-all duration-300">{s.val}</span>
+                      <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider mt-0.5 whitespace-nowrap">{s.label}</span>
                     </div>
                   ))}
                 </div>
+
+                {/* Pending Waze Questions */}
+                {pendingWazeQuestion && (
+                  <div className="glass-card rounded-3xl p-5 w-full border border-slate-100 dark:border-white/5 mt-4 text-left bg-white/5 animate-[fadeInUp_0.4s_ease-out]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 rounded-full bg-brand-coral-500 animate-ping" />
+                      <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                        {lang === 'en' ? 'Pending Waze Questions' : lang === 'es' ? 'Preguntas Waze Pendientes' : 'Perguntas Waze Pendentes'}
+                      </h3>
+                    </div>
+                    <p className="text-xs font-semibold text-slate-750 dark:text-slate-350 mb-3 leading-relaxed">
+                      {lang === 'en' ? 'Someone is asking: How is Sheridan\'s Irish Pub right now?' : lang === 'es' ? 'Alguien está preguntando: ¿Cómo está Sheridan\'s Irish Pub ahora?' : 'Alguém perguntando: Como está o Sheridan\'s Irish Pub agora?'}
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: 'tranquilo', label: t('waze_tranquilo') },
+                        { id: 'cheio', label: t('waze_cheio') },
+                        { id: 'lotado', label: t('waze_lotado') }
+                      ].map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => {
+                            setBadgeProgress(100);
+                            setWazePoints(prev => prev + 10);
+                            setHelpedCount(prev => prev + 1);
+                            setPendingWazeQuestion(false);
+                            triggerNotification(
+                              lang === 'en' 
+                                ? 'Thanks! +10 points. Gold Badge restored!' 
+                                : lang === 'es' 
+                                  ? '¡Gracias! +10 puntos. ¡Sello de Oro restaurado!' 
+                                  : 'Obrigado! +10 pontos. Selo Ouro restaurado!'
+                            );
+                          }}
+                          className="py-2 px-1 text-center text-[10px] font-bold rounded-xl border border-slate-200/60 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-350 hover:border-brand-coral-500 hover:bg-brand-coral-500/5 active:scale-95 transition-all cursor-pointer"
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Preferências */}
                 {/* Preferências */}

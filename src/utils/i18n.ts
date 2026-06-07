@@ -205,7 +205,23 @@ export const TRANSLATIONS = {
     pref_acc_deaf: "🤟 Atendimento em LIBRAS",
     pref_acc_blind: "🔊 Cardápio Acessível",
     pref_speak_en: "🇬🇧 Atendimento em Inglês",
-    pref_speak_es: "🇪🇸 Atendimento em Espanhol"
+    pref_speak_es: "🇪🇸 Atendimento em Espanhol",
+    como_esta_agora: "Como está agora?",
+    perguntar_sobre: "Perguntar status do local",
+    pergunta_enviada_desc: "Enviando sinal GPS para quem está lá...",
+    agradecer_contribuinte: "Agradecer e Dar Pontos",
+    selo_decaindo_aviso: "Seu Selo está decaindo! Ajude outros usuários para restaurar o Ouro.",
+    waze_tranquilo: "Tranquilo",
+    waze_cheio: "Cheio",
+    waze_lotado: "Lotado",
+    waze_sem_fila: "Sem Fila",
+    waze_fila_rapida: "Fila Rápida",
+    waze_fila_demorada: "Fila Demorada",
+    metric_instagram: "Cliques no Instagram",
+    metric_whatsapp: "Cliques no WhatsApp",
+    metric_maps: "Navegação Maps",
+    metric_uber99: "Chamados Uber/99",
+    metric_website: "Site/Cardápio"
   },
   en: {
     // Navegação Inferior
@@ -411,7 +427,23 @@ export const TRANSLATIONS = {
     pref_acc_deaf: "🤟 Sign Language Staff",
     pref_acc_blind: "🔊 Accessible Menu",
     pref_speak_en: "🇬🇧 English-Speaking Staff",
-    pref_speak_es: "🇪🇸 Spanish-Speaking Staff"
+    pref_speak_es: "🇪🇸 Spanish-Speaking Staff",
+    como_esta_agora: "How is it now?",
+    perguntar_sobre: "Ask status of the venue",
+    pergunta_enviada_desc: "Sending GPS signal to who is there...",
+    agradecer_contribuinte: "Thank & Give Points",
+    selo_decaindo_aviso: "Your badge is decaying! Help other users to restore the Gold.",
+    waze_tranquilo: "Quiet",
+    waze_cheio: "Crowded",
+    waze_lotado: "Packed",
+    waze_sem_fila: "No Line",
+    waze_fila_rapida: "Fast Line",
+    waze_fila_demorada: "Slow Line",
+    metric_instagram: "Instagram Clicks",
+    metric_whatsapp: "WhatsApp Clicks",
+    metric_maps: "Maps Navigation",
+    metric_uber99: "Uber/99 Requests",
+    metric_website: "Website/Menu"
   },
   es: {
     // Navegação Inferior
@@ -617,8 +649,24 @@ export const TRANSLATIONS = {
     pref_acc_deaf: "🤟 Atiende en Señas (LIBRAS)",
     pref_acc_blind: "🔊 Menú Accesible",
     pref_speak_en: "🇬🇧 Personal habla Inglés",
-    pref_speak_es: "🇪🇸 Personal habla Español"
-  }
+    pref_speak_es: "🇪🇸 Personal habla Español",
+    como_esta_agora: "¿Cómo está ahora?",
+    perguntar_sobre: "Preguntar status del local",
+    pergunta_enviada_desc: "Enviando señal GPS a quienes están allá...",
+    agradecer_contribuinte: "Agradecer y Dar Puntos",
+    selo_decaindo_aviso: "¡Tu sello se está decayendo! Ayuda a otros usuarios para restaurar el Oro.",
+    waze_tranquilo: "Tranquilo",
+    waze_cheio: "Cheio",
+    waze_lotado: "Lotado",
+    waze_sem_fila: "Sin Fila",
+    waze_fila_rapida: "Fila Rápida",
+    waze_fila_demorada: "Fila Demorada",
+    metric_instagram: "Clics en Instagram",
+    metric_whatsapp: "Clics en WhatsApp",
+    metric_maps: "Navegación Maps",
+    metric_uber99: "Llamadas Uber/99",
+    metric_website: "Sitio/Menú"
+  },
 };
 
 export const getLanguage = (): Language => {

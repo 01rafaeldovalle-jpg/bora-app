@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
-import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin, ShoppingBag, Calendar, Clock, Ticket } from 'lucide-react';
-import { getLanguage } from '../../utils/i18n';
+import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin, ShoppingBag, Calendar, Clock, Ticket, MessageSquare } from 'lucide-react';
+import { getLanguage, t } from '../../utils/i18n';
 
 interface PlaceCardProps {
   place: Place;
@@ -19,6 +19,9 @@ export default function PlaceCard({
   onClose
 }: PlaceCardProps) {
   const [isImgLoaded, setIsImgLoaded] = useState(false);
+  const [isWazeOpen, setIsWazeOpen] = useState(false);
+  const [wazeStep, setWazeStep] = useState<'ask' | 'loading' | 'reply' | 'thanked'>('ask');
+  const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
 
   // Helper para abrir as rotas do celular
   const handleDirections = (e: React.MouseEvent, type: 'google-maps' | 'uber' | '99') => {
@@ -141,6 +144,19 @@ export default function PlaceCard({
               )}
               <button
                 type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsWazeOpen(true);
+                  setWazeStep('ask');
+                  setSelectedQuestion(null);
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-555 dark:text-slate-350 transition-colors"
+                title={t('como_esta_agora')}
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-brand-coral-500" />
+              </button>
+              <button
+                type="button"
                 onClick={handleShare}
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-500 dark:text-slate-350 transition-colors"
                 title="Compartilhar"
@@ -196,6 +212,23 @@ export default function PlaceCard({
               <span className="text-brand-coral-500 font-bold ml-1">• a {place.distance < 1 ? `${Math.round(place.distance * 1000)} m` : `${place.distance.toFixed(1)} km`} de você</span>
             )}
           </p>
+          
+          {/* Waze highlighted link */}
+          <div className="mt-2.5 mb-1 text-left">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsWazeOpen(true);
+                setWazeStep('ask');
+                setSelectedQuestion(null);
+              }}
+              className="text-[10px] font-bold text-brand-coral-500 hover:text-brand-coral-600 flex items-center gap-1 bg-brand-coral-500/5 px-2.5 py-1.5 rounded-xl border border-brand-coral-500/10 active:scale-95 transition-all cursor-pointer"
+            >
+              <MessageSquare className="w-3.5 h-3.5 fill-brand-coral-500/10" />
+              {t('como_esta_agora')}
+            </button>
+          </div>
         </div>
 
         {/* Ações e Rotas Integradas */}
@@ -291,6 +324,139 @@ export default function PlaceCard({
           </div>
         </div>
       </div>
+
+      {/* ══════════ WAZE MODAL ══════════ */}
+      {isWazeOpen && (
+        <div 
+          onClick={(e) => e.stopPropagation()} 
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 backdrop-blur-xs p-4"
+        >
+          <div className="relative w-full max-w-sm bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/10 rounded-[28px] p-6 shadow-2xl flex flex-col text-slate-900 dark:text-slate-100 animate-scaleIn">
+            <button
+              onClick={() => setIsWazeOpen(false)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {wazeStep === 'ask' && (
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-3">
+                    <MessageSquare className="w-6 h-6 text-brand-coral-500" />
+                  </div>
+                  <h3 className="text-base font-outfit font-black text-slate-900 dark:text-white">
+                    {getLanguage() === 'en' ? `How is ${place.name} now?` : getLanguage() === 'es' ? `¿Cómo está ${place.name} ahora?` : `Como está o ${place.name} agora?`}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-1 text-center">{t('perguntar_sobre')}</p>
+                </div>
+
+                <div className="space-y-2.5">
+                  {[
+                    { id: 'crowd', label: getLanguage() === 'en' ? 'Is it very crowded?' : getLanguage() === 'es' ? '¿Está muy lleno?' : 'Está muito cheio?' },
+                    { id: 'line', label: getLanguage() === 'en' ? 'Is there a line to enter?' : getLanguage() === 'es' ? '¿Hay fila para entrar?' : 'Tem fila para entrar?' },
+                    { id: 'vibe', label: getLanguage() === 'en' ? 'What is the current vibe?' : getLanguage() === 'es' ? '¿Cuál es la vibra actual?' : 'Qual a vibe atual?' }
+                  ].map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() => setSelectedQuestion(q.id)}
+                      className={`w-full p-4 text-left text-xs font-bold rounded-2xl border transition-all cursor-pointer ${
+                        selectedQuestion === q.id
+                          ? 'border-brand-coral-500 bg-brand-coral-500/5 text-brand-coral-500 shadow-sm shadow-brand-coral-500/10'
+                          : 'border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (selectedQuestion) {
+                      setWazeStep('loading');
+                      setTimeout(() => {
+                        setWazeStep('reply');
+                      }, 2000);
+                    }
+                  }}
+                  disabled={!selectedQuestion}
+                  className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-coral-500/20 active:scale-95 transition-all cursor-pointer"
+                >
+                  {t('continuar')}
+                </button>
+              </div>
+            )}
+
+            {wazeStep === 'loading' && (
+              <div className="py-8 flex flex-col items-center justify-center space-y-4 text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-brand-coral-500 border-r-2" />
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">{t('pergunta_enviada_desc')}</h4>
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    {getLanguage() === 'en' ? 'Querying nearby contributors via GPS...' : getLanguage() === 'es' ? 'Consultando colaboradores cercanos vía GPS...' : 'Consultando colaboradores próximos via GPS...'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {wazeStep === 'reply' && (
+              <div className="space-y-5">
+                <div className="text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-brand-teal-500/15 border border-brand-teal-500/30 flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle className="w-6 h-6 text-brand-teal-500" />
+                  </div>
+                  <h3 className="text-base font-outfit font-black text-slate-900 dark:text-white">
+                    {getLanguage() === 'en' ? 'Response Received!' : getLanguage() === 'es' ? '¡Respuesta Recibida!' : 'Resposta Recebida!'}
+                  </h3>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 text-left space-y-1">
+                  <span className="text-[10px] font-bold text-brand-coral-500 block">@renatomoreira</span>
+                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    {selectedQuestion === 'crowd' ? (
+                      getLanguage() === 'en' ? 'Crowded, but no line!' : getLanguage() === 'es' ? '¡Lleno, pero sin fila!' : 'Cheio, mas sem fila!'
+                    ) : selectedQuestion === 'line' ? (
+                      getLanguage() === 'en' ? 'Fast line, about 10 mins.' : getLanguage() === 'es' ? 'Fila rápida, unos 10 min.' : 'Fila rápida, cerca de 10 min.'
+                    ) : (
+                      getLanguage() === 'en' ? 'Great vibe, acoustic rock playing!' : getLanguage() === 'es' ? '¡Excelente vibra, tocando rock acústico!' : 'Vibe ótima, tocando rock acústico!'
+                    )}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setWazeStep('thanked')}
+                  className="w-full h-12 rounded-2xl bg-brand-teal-500 hover:bg-brand-teal-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-teal-500/20 active:scale-95 transition-all cursor-pointer"
+                >
+                  {t('agradecer_contribuinte')} (+10 pts)
+                </button>
+              </div>
+            )}
+
+            {wazeStep === 'thanked' && (
+              <div className="py-6 flex flex-col items-center justify-center space-y-4 text-center animate-scaleIn">
+                <div className="w-14 h-14 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center text-emerald-500 font-black text-2xl animate-bounce">
+                  ✓
+                </div>
+                <div>
+                  <h4 className="text-base font-outfit font-black text-slate-900 dark:text-white">
+                    {getLanguage() === 'en' ? 'Thank You Sent!' : getLanguage() === 'es' ? '¡Agradecimiento Enviado!' : 'Agradecimento enviado!'}
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {getLanguage() === 'en' ? '+10 points added to the contributor.' : getLanguage() === 'es' ? '+10 puntos sumados al colaborador.' : '+10 pontos somados ao colaborador.'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsWazeOpen(false)}
+                  className="w-full h-12 rounded-2xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-white font-bold text-xs active:scale-95 transition-all cursor-pointer"
+                >
+                  {getLanguage() === 'en' ? 'Close' : getLanguage() === 'es' ? 'Cerrar' : 'Fechar'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
