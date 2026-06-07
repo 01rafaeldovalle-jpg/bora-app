@@ -38,7 +38,7 @@ export const PREFERENCES_LIST = [
 
 // ─── Onboarding full-screen overlay ────────────────────────────────────────────
 
-type OnboardingView = 'splash' | 'email-login' | 'signup-1' | 'signup-2' | 'signup-3' | 'signup-4' | 'signup-5';
+type OnboardingView = 'splash' | 'email-login' | 'signup-1' | 'signup-2' | 'signup-3' | 'signup-4' | 'signup-5' | 'signup-6';
 
 function OnboardingOverlay({
   initialView = 'splash',
@@ -65,6 +65,9 @@ function OnboardingOverlay({
   const [avatar, setAvatar] = useState<string | null>(null);
   const [prefs, setPrefs] = useState<string[]>([]);
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [birthday, setBirthday] = useState('');
+  const [gender, setGender] = useState('');
+  const [neighborhood, setNeighborhood] = useState('');
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
@@ -111,12 +114,12 @@ function OnboardingOverlay({
       if (error) {
         // fallback mock
         localStorage.setItem('giro_google_mock_user', JSON.stringify({ name: 'Demo Giro', avatar: null }));
-        setView('signup-4');
+        setView('signup-5');
       }
     } else {
       // Mock Google Login: directly jump to interests step
       localStorage.setItem('giro_google_mock_user', JSON.stringify({ name: 'Demo Giro', avatar: null }));
-      setView('signup-4');
+      setView('signup-5');
     }
     setLoading(false);
   };
@@ -251,6 +254,9 @@ function OnboardingOverlay({
             avatar_url: avatar,
             preferences: prefs,
             favorites: [],
+            birthday: birthday,
+            gender: gender,
+            neighborhood: neighborhood,
           });
           onComplete(authData.session || { user: authData.user });
         }
@@ -270,10 +276,29 @@ function OnboardingOverlay({
 
       localStorage.setItem(
         'giro_mock_user',
-        JSON.stringify({ email: email || 'demo@giro.app', password, name: finalName, username, avatar: finalAvatar, preferences: prefs })
+        JSON.stringify({ 
+          email: email || 'demo@giro.app', 
+          password, 
+          name: finalName, 
+          username, 
+          avatar: finalAvatar, 
+          preferences: prefs,
+          birthday,
+          gender,
+          neighborhood 
+        })
       );
       onComplete({
-        user: { email: email || 'demo@giro.app', user_metadata: { full_name: finalName, avatar_url: finalAvatar } },
+        user: { 
+          email: email || 'demo@giro.app', 
+          user_metadata: { 
+            full_name: finalName, 
+            avatar_url: finalAvatar,
+            birthday,
+            gender,
+            neighborhood 
+          } 
+        },
       });
     }
     setLoading(false);
@@ -288,6 +313,7 @@ function OnboardingOverlay({
     'signup-3': 3,
     'signup-4': 4,
     'signup-5': 5,
+    'signup-6': 6,
   };
   const currentStep = stepMap[view];
   const isSignup = currentStep > 0;
@@ -304,7 +330,7 @@ function OnboardingOverlay({
       {/* Progress bar (signup only) */}
       {isSignup && (
         <div className="relative z-10 flex items-center gap-1.5 px-6 pt-14 pb-0">
-          {[1, 2, 3, 4, 5].map((s) => (
+          {[1, 2, 3, 4, 5, 6].map((s) => (
             <div
               key={s}
               className={`flex-1 h-1 rounded-full transition-all duration-500 ${
@@ -326,6 +352,7 @@ function OnboardingOverlay({
             else if (view === 'signup-3') setView('signup-2');
             else if (view === 'signup-4') setView('signup-3');
             else if (view === 'signup-5') setView('signup-4');
+            else if (view === 'signup-6') setView('signup-5');
           }}
           className="absolute top-14 left-5 z-20 w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:bg-white/10 hover:text-white transition-all active:scale-95"
         >
@@ -690,8 +717,86 @@ function OnboardingOverlay({
           </div>
         )}
 
-        {/* ══════════ SIGNUP STEP 3 – Foto ══════════ */}
+        {/* ══════════ SIGNUP STEP 3 – Dados de Conexão ══════════ */}
         {view === 'signup-3' && (
+          <div className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]">
+            <div className="text-center mt-2">
+              <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-7 h-7 text-brand-coral-500" />
+              </div>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Sobre você</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Dados rápidos para liberar benefícios e localização.</p>
+            </div>
+
+            <div className="space-y-4 text-left">
+              {/* Aniversário */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Data de Nascimento</label>
+                <input
+                  type="date"
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  className="w-full h-14 rounded-2xl form-input px-4 text-sm"
+                />
+              </div>
+
+              {/* Gênero */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Como você se identifica?</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['Feminino', 'Masculino', 'Outro'].map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setGender(g)}
+                      className={`h-11 rounded-xl text-xs font-bold border active:scale-95 transition-all select-none ${
+                        gender === g
+                          ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md'
+                          : 'bg-white dark:bg-brand-indigo-950 border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-slate-350'
+                      }`}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bairro */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Onde você mora em Curitiba?</label>
+                <select
+                  value={neighborhood}
+                  onChange={(e) => setNeighborhood(e.target.value)}
+                  className="w-full h-14 rounded-2xl form-input px-4 text-sm cursor-pointer bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                >
+                  <option value="" className="text-slate-400">Selecione seu Bairro...</option>
+                  {['Água Verde', 'Batel', 'Bigorrilho', 'Boqueirão', 'Cabral', 'Cajuru', 'Centro', 'Cristo Rei', 'Juvevê', 'Mercês', 'Novo Mundo', 'Portão', 'Prado Velho', 'Santa Felicidade', 'Outro'].map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {err && <p className="text-xs text-rose-400 font-semibold text-center">{err}</p>}
+
+            <button
+              type="button"
+              onClick={() => {
+                setErr('');
+                if (!birthday) { setErr('A data de nascimento é obrigatória.'); return; }
+                if (!gender) { setErr('A seleção de gênero é obrigatória.'); return; }
+                if (!neighborhood) { setErr('Por favor, informe seu bairro.'); return; }
+                setView('signup-4');
+              }}
+              className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2 mt-2"
+            >
+              Avançar <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* ══════════ SIGNUP STEP 4 – Foto ══════════ */}
+        {view === 'signup-4' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 animate-[fadeInUp_0.35s_ease-out]">
             <div className="text-center mt-2">
               <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">{t('sua_foto')}</h2>
@@ -725,6 +830,7 @@ function OnboardingOverlay({
             <div className="w-full space-y-3">
               <div className="w-full flex gap-3">
                 <button
+                  type="button"
                   onClick={() => cameraInputRef.current?.click()}
                   className="flex-1 h-14 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all btn-premium shadow-md"
                 >
@@ -733,6 +839,7 @@ function OnboardingOverlay({
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => fileInputRef.current?.click()}
                   className="flex-1 h-14 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all btn-premium shadow-md"
                 >
@@ -742,7 +849,8 @@ function OnboardingOverlay({
               </div>
 
               <button
-                onClick={() => setView('signup-4')}
+                type="button"
+                onClick={() => setView('signup-5')}
                 className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2"
               >
                 {t('continuar')}
@@ -752,8 +860,8 @@ function OnboardingOverlay({
           </div>
         )}
 
-        {/* ══════════ SIGNUP STEP 4 – Interesses ══════════ */}
-        {view === 'signup-4' && (
+        {/* ══════════ SIGNUP STEP 5 – Interesses ══════════ */}
+        {view === 'signup-5' && (
           <div className="w-full max-w-sm flex flex-col gap-6 animate-[fadeInUp_0.35s_ease-out]">
             <div className="text-center mt-2">
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
@@ -772,6 +880,7 @@ function OnboardingOverlay({
                   return (
                     <button
                       key={pref.id}
+                      type="button"
                       onClick={() => togglePref(pref.id)}
                       className={`h-14 rounded-2xl border text-xs font-bold transition-all flex items-center px-4 gap-3 select-none ${
                         isActive
@@ -797,7 +906,8 @@ function OnboardingOverlay({
             </div>
 
             <button
-              onClick={() => { if (prefs.length >= 3) setView('signup-5'); }}
+              type="button"
+              onClick={() => { if (prefs.length >= 3) setView('signup-6'); }}
               disabled={prefs.length < 3}
               className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
@@ -807,8 +917,8 @@ function OnboardingOverlay({
           </div>
         )}
 
-        {/* ══════════ SIGNUP STEP 5 – GPS ══════════ */}
-        {view === 'signup-5' && (
+        {/* ══════════ SIGNUP STEP 6 – GPS ══════════ */}
+        {view === 'signup-6' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center animate-[fadeInUp_0.35s_ease-out]">
             <div className="w-24 h-24 rounded-full bg-brand-teal-500/15 border-2 border-brand-teal-500/30 flex items-center justify-center mx-auto shadow-2xl shadow-brand-teal-500/10">
               <MapPin className="w-12 h-12 text-brand-teal-400 animate-bounce" />
@@ -825,6 +935,7 @@ function OnboardingOverlay({
 
             <div className="w-full space-y-3">
               <button
+                type="button"
                 onClick={() => {
                   if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
@@ -850,6 +961,7 @@ function OnboardingOverlay({
               </button>
 
               <button
+                type="button"
                 onClick={handleFinishSignup}
                 disabled={loading}
                 className="w-full h-14 rounded-2xl btn-secondary text-sm"
@@ -1415,6 +1527,13 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
   const [isCadastraisOpen, setIsCadastraisOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editNickname, setEditNickname] = useState('');
+  const [editBirthday, setEditBirthday] = useState('');
+  const [editGender, setEditGender] = useState('');
+  const [editNeighborhood, setEditNeighborhood] = useState('');
+  const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // Crop
@@ -1458,27 +1577,92 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
 
   const prefs = PREFERENCES_LIST;
 
+  const userBirthday = metadata?.birthday || '';
+  const userGender = metadata?.gender || '';
+  const userNeighborhood = metadata?.neighborhood || '';
+
   const openCadastrais = () => {
     setEditName(userName);
     setEditNickname(userNickname);
+    setEditBirthday(userBirthday);
+    setEditGender(userGender);
+    setEditNeighborhood(userNeighborhood);
+    setIsPasswordSectionOpen(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmNewPassword('');
     setIsCadastraisOpen(true);
   };
 
   const saveCadastrais = async () => {
     if (supabase && session) {
-      await supabase.auth.updateUser({ data: { full_name: editName } });
-      await supabase.from('profiles').update({ full_name: editName, nickname: editNickname }).eq('id', session.user.id);
+      await supabase.auth.updateUser({ 
+        data: { 
+          full_name: editName,
+          birthday: editBirthday,
+          gender: editGender,
+          neighborhood: editNeighborhood
+        } 
+      });
+      await supabase.from('profiles').update({ 
+        full_name: editName, 
+        nickname: editNickname,
+        birthday: editBirthday,
+        gender: editGender,
+        neighborhood: editNeighborhood
+      }).eq('id', session.user.id);
     }
     const saved = localStorage.getItem('giro_mock_user');
     if (saved) {
       const u = JSON.parse(saved);
       u.name = editName;
+      u.username = editNickname;
+      u.birthday = editBirthday;
+      u.gender = editGender;
+      u.neighborhood = editNeighborhood;
       localStorage.setItem('giro_mock_user', JSON.stringify(u));
     }
     if (mockSession) {
-      const updatedSess = { ...mockSession, user: { ...mockSession.user, user_metadata: { ...mockSession.user.user_metadata, full_name: editName } } };
+      const updatedSess = { 
+        ...mockSession, 
+        user: { 
+          ...mockSession.user, 
+          user_metadata: { 
+            ...mockSession.user.user_metadata, 
+            full_name: editName,
+            birthday: editBirthday,
+            gender: editGender,
+            neighborhood: editNeighborhood
+          } 
+        } 
+      };
       setMockSession(updatedSess);
       localStorage.setItem('giro_mock_session', JSON.stringify(updatedSess));
+    }
+    
+    // Mudança de Senha
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        alert('A nova senha deve ter pelo menos 6 caracteres.');
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        alert('A confirmação da nova senha não confere.');
+        return;
+      }
+      if (supabase && session) {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          alert(`Erro ao alterar senha: ${error.message}`);
+          return;
+        }
+      }
+      if (saved) {
+        const u = JSON.parse(saved);
+        u.password = newPassword;
+        localStorage.setItem('giro_mock_user', JSON.stringify(u));
+      }
+      triggerNotification('Senha alterada com sucesso!');
     }
     setIsCadastraisOpen(false);
   };
@@ -2751,7 +2935,17 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Nickname</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">@</span>
-                  <input type="text" value={editNickname.replace('@', '')} onChange={(e) => setEditNickname(`@${e.target.value.replace('@', '')}`)}
+                  <input type="text" value={editNickname.replace('@', '')} 
+                    onChange={(e) => {
+                      const clean = e.target.value
+                        .replace(/^@/, '')
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .toLowerCase()
+                        .replace(/\s+/g, '_')
+                        .replace(/[^a-z0-9_]/g, '');
+                      setEditNickname(`@${clean}`);
+                    }}
                     className="w-full h-12 rounded-2xl form-input pl-10 pr-4 text-sm" />
                 </div>
               </div>
@@ -2763,6 +2957,64 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                   <input type="email" value={user?.email || ''} readOnly
                     className="w-full h-12 rounded-2xl form-input pl-10 pr-10 cursor-not-allowed opacity-60" />
                 </div>
+                <p className="text-[9px] text-slate-455 mt-1 pl-1">
+                  * Por questões de segurança, o e-mail não pode ser alterado diretamente.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Aniversário</label>
+                  <input type="date" value={editBirthday} onChange={(e) => setEditBirthday(e.target.value)}
+                    className="w-full h-12 rounded-2xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Gênero</label>
+                  <select value={editGender} onChange={(e) => setEditGender(e.target.value)}
+                    className="w-full h-12 rounded-2xl form-input px-3 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Bairro de Residência</label>
+                <select value={editNeighborhood} onChange={(e) => setEditNeighborhood(e.target.value)}
+                  className="w-full h-12 rounded-2xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                >
+                  <option value="">Selecione seu Bairro...</option>
+                  {['Água Verde', 'Batel', 'Bigorrilho', 'Boqueirão', 'Cabral', 'Cajuru', 'Centro', 'Cristo Rei', 'Juvevê', 'Mercês', 'Novo Mundo', 'Portão', 'Prado Velho', 'Santa Felicidade', 'Outro'].map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Seção Expansível de Alterar Senha */}
+              <div className="border-t border-slate-100 dark:border-white/5 pt-3.5 mt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordSectionOpen(!isPasswordSectionOpen)}
+                  className="text-xs font-bold text-brand-coral-500 hover:text-brand-coral-600 transition-colors flex items-center gap-1.5"
+                >
+                  {isPasswordSectionOpen ? '✕ Cancelar alteração de senha' : '🔑 Deseja alterar sua senha?'}
+                </button>
+                
+                {isPasswordSectionOpen && (
+                  <div className="space-y-3 mt-3 animate-fadeIn">
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-550 dark:text-slate-400 uppercase block mb-1">Nova Senha</label>
+                      <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mínimo 6 caracteres"
+                        className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-slate-550 dark:text-slate-400 uppercase block mb-1">Confirmar Nova Senha</label>
+                      <input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="Repita a nova senha"
+                        className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             <button onClick={saveCadastrais}
