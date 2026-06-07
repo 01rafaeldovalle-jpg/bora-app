@@ -3,7 +3,7 @@ import {
   Edit2, Bookmark, Edit3, Heart, User, Bell, LogOut,
   ChevronRight, Mail, Lock, Eye, EyeOff, Save, X, Trash2,
   MapPin, ArrowRight, ArrowLeft, Camera, Sparkles, CheckCircle2,
-  Instagram, Globe, Building2, Building, BarChart3, Star, Clock, Phone
+  Instagram, Globe, Building2, Building, BarChart3, Star, Clock, Phone, Image
 } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import Cropper from 'react-easy-crop';
@@ -55,7 +55,8 @@ function OnboardingOverlay({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Usado para a Galeria
+  const cameraInputRef = useRef<HTMLInputElement>(null); // Usado para a Câmera
 
   const allPrefs = [
     { id: 'pet', label: '🐶 Pet Friendly' },
@@ -651,26 +652,43 @@ function OnboardingOverlay({
                   </div>
                 )}
               </div>
-              <label className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-brand-coral-500 border-4 border-slate-50 dark:border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 active:scale-95 transition-all shadow-lg">
+              <label 
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-1 right-1 w-10 h-10 rounded-full bg-brand-coral-500 border-4 border-slate-50 dark:border-brand-indigo-950 flex items-center justify-center cursor-pointer hover:bg-brand-coral-600 active:scale-95 transition-all shadow-lg"
+              >
                 <Camera className="w-4 h-4 text-white" />
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
               </label>
+
+              {/* Inputs Ocultos de Arquivo */}
+              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleAvatarUpload} />
             </div>
 
             <div className="w-full space-y-3">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full h-14 rounded-2xl btn-secondary text-sm flex items-center justify-center gap-2"
-              >
-                <Camera className="w-5 h-5 text-slate-500 dark:text-slate-300" />
-                {avatar ? 'Trocar Foto' : 'Escolher Foto da Galeria'}
-              </button>
+              {/* Botões Lado a Lado */}
+              <div className="w-full flex gap-3">
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="flex-1 h-14 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all btn-premium shadow-md"
+                >
+                  <Camera className="w-4 h-4 text-brand-coral-500" />
+                  Tirar Foto
+                </button>
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 h-14 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all btn-premium shadow-md"
+                >
+                  <Image className="w-4 h-4 text-brand-coral-500" />
+                  Galeria
+                </button>
+              </div>
 
               <button
                 onClick={() => setView('signup-4')}
                 className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2"
               >
-                {avatar ? 'Confirmar e Continuar' : 'Pular por Agora'}
+                Continuar
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
