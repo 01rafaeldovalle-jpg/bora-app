@@ -16,6 +16,25 @@ interface ProfileProps {
   favoritesCount: number;
 }
 
+export const PREFERENCES_LIST = [
+  { id: 'pet', label: '🐶 Pet Friendly' },
+  { id: 'vegan', label: '🌿 Vegano' },
+  { id: 'work', label: '💻 Trabalhar' },
+  { id: 'outdoor', label: '☀️ Ar Livre' },
+  { id: 'live-music', label: '🎶 Música ao Vivo' },
+  { id: 'date', label: '🕯️ Encontro' },
+  { id: 'cheap', label: '💰 Econômico' },
+  { id: 'sofisticado', label: '💎 Sofisticado' },
+  { id: 'descontraido', label: '🍻 Descontraído' },
+  { id: 'kids', label: '🧒 Espaço Kids' },
+  { id: 'lgbt', label: '🌈 LGBTQ+ Friendly' },
+  { id: 'accessible-motor', label: '♿ Acessibilidade Motora' },
+  { id: 'accessible-deaf', label: '🤟 Atendimento em LIBRAS' },
+  { id: 'accessible-blind', label: '🔊 Cardápio Acessível' },
+  { id: 'speak-en', label: '🇬🇧 Atendimento em Inglês' },
+  { id: 'speak-es', label: '🇪🇸 Atendimento em Espanhol' },
+];
+
 // ─── Onboarding full-screen overlay ────────────────────────────────────────────
 
 type OnboardingView = 'splash' | 'email-login' | 'signup-1' | 'signup-2' | 'signup-3' | 'signup-4' | 'signup-5';
@@ -58,22 +77,7 @@ function OnboardingOverlay({
   const fileInputRef = useRef<HTMLInputElement>(null); // Usado para a Galeria
   const cameraInputRef = useRef<HTMLInputElement>(null); // Usado para a Câmera
 
-  const allPrefs = [
-    { id: 'pet', label: '🐶 Pet Friendly' },
-    { id: 'vegan', label: '🌿 Vegano' },
-    { id: 'work', label: '💻 Trabalhar' },
-    { id: 'outdoor', label: '☀️ Ar Livre' },
-    { id: 'live-music', label: '🎶 Música ao Vivo' },
-    { id: 'date', label: '🕯️ Encontro' },
-    { id: 'cheap', label: '💰 Econômico' },
-    { id: 'sofisticado', label: '💎 Sofisticado' },
-    { id: 'descontraido', label: '🍻 Descontraído' },
-    { id: 'kids', label: '🧒 Espaço Kids' },
-    { id: 'lgbt', label: '🌈 LGBTQ+ Friendly' },
-    { id: 'accessible-motor', label: '♿ Acessibilidade Motora' },
-    { id: 'accessible-deaf', label: '🤟 Atendimento em LIBRAS' },
-    { id: 'accessible-blind', label: '🔊 Cardápio Acessível' },
-  ];
+  const allPrefs = PREFERENCES_LIST;
 
   const togglePref = (id: string) =>
     setPrefs((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
@@ -1054,8 +1058,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   }, []);
 
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
+  const [badgeLevel, setBadgeLevel] = useState<'gold' | 'silver' | 'bronze'>('gold');
   const [badgeProgress, setBadgeProgress] = useState(65);
-  const badgeLevel = badgeProgress >= 80 ? 'gold' : badgeProgress >= 40 ? 'silver' : 'bronze';
   const [wazePoints, setWazePoints] = useState(80);
   const [helpedCount, setHelpedCount] = useState(142);
   const [pendingWazeQuestion, setPendingWazeQuestion] = useState(true);
@@ -1432,22 +1436,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
   const firstLetter = userName.charAt(0).toUpperCase();
   const avatarToShow = userAvatar || profilePhotoUrl;
 
-  const prefs = [
-    { id: 'pet', label: '🐶 Pet Friendly' },
-    { id: 'vegan', label: '🌿 Vegano' },
-    { id: 'work', label: '💻 Trabalhar' },
-    { id: 'outdoor', label: '☀️ Ar Livre' },
-    { id: 'live-music', label: '🎶 Música ao Vivo' },
-    { id: 'date', label: '🍷 Encontro' },
-    { id: 'specialty-coffee', label: '☕ Café Especial' },
-    { id: 'craft-beer', label: '🍺 Cerveja Artesanal' },
-    { id: 'street-food', label: '🍕 Comida de Rua' },
-    { id: 'cultural', label: '🎨 Cultural' },
-    { id: 'kids', label: '🧒 Espaço Kids' },
-    { id: 'accessible', label: '♿ Acessível' },
-  ];
-
-
+  const prefs = PREFERENCES_LIST;
 
   const openCadastrais = () => {
     setEditName(userName);
@@ -2685,6 +2674,16 @@ export default function Profile({ favoritesCount }: ProfileProps) {
             <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-2 gap-2 mb-6 min-h-0">
               {prefs.map((pref) => {
                 const isActive = userPreferences.includes(pref.id);
+                const translatedLabel = (() => {
+                  let key = `pref_${pref.id.replace(/-/g, '_')}`;
+                  if (pref.id === 'accessible-motor') key = 'pref_acc_motor';
+                  else if (pref.id === 'accessible-deaf') key = 'pref_acc_deaf';
+                  else if (pref.id === 'accessible-blind') key = 'pref_acc_blind';
+                  return t(key as any) || pref.label;
+                })();
+                const emoji = translatedLabel.split(' ')[0];
+                const text = translatedLabel.split(' ').slice(1).join(' ');
+                
                 return (
                   <button key={pref.id}
                     onClick={() => setUserPreferences((prev) => prev.includes(pref.id) ? prev.filter((p) => p !== pref.id) : [...prev, pref.id])}
@@ -2693,8 +2692,8 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                         : 'border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10'
                     }`}
                   >
-                    <span className="text-sm shrink-0">{pref.label.split(' ')[0]}</span>
-                    <span className="truncate">{pref.label.split(' ').slice(1).join(' ')}</span>
+                    <span className="text-sm shrink-0">{emoji}</span>
+                    <span className="truncate">{text}</span>
                   </button>
                 );
               })}
