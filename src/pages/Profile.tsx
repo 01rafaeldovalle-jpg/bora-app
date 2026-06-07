@@ -328,6 +328,19 @@ function OnboardingOverlay({
         </button>
       )}
 
+      {/* Language Selector (Splash view only, aligned with top right header area) */}
+      {view === 'splash' && (
+        <div className="absolute top-14 right-5 z-20">
+          <button 
+            onClick={handleToggleLanguage} 
+            className="h-9 px-3 flex items-center justify-center gap-1.5 rounded-full bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-[11px] font-bold text-slate-600 dark:text-slate-350 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all shadow-md"
+          >
+            <Globe className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            {lang.toUpperCase()}
+          </button>
+        </div>
+      )}
+
       {/* Step label */}
       {isSignup && (
         <div className="relative z-10 text-center mt-3">
@@ -343,17 +356,6 @@ function OnboardingOverlay({
         {/* ══════════ SPLASH ══════════ */}
         {view === 'splash' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 animate-[fadeInUp_0.4s_ease-out] relative">
-            
-            {/* Seletor de Idioma Flutuante no Splash */}
-            <div className="absolute -top-12 right-0 z-50">
-              <button 
-                onClick={handleToggleLanguage} 
-                className="w-12 h-10 flex items-center justify-center gap-1 rounded-xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-[10px] font-bold text-slate-600 dark:text-slate-350 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all shadow-md"
-              >
-                <Globe className="w-3 h-3 text-slate-400 shrink-0" />
-                {lang.toUpperCase()}
-              </button>
-            </div>
             {/* Logo Tipográfico */}
             <div className="text-center mb-6">
               <h1 className="text-6xl font-outfit font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-brand-coral-500 dark:from-white dark:to-brand-coral-300 bg-clip-text text-transparent leading-none select-none">
@@ -415,10 +417,28 @@ function OnboardingOverlay({
             </div>
 
             <p className="text-[11px] text-slate-600 text-center mt-2 max-w-[260px] leading-relaxed">
-              Ao entrar, você concorda com nossos{' '}
-              <button onClick={() => setIsTermsOpen(true)} className="text-slate-500 dark:text-slate-400 underline underline-offset-2">
-                Termos e Privacidade
-              </button>
+              {lang === 'en' ? (
+                <>
+                  By signing in, you agree to our{' '}
+                  <button onClick={() => setIsTermsOpen(true)} className="text-slate-500 dark:text-slate-400 underline underline-offset-2 font-semibold hover:text-brand-coral-500 transition-colors">
+                    Terms & Privacy
+                  </button>
+                </>
+              ) : lang === 'es' ? (
+                <>
+                  Al ingresar, aceptas nuestros{' '}
+                  <button onClick={() => setIsTermsOpen(true)} className="text-slate-500 dark:text-slate-400 underline underline-offset-2 font-semibold hover:text-brand-coral-500 transition-colors">
+                    Términos y Privacidad
+                  </button>
+                </>
+              ) : (
+                <>
+                  Ao entrar, você concorda com nossos{' '}
+                  <button onClick={() => setIsTermsOpen(true)} className="text-slate-500 dark:text-slate-400 underline underline-offset-2 font-semibold hover:text-brand-coral-500 transition-colors">
+                    Termos e Privacidade
+                  </button>
+                </>
+              )}
             </p>
           </div>
         )}
