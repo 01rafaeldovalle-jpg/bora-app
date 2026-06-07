@@ -15,10 +15,18 @@ import AuthPromptModal from './components/common/AuthPromptModal';
 import ReviewsModal from './components/places/ReviewsModal';
 import { Review } from './types';
 import { MOCK_REVIEWS } from './utils/constants';
+import { t } from './utils/i18n';
 
 type Tab = 'home' | 'explore' | 'favorites' | 'profile';
 
 export default function App() {
+  const [lang, setLangState] = useState(() => localStorage.getItem('giro_lang') || 'pt');
+  useEffect(() => {
+    const handleLang = () => setLangState(localStorage.getItem('giro_lang') || 'pt');
+    window.addEventListener('giro-language-change', handleLang);
+    return () => window.removeEventListener('giro-language-change', handleLang);
+  }, []);
+
   const [currentTab, setTab] = useState<Tab>('home');
   const [viewMode, setViewMode] = useState<'swipe' | 'list'>('swipe');
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -683,10 +691,10 @@ export default function App() {
         <Header 
           title={
             currentTab === 'profile' 
-              ? 'Meu Perfil' 
+              ? t('header_profile') 
               : currentTab === 'favorites' 
-                ? 'Meus Favoritos' 
-                : 'Giro'
+                ? t('header_favorites') 
+                : t('header_giro')
           }
           showLocationSelector={currentTab === 'home' || currentTab === 'explore'}
           searchRadius={searchRadius}

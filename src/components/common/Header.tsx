@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Compass, Moon, Sun, MapPin, ChevronDown, Search, Locate, X } from 'lucide-react';
+import { Compass, Moon, Sun, MapPin, ChevronDown, Search, Locate, X, Globe } from 'lucide-react';
 import { getLanguage, setLanguage } from '../../utils/i18n';
 
 
@@ -65,6 +65,12 @@ export default function Header({
     window.addEventListener('giro-language-change', handleLangChange);
     return () => window.removeEventListener('giro-language-change', handleLangChange);
   }, []);
+
+  const handleToggleLanguage = () => {
+    const nextLang = lang === 'pt' ? 'en' : lang === 'en' ? 'es' : 'pt';
+    setLanguage(nextLang);
+  };
+
 
   const [locationLabel, setLocationLabel] = useState('Curitiba - PR');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -342,9 +348,10 @@ export default function Header({
 
           {/* IDIOMA & TEMA (Direita) */}
           <button 
-            onClick={() => setLanguage(lang === 'pt' ? 'en' : 'pt')} 
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-[10px] font-bold text-slate-600 dark:text-slate-350 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all mr-1"
+            onClick={handleToggleLanguage} 
+            className="w-12 h-10 flex items-center justify-center gap-1 rounded-xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-[10px] font-bold text-slate-600 dark:text-slate-350 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all mr-1"
           >
+            <Globe className="w-3 h-3 text-slate-400 shrink-0" />
             {lang.toUpperCase()}
           </button>
 

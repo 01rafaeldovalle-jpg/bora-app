@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Place } from '../../types';
 import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin, ShoppingBag, Calendar, Clock, Ticket } from 'lucide-react';
+import { getLanguage } from '../../utils/i18n';
 
 interface PlaceCardProps {
   place: Place;
@@ -164,7 +165,11 @@ export default function PlaceCard({
             </div>
           </div>
           <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed mb-3">
-            {place.description}
+            {getLanguage() === 'en' && place.description_en 
+              ? place.description_en 
+              : getLanguage() === 'es' && place.description_es 
+                ? place.description_es 
+                : place.description}
           </p>
           {place.event_date && (
             <div className="flex items-center gap-3 mb-3 p-2.5 rounded-2xl bg-brand-coral-500/5 dark:bg-brand-coral-500/10 border border-brand-coral-500/20 text-[10px] font-bold text-brand-coral-600 dark:text-brand-coral-400 uppercase tracking-wider">

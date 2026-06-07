@@ -10,6 +10,8 @@ export interface Place {
   id: string;
   name: string;
   description: string;
+  description_en?: string; // Descrição traduzida em inglês
+  description_es?: string; // Descrição traduzida em espanhol
   address: string;
   phone?: string;
   instagram_handle?: string;

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Map, Heart, User } from 'lucide-react';
+import { getLanguage, t } from '../../utils/i18n';
 
 interface BottomNavigationProps {
   currentTab: 'home' | 'explore' | 'favorites' | 'profile';
@@ -7,11 +8,18 @@ interface BottomNavigationProps {
 }
 
 export default function BottomNavigation({ currentTab, setTab }: BottomNavigationProps) {
+  const [lang, setLangState] = useState(getLanguage());
+  useEffect(() => {
+    const handleLang = (e: any) => setLangState(e.detail.lang);
+    window.addEventListener('giro-language-change', handleLang);
+    return () => window.removeEventListener('giro-language-change', handleLang);
+  }, []);
+
   const navItems = [
-    { id: 'home', label: 'Início', icon: Home },
-    { id: 'explore', label: 'Explorar', icon: Map },
-    { id: 'favorites', label: 'Favoritos', icon: Heart },
-    { id: 'profile', label: 'Perfil', icon: User },
+    { id: 'home', label: t('nav_home'), icon: Home },
+    { id: 'explore', label: t('nav_explore'), icon: Map },
+    { id: 'favorites', label: t('nav_favorites'), icon: Heart },
+    { id: 'profile', label: t('nav_profile'), icon: User },
   ] as const;
 
   return (
