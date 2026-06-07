@@ -64,13 +64,15 @@ function OnboardingOverlay({
     { id: 'work', label: '💻 Trabalhar' },
     { id: 'outdoor', label: '☀️ Ar Livre' },
     { id: 'live-music', label: '🎶 Música ao Vivo' },
-    { id: 'date', label: '🍷 Encontro' },
-    { id: 'specialty-coffee', label: '☕ Café Especial' },
-    { id: 'craft-beer', label: '🍺 Cerveja Artesanal' },
-    { id: 'street-food', label: '🍕 Comida de Rua' },
-    { id: 'cultural', label: '🎨 Cultural' },
+    { id: 'date', label: '🕯️ Encontro' },
+    { id: 'cheap', label: '💰 Econômico' },
+    { id: 'sofisticado', label: '💎 Sofisticado' },
+    { id: 'descontraido', label: '🍻 Descontraído' },
     { id: 'kids', label: '🧒 Espaço Kids' },
-    { id: 'accessible', label: '♿ Acessível' },
+    { id: 'lgbt', label: '🌈 LGBTQ+ Friendly' },
+    { id: 'accessible-motor', label: '♿ Acessibilidade Motora' },
+    { id: 'accessible-deaf', label: '🤟 Atendimento em LIBRAS' },
+    { id: 'accessible-blind', label: '🔊 Cardápio Acessível' },
   ];
 
   const togglePref = (id: string) =>
@@ -700,7 +702,7 @@ function OnboardingOverlay({
           <div className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]">
             <div className="text-center mt-2">
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-7 h-7 text-brand-coral-500" />
+                <Heart className="w-7 h-7 text-brand-coral-500 animate-pulse fill-brand-coral-500" />
               </div>
               <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Seus interesses</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Escolha pelo menos 3 para calibrar seu Swipe ⚡</p>
@@ -1930,50 +1932,97 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                   </>
                 )}
 
-                {/* Seleção de Tags de Vibe */}
-                <div className="space-y-2 mt-4 pt-4 border-t border-slate-200 dark:border-white/5">
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                    Selecione o estilo/vibe do seu local
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { id: 'rock', name: 'Rock', icon: '🎸' },
-                      { id: 'eletronica', name: 'Eletrônica', icon: '⚡' },
-                      { id: 'sertanejo', name: 'Sertanejo', icon: '🤠' },
-                      { id: 'samba_pagode', name: 'Samba & Pagode', icon: '🥁' },
-                      { id: 'jazz_blues', name: 'Jazz & Blues', icon: '🎷' },
-                      { id: 'romantico', name: 'Romântico', icon: '🕯️' },
-                      { id: 'alternativo', name: 'Alternativo/Indie', icon: '🌿' },
-                      { id: 'sofisticado', name: 'Sofisticado', icon: '💎' },
-                      { id: 'forro', name: 'Forró', icon: '🪗' },
-                      { id: 'pop_funk', name: 'Pop & Funk', icon: '🎤' },
-                      { id: 'acustico_mpb', name: 'Acústico & MPB', icon: '🎸' },
-                      { id: 'descontraido', name: 'Descontraído', icon: '🍻' }
-                    ].map((tag) => {
-                      const isSelected = bizTags.includes(tag.id);
-                      return (
-                        <button
-                          key={tag.id}
-                          type="button"
-                          onClick={() => {
-                            setBizTags(prev => 
-                              prev.includes(tag.id) 
-                                ? prev.filter(t => t !== tag.id) 
-                                : [...prev, tag.id]
-                            );
-                          }}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-all ${
-                            isSelected
-                              ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-sm'
-                              : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-655 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-white/8'
-                          }`}
-                        >
-                          <span>{tag.icon}</span>
-                          <span>{tag.name}</span>
-                        </button>
-                      );
-                    })}
+                {/* Seleção de Tags do Estabelecimento */}
+                <div className="space-y-4 mt-4 pt-4 border-t border-slate-200 dark:border-white/5">
+                  
+                  {/* Categoria 1: Música & Vibe */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                      Música & Vibe do seu local
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { id: 'rock', name: 'Rock', icon: '🎸' },
+                        { id: 'eletronica', name: 'Eletrônica', icon: '⚡' },
+                        { id: 'sertanejo', name: 'Sertanejo', icon: '🤠' },
+                        { id: 'samba_pagode', name: 'Samba & Pagode', icon: '🥁' },
+                        { id: 'jazz_blues', name: 'Jazz & Blues', icon: '🎷' },
+                        { id: 'romantico', name: 'Romântico', icon: '🕯️' },
+                        { id: 'alternativo', name: 'Alternativo/Indie', icon: '🌿' },
+                        { id: 'sofisticado', name: 'Sofisticado', icon: '💎' },
+                        { id: 'forro', name: 'Forró', icon: '🪗' },
+                        { id: 'pop_funk', name: 'Pop & Funk', icon: '🎤' },
+                        { id: 'acustico_mpb', name: 'Acústico & MPB', icon: '🎸' },
+                        { id: 'descontraido', name: 'Descontraído', icon: '🍻' }
+                      ].map((tag) => {
+                        const isSelected = bizTags.includes(tag.id);
+                        return (
+                          <button
+                            key={tag.id}
+                            type="button"
+                            onClick={() => {
+                              setBizTags(prev => 
+                                prev.includes(tag.id) ? prev.filter(t => t !== tag.id) : [...prev, tag.id]
+                              );
+                            }}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-all ${
+                              isSelected
+                                ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-sm'
+                                : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-655 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-white/8'
+                            }`}
+                          >
+                            <span>{tag.icon}</span>
+                            <span>{tag.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+
+                  {/* Categoria 2: Diferenciais & Acessibilidade */}
+                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                      Diferenciais & Acessibilidade
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { id: 'pet', name: 'Pet Friendly', icon: '🐶' },
+                        { id: 'vegan', name: 'Vegano/Saudável', icon: '🌿' },
+                        { id: 'work', name: 'Trabalhar/Estudar', icon: '💻' },
+                        { id: 'outdoor', name: 'Ao Ar Livre', icon: '☀️' },
+                        { id: 'live-music', name: 'Música ao Vivo', icon: '🎶' },
+                        { id: 'date', name: 'Encontro Romântico', icon: '🕯️' },
+                        { id: 'cheap', name: 'Econômico/Barato', icon: '💰' },
+                        { id: 'kids', name: 'Espaço Kids', icon: '🧒' },
+                        { id: 'lgbt', name: 'LGBTQ+ Friendly', icon: '🌈' },
+                        { id: 'accessible-motor', name: 'Acessibilidade Motora', icon: '♿' },
+                        { id: 'accessible-deaf', name: 'Atendimento em LIBRAS', icon: '🤟' },
+                        { id: 'accessible-blind', name: 'Cardápio Acessível', icon: '🔊' }
+                      ].map((tag) => {
+                        const isSelected = bizTags.includes(tag.id);
+                        return (
+                          <button
+                            key={tag.id}
+                            type="button"
+                            onClick={() => {
+                              setBizTags(prev => 
+                                prev.includes(tag.id) ? prev.filter(t => t !== tag.id) : [...prev, tag.id]
+                              );
+                            }}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold transition-all ${
+                              isSelected
+                                ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-sm'
+                                : 'bg-slate-50 dark:bg-white/5 border-slate-200/60 dark:border-white/10 text-slate-655 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-white/8'
+                            }`}
+                          >
+                            <span>{tag.icon}</span>
+                            <span>{tag.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-200/50 dark:bg-white/5 border border-slate-300/50 dark:border-white/5 text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed mt-4">
