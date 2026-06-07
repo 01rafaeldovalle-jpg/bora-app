@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Place, Category } from '../types';
 import { CATEGORIES, MOCK_PLACES, MOCK_EVENTS } from '../utils/constants';
 import PlaceCard from '../components/places/PlaceCard';
 import SearchBar from '../components/common/SearchBar';
+import { getLanguage, t } from '../utils/i18n';
 import * as Icons from 'lucide-react';
 import { Calendar, Clock, MapPin, Sparkles, Search, Check } from 'lucide-react';
 
@@ -108,6 +109,13 @@ export default function Home({
   onDeleteCollection,
   onRenameCollection
 }: HomeProps) {
+  const [lang, setLangState] = useState(getLanguage());
+  useEffect(() => {
+    const handleLang = (e: any) => setLangState(e.detail.lang);
+    window.addEventListener('giro-language-change', handleLang);
+    return () => window.removeEventListener('giro-language-change', handleLang);
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([]);
@@ -519,7 +527,7 @@ export default function Home({
 
   const handleDeleteClick = () => {
     if (!activeFolder) return;
-    const confirmDelete = window.confirm("Tem certeza que deseja excluir esta pasta? Os locais salvos não serão apagados da lista geral.");
+    const confirmDelete = window.confirm(t('home_confirm_delete_folder'));
     if (confirmDelete) {
       onDeleteCollection(activeFolder);
       setActiveFolder(null);
@@ -570,13 +578,13 @@ export default function Home({
               }} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Search className="w-3.5 h-3.5" /> Radar
+              <Search className="w-3.5 h-3.5" /> {t('home_radar')}
             </button>
             <button 
               onClick={() => setViewMode('list')} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${viewMode === 'list' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Icons.Bookmark className="w-3.5 h-3.5" /> Salvos
+              <Icons.Bookmark className="w-3.5 h-3.5" /> {t('home_saved')}
             </button>
           </div>
 
@@ -588,8 +596,8 @@ export default function Home({
             <Icons.Filter className="w-3.5 h-3.5 text-white" />
             <span>
               {selectedCategories.length === 0 
-                ? 'Filtros' 
-                : `Filtros (${selectedCategories.length})`}
+                ? t('home_filters') 
+                : `${t('home_filters')} (${selectedCategories.length})`}
             </span>
           </button>
         </div>
@@ -606,13 +614,13 @@ export default function Home({
               }} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${(viewMode as string) === 'swipe' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Search className="w-3.5 h-3.5" /> Radar
+              <Search className="w-3.5 h-3.5" /> {t('home_radar')}
             </button>
             <button 
               onClick={() => setViewMode('list')} 
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${(viewMode as string) === 'list' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:white'}`}
             >
-              <Icons.Bookmark className="w-3.5 h-3.5" /> Salvos
+              <Icons.Bookmark className="w-3.5 h-3.5" /> {t('home_saved')}
             </button>
           </div>
         </div>
@@ -645,13 +653,13 @@ export default function Home({
                     ref={badgeLikeRef}
                     className="absolute top-8 left-8 border-4 border-brand-teal-500 text-brand-teal-500 dark:border-brand-teal-400 dark:text-brand-teal-400 px-4 py-2 rounded-xl text-xl font-black uppercase tracking-wider -rotate-12 opacity-0 z-20 pointer-events-none transition-opacity duration-100"
                   >
-                    Giro!
+                    {t('home_swipe_like')}
                   </div>
                   <div 
                     ref={badgeNopeRef}
                     className="absolute top-8 right-8 border-4 border-brand-coral-500 text-brand-coral-500 px-4 py-2 rounded-xl text-xl font-black uppercase tracking-wider rotate-12 opacity-0 z-20 pointer-events-none transition-opacity duration-100"
                   >
-                    Nem...
+                    {t('home_swipe_nope')}
                   </div>
 
                   <PlaceCard
@@ -668,8 +676,8 @@ export default function Home({
               <div className="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500 mx-auto">
                 <Icons.Compass className="w-8 h-8 animate-spin-slow" />
               </div>
-              <h3 className="text-lg font-outfit font-bold text-white mb-2">Sem locais nesta categoria</h3>
-              <p className="text-xs text-slate-400 max-w-xs leading-relaxed mx-auto">Selecione outra categoria ou limpe filtros para continuar combinando.</p>
+              <h3 className="text-lg font-outfit font-bold text-white mb-2">{t('home_empty_feed_title')}</h3>
+              <p className="text-xs text-slate-400 max-w-xs leading-relaxed mx-auto">{t('home_empty_feed_desc')}</p>
               <button
                 onClick={() => {
                   setSearchQuery('');
@@ -679,7 +687,7 @@ export default function Home({
                 }}
                 className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
               >
-                Limpar Filtros
+                {t('home_clear_filters')}
               </button>
             </div>
           )}
@@ -690,7 +698,7 @@ export default function Home({
             {/* Lista de Pastas/Coleções */}
             <div className="py-4 px-6 max-w-6xl mx-auto w-full">
               <h3 className="text-xs font-bold text-slate-450 dark:text-slate-500 uppercase tracking-widest mb-4">
-                Minhas Coleções
+                {t('home_my_collections')}
               </h3>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -722,10 +730,10 @@ export default function Home({
                       <div className="px-1.5 pb-1 flex-1 flex flex-col justify-between">
                         <div>
                           <h4 className="text-sm font-outfit font-black text-slate-900 dark:text-white group-hover:text-brand-coral-500 transition-colors line-clamp-1 mb-0.5">
-                            {folder.name}
+                            {folder.name === 'Todos os Salvos' ? t('home_all_saved') : folder.name}
                           </h4>
                           <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                            {folder.ids.length} {folder.ids.length === 1 ? 'local' : 'locais'}
+                            {folder.ids.length} {folder.ids.length === 1 ? t('home_local_singular') : t('home_local_plural')}
                           </p>
                         </div>
                       </div>
@@ -751,7 +759,7 @@ export default function Home({
                   className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 py-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 active:scale-[0.98] transition-all text-slate-800 dark:text-white"
                 >
                   <Icons.ArrowLeft className="w-3.5 h-3.5" />
-                  Voltar para Pastas
+                  {t('home_back_folders')}
                 </button>
                 
                 {isEditingName ? (
@@ -791,7 +799,7 @@ export default function Home({
                     <div className="flex items-center gap-2">
                       <Icons.FolderHeart className="w-4 h-4 text-brand-coral-500" />
                       <h3 className="text-sm font-outfit font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                        {activeFolder}
+                        {activeFolder === 'Todos os Salvos' ? t('home_all_saved') : activeFolder}
                       </h3>
                     </div>
                     {!(activeFolder === 'Todos os Salvos' || activeFolder === 'Salvos') && (
@@ -825,9 +833,9 @@ export default function Home({
                   <div className="w-16 h-16 rounded-full bg-brand-indigo-900/50 border border-white/5 flex items-center justify-center mb-4 text-brand-coral-500 mx-auto">
                     <Icons.FolderHeart className="w-8 h-8 text-brand-coral-500/80" />
                   </div>
-                  <h3 className="text-base font-outfit font-bold text-slate-950 dark:text-white mb-2">Pasta vazia</h3>
+                  <h3 className="text-base font-outfit font-bold text-slate-950 dark:text-white mb-2">{t('home_empty_folder_title')}</h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-xs mx-auto">
-                    Nenhum local nesta pasta. Use o Swipe para salvar locais aqui!
+                    {t('home_empty_folder_desc')}
                   </p>
                 </div>
               ) : filteredFolderPlaces.length > 0 ? (
@@ -844,7 +852,7 @@ export default function Home({
                 </div>
               ) : (
                 <div className="glass-card rounded-3xl p-8 text-center border border-slate-200/50 dark:border-white/5 bg-white/70 dark:bg-brand-indigo-950/40">
-                  <p className="text-sm text-slate-550 dark:text-slate-400">Nenhum local encontrado para a sua seleção nesta pasta.</p>
+                  <p className="text-sm text-slate-550 dark:text-slate-400">{t('home_no_places_found')}</p>
                   <button
                     onClick={() => {
                       setSearchQuery('');
@@ -854,7 +862,7 @@ export default function Home({
                     }}
                     className="mt-4 text-xs font-semibold text-brand-coral-400 border border-brand-coral-500/20 px-4 py-2 rounded-full hover:bg-brand-coral-500/10 transition-all"
                   >
-                    Limpar Filtros
+                    {t('home_clear_filters')}
                   </button>
                 </div>
               )}
@@ -876,7 +884,7 @@ export default function Home({
             <div className="flex items-center justify-between mb-5 shrink-0">
               <div className="flex items-center gap-2">
                 <Icons.Filter className="w-5 h-5 text-brand-coral-500" />
-                <h3 className="text-base font-outfit font-black text-slate-900 dark:text-white">Filtros</h3>
+                <h3 className="text-base font-outfit font-black text-slate-900 dark:text-white">{t('home_filters')}</h3>
               </div>
               <button 
                 type="button"
@@ -935,7 +943,7 @@ export default function Home({
                         }`}>
                           <IconRenderer name={cat.icon} className="w-4 h-4" />
                         </div>
-                        <span className="truncate text-xs">{cat.name}</span>
+                        <span className="truncate text-xs">{t(`cat_${cat.id}` as any)}</span>
                       </div>
                       
                       <div className="flex items-center gap-2">
@@ -1012,7 +1020,7 @@ export default function Home({
                             >
                               <div className="flex items-center gap-2">
                                 <span className="text-sm">{sub.emoji}</span>
-                                <span className="text-xs">{sub.name}</span>
+                                <span className="text-xs">{t(`sub_${sub.id}` as any)}</span>
                               </div>
                               <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                                 isSubSelected
@@ -1057,7 +1065,7 @@ export default function Home({
                             >
                               <div className="flex items-center gap-2">
                                 <span className="text-sm">{sub.emoji}</span>
-                                <span className="text-xs">{sub.name}</span>
+                                <span className="text-xs">{t(`sub_${sub.id}` as any)}</span>
                               </div>
                               <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                                 isSubSelected
@@ -1097,7 +1105,7 @@ export default function Home({
                             >
                               <div className="flex items-center gap-2">
                                 <span className="text-sm">{sub.emoji}</span>
-                                <span className="text-xs">{sub.name}</span>
+                                <span className="text-xs">{t(`sub_${sub.id}` as any)}</span>
                               </div>
                               <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                                 isSubSelected
@@ -1137,7 +1145,7 @@ export default function Home({
                             >
                               <div className="flex items-center gap-2">
                                 <span className="text-sm">{sub.emoji}</span>
-                                <span className="text-xs">{sub.name}</span>
+                                <span className="text-xs">{t(`sub_${sub.id}` as any)}</span>
                               </div>
                               <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                                 isSubSelected
@@ -1176,7 +1184,7 @@ export default function Home({
                             >
                               <div className="flex items-center gap-2">
                                 <span className="text-sm">{sub.emoji}</span>
-                                <span className="text-xs">{sub.name}</span>
+                                <span className="text-xs">{t(`sub_${sub.id}` as any)}</span>
                               </div>
                               <div className={`w-4 h-4 rounded-md border flex items-center justify-center shrink-0 transition-all ${
                                 isSubSelected
@@ -1198,7 +1206,7 @@ export default function Home({
 
               {/* Estilo & Vibe Section */}
               <div className="mt-4 pt-4 border-t border-slate-150 dark:border-white/5">
-                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Estilo & Vibe</h4>
+                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">{t('home_vibe_style')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {[
                     { id: 'rock', name: 'Rock', icon: '🎸' },
@@ -1233,7 +1241,7 @@ export default function Home({
                         }`}
                       >
                         <span>{tag.icon}</span>
-                        <span>{tag.name}</span>
+                        <span>{t(`tag_${tag.id}` as any)}</span>
                       </button>
                     );
                   })}
@@ -1254,14 +1262,14 @@ export default function Home({
                 disabled={selectedCategories.length === 0 && selectedSubCategories.length === 0 && selectedTags.length === 0}
                 className="flex-1 py-2.5 text-center text-xs font-bold text-slate-500 dark:text-slate-450 hover:text-brand-coral-500 dark:hover:text-brand-coral-400 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl transition-all active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none"
               >
-                Limpar Filtros
+                {t('home_clear_filters')}
               </button>
               <button
                 type="button"
                 onClick={() => setIsCategoryModalOpen(false)}
                 className="flex-1 py-2.5 text-center text-xs font-bold text-white bg-brand-coral-500 hover:bg-brand-coral-600 rounded-xl transition-all active:scale-[0.98] shadow-md shadow-brand-coral-500/10"
               >
-                Aplicar
+                {t('home_apply')}
               </button>
             </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Compass, Moon, Sun, MapPin, ChevronDown, Search, Locate, X, Globe } from 'lucide-react';
-import { getLanguage, setLanguage } from '../../utils/i18n';
+import { getLanguage, setLanguage, t } from '../../utils/i18n';
 
 
 
@@ -397,15 +397,15 @@ export default function Header({
             
             <div className="space-y-1">
               <h3 className="text-lg font-outfit font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-brand-coral-500" /> Definir Localização
+                <MapPin className="w-5 h-5 text-brand-coral-500" /> {t('loc_modal_title')}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Pesquise bairros, ruas ou pontos turísticos para simular sua localização no Giro.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('loc_modal_desc')}</p>
             </div>
 
             {gpsDenied && (
               <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-2.5 text-[11px] text-amber-700 dark:text-amber-400 leading-snug shrink-0">
                 <span className="text-sm shrink-0">⚠️</span>
-                <p>Sua geolocalização está desativada. Escolha um bairro de Curitiba abaixo para continuar explorando.</p>
+                <p>{t('loc_gps_denied')}</p>
               </div>
             )}
 
@@ -419,7 +419,7 @@ export default function Header({
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full h-12 pl-10 pr-4 rounded-2xl bg-white dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-sm outline-none transition-colors duration-300 focus:border-brand-coral-500 dark:focus:border-brand-coral-500" 
-                placeholder="Para onde quer dar um Giro?"
+                placeholder={t('loc_search_placeholder')}
               />
             </div>
 
@@ -428,13 +428,13 @@ export default function Header({
               onClick={handleUseGPS}
               className="w-full h-11 rounded-2xl bg-brand-coral-500/10 hover:bg-brand-coral-500/20 text-brand-coral-600 dark:text-brand-coral-400 border border-brand-coral-500/20 dark:border-brand-coral-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 btn-premium"
             >
-              <Locate className="w-4 h-4" /> Usar minha localização atual (GPS)
+              <Locate className="w-4 h-4" /> {t('loc_use_gps')}
             </button>
 
             {/* Seletor de Raio de Busca */}
             <div className="space-y-2">
               <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
-                Raio de busca (Distância)
+                {t('loc_radius_label')}
               </label>
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
                 {[
@@ -456,7 +456,7 @@ export default function Header({
                           : 'bg-white dark:bg-brand-indigo-900/40 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/5 hover:border-brand-coral-500/30'
                       }`}
                     >
-                      {opt.label}
+                      {opt.label === 'Sem limite' ? t('loc_no_limit') : opt.label}
                     </button>
                   );
                 })}
@@ -470,7 +470,7 @@ export default function Header({
               {isLoading && (
                 <div className="flex items-center justify-center py-6 gap-2 text-xs text-slate-500">
                   <div className="w-4 h-4 border-2 border-brand-coral-500 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Buscando endereços...</span>
+                  <span>{t('loc_searching')}</span>
                 </div>
               )}
 
@@ -479,16 +479,16 @@ export default function Header({
                   {isSubscribed ? (
                     <div className="text-center space-y-2 py-2">
                       <div className="text-2xl">🎉</div>
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">Inscrição Confirmada!</h4>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">Avisaremos você assim que o Giro chegar em <strong>{waitingListCity}</strong>!</p>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">{t('loc_subscribed_title')}</h4>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">{t('loc_subscribed_desc')} <strong>{waitingListCity}</strong>!</p>
                     </div>
                   ) : (
                     <>
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-brand-coral-500/20 flex items-center justify-center shrink-0 text-brand-coral-500 font-bold text-sm">🚀</div>
                         <div className="space-y-1">
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-white">O Giro ainda não chegou em {waitingListCity}!</h4>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">No momento, estamos ativos apenas em Curitiba - PR. Deixe seu e-mail para entrar na lista de espera!</p>
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-white">{t('loc_not_arrived')}{waitingListCity}!</h4>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">{t('loc_only_curitiba')}</p>
                         </div>
                       </div>
                       <form onSubmit={handleWaitingListSubmit} className="flex gap-2">
@@ -497,10 +497,10 @@ export default function Header({
                           required 
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="Seu e-mail" 
+                          placeholder={t('loc_email_placeholder')} 
                           className="flex-1 h-9 px-3 rounded-xl bg-white dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 text-[11px] text-slate-900 dark:text-white outline-none"
                         />
-                        <button type="submit" className="h-9 px-4 rounded-xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-[11px] btn-premium">Me avise</button>
+                        <button type="submit" className="h-9 px-4 rounded-xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-[11px] btn-premium">{t('loc_notify_me')}</button>
                       </form>
                     </>
                   )}
@@ -531,7 +531,7 @@ export default function Header({
 
               {!isLoading && !waitingListCity && searchQuery && suggestions.length === 0 && (
                 <div className="p-4 text-center text-xs text-slate-500">
-                  Nenhum endereço encontrado. Tente pesquisar com termos mais simples.
+                  {t('loc_not_found')}
                 </div>
               )}
             </div>

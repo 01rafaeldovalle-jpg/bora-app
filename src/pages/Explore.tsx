@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Place } from '../types';
 import { MOCK_PLACES } from '../utils/constants';
 import LeafletMap from '../components/maps/LeafletMap';
 import SearchBar from '../components/common/SearchBar';
 import PlaceCard from '../components/places/PlaceCard';
 import { MapPin, X, Navigation, ArrowLeft } from 'lucide-react';
+import { getLanguage, t } from '../utils/i18n';
 
 interface ExploreProps {
   favorites: string[];
@@ -39,6 +40,13 @@ export default function Explore({
   onCloseOnlyFavorites,
   searchRadius
 }: ExploreProps) {
+  const [lang, setLangState] = useState(getLanguage());
+  useEffect(() => {
+    const handleLang = (e: any) => setLangState(e.detail.lang);
+    window.addEventListener('giro-language-change', handleLang);
+    return () => window.removeEventListener('giro-language-change', handleLang);
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState('');
 
   // Filtrar locais no mapa
@@ -112,7 +120,7 @@ export default function Explore({
               setSearchQuery(val);
               setSelectedPlace(null); // Limpa seleção ao buscar
             }} 
-            placeholder="Pesquisar no mapa..."
+            placeholder={t('search_on_map')}
           />
         </div>
 
@@ -121,7 +129,7 @@ export default function Explore({
             onClick={onCloseOnlyFavorites}
             className="w-full h-11 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-xs rounded-2xl flex items-center justify-center gap-2 shadow-premium border border-white/10 btn-premium transition-all animate-fade-in"
           >
-            <ArrowLeft className="w-4 h-4" /> Voltar para os Matches
+            <ArrowLeft className="w-4 h-4" /> {t('home_back_matches')}
           </button>
         )}
       </div>

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Place } from '../types';
 import { MOCK_PLACES } from '../utils/constants';
 import PlaceCard from '../components/places/PlaceCard';
 import { Bookmark, Compass, FolderHeart, FolderOpen, ArrowLeft, Trash2 } from 'lucide-react';
+import { getLanguage, t } from '../utils/i18n';
 
 interface FavoritesProps {
   favorites: string[];
@@ -36,6 +37,13 @@ export default function Favorites({
   collections,
   onDeleteCollection
 }: FavoritesProps) {
+  const [lang, setLangState] = useState(getLanguage());
+  useEffect(() => {
+    const handleLang = (e: any) => setLangState(e.detail.lang);
+    window.addEventListener('giro-language-change', handleLang);
+    return () => window.removeEventListener('giro-language-change', handleLang);
+  }, []);
+
   const [activeSubTab, setActiveSubTab] = useState<'places' | 'collections'>('places');
   const [expandedCollectionName, setExpandedCollectionName] = useState<string | null>(null);
 
@@ -79,7 +87,7 @@ export default function Favorites({
                 onClick={() => setExpandedCollectionName(null)}
                 className="self-start flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-brand-coral-500 dark:hover:text-white transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" /> Voltar para Coleções
+                <ArrowLeft className="w-4 h-4" /> {t('fav_back_collections')}
               </button>
               
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-3">
@@ -89,10 +97,10 @@ export default function Favorites({
                   </div>
                   <div>
                     <h2 className="text-lg font-outfit font-black text-slate-900 dark:text-white leading-tight">
-                      {expandedCollectionName}
+                      {expandedCollectionName === 'Todos os Salvos' || expandedCollectionName === 'Salvos' ? t('home_all_saved') : expandedCollectionName}
                     </h2>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">
-                      {collectionPlaces.length} {collectionPlaces.length === 1 ? 'local salvo' : 'locais salvos'}
+                      {collectionPlaces.length} {collectionPlaces.length === 1 ? t('fav_saved_singular') : t('fav_saved_plural')}
                     </p>
                   </div>
                 </div>
@@ -100,7 +108,8 @@ export default function Favorites({
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm(`Tem certeza que deseja excluir a coleção "${expandedCollectionName}"?`)) {
+                    const dispName = expandedCollectionName === 'Todos os Salvos' || expandedCollectionName === 'Salvos' ? t('home_all_saved') : expandedCollectionName;
+                    if (confirm(`${t('fav_confirm_delete')}"${dispName}"?`)) {
                       onDeleteCollection(expandedCollectionName);
                       setExpandedCollectionName(null);
                     }
@@ -131,9 +140,9 @@ export default function Favorites({
                 <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-brand-indigo-900/50 border border-slate-200 dark:border-white/5 flex items-center justify-center mb-4 text-brand-coral-500">
                   <Bookmark className="w-8 h-8" />
                 </div>
-                <h3 className="text-base font-outfit font-bold text-slate-850 dark:text-white mb-2">Coleção Vazia</h3>
+                <h3 className="text-base font-outfit font-bold text-slate-850 dark:text-white mb-2">{t('fav_empty_collection_title')}</h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-                  Não há locais salvos nesta coleção ainda.
+                  {t('fav_empty_collection_desc')}
                 </p>
               </div>
             )}
@@ -142,7 +151,7 @@ export default function Favorites({
           /* Visão Principal da Aba de Favoritos (Alternador entre Locais e Coleções) */
           <>
             {/* Seletor Visual de Sub-Abas */}
-            <div className="bg-slate-200/60 dark:bg-brand-indigo-950/80 border border-slate-300/40 dark:border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6 max-w-xs">
+            <div className="bg-slate-200/60 dark:bg-brand-indigo-950/85 border border-slate-300/40 dark:border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6 max-w-xs">
               <button
                 type="button"
                 onClick={() => setActiveSubTab('places')}
@@ -150,7 +159,7 @@ export default function Favorites({
                   activeSubTab === 'places' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                Locais (Todos)
+                {t('fav_tab_places')}
               </button>
               <button
                 type="button"
@@ -159,7 +168,7 @@ export default function Favorites({
                   activeSubTab === 'collections' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                Coleções (Pastas)
+                {t('fav_tab_collections')}
               </button>
             </div>
 
@@ -184,9 +193,9 @@ export default function Favorites({
                       <Bookmark className="w-8 h-8 fill-brand-coral-500" />
                     </div>
                     
-                    <h3 className="text-base font-outfit font-bold text-slate-850 dark:text-white mb-2">Nenhum favorito salvo</h3>
+                    <h3 className="text-base font-outfit font-bold text-slate-855 dark:text-white mb-2">{t('fav_no_favorites_title')}</h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed mb-6">
-                      Marque locais incríveis de Curitiba com a bandeirinha para salvá-los aqui e planejar seu rolê com facilidade.
+                      {t('fav_no_favorites_desc')}
                     </p>
                     
                     <button
@@ -195,7 +204,7 @@ export default function Favorites({
                       className="flex items-center gap-2 bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-semibold text-xs px-6 h-11 rounded-2xl transition-all btn-premium shadow-md"
                     >
                       <Compass className="w-4 h-4" />
-                      <span>Explorar Locais</span>
+                      <span>{t('fav_explore_btn')}</span>
                     </button>
                   </div>
                 )}
@@ -222,10 +231,10 @@ export default function Favorites({
                         
                         <div className="text-left mt-auto">
                           <h4 className="font-outfit font-black text-slate-800 dark:text-white text-sm line-clamp-1 leading-snug">
-                            {name}
+                            {name === 'Todos os Salvos' || name === 'Salvos' ? t('home_all_saved') : name}
                           </h4>
                           <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-semibold uppercase tracking-wider">
-                            {collections[name]?.length || 0} {collections[name]?.length === 1 ? 'local' : 'locais'}
+                            {collections[name]?.length || 0} {collections[name]?.length === 1 ? t('home_local_singular') : t('home_local_plural')}
                           </p>
                         </div>
                       </div>
@@ -236,9 +245,9 @@ export default function Favorites({
                     <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-brand-indigo-900/50 border border-slate-200/60 dark:border-white/5 flex items-center justify-center mb-4 text-brand-coral-500">
                       <FolderHeart className="w-8 h-8" />
                     </div>
-                    <h3 className="text-base font-outfit font-bold text-slate-850 dark:text-white mb-2">Nenhuma coleção</h3>
+                    <h3 className="text-base font-outfit font-bold text-slate-855 dark:text-white mb-2">{t('fav_no_collections_title')}</h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
-                      Você ainda não criou pastas. Use o botão de salvar nos cards de locais para criar suas pastas temáticas!
+                      {t('fav_no_collections_desc')}
                     </p>
                   </div>
                 )}
