@@ -2272,19 +2272,23 @@ export default function Profile({ favoritesCount }: ProfileProps) {
     <div className="pb-24 text-slate-900 dark:text-slate-100 w-full flex flex-col items-center">
       <div className="px-6 py-6 max-w-md mx-auto w-full flex flex-col">
         {/* Segmented Control */}
-        <div className="bg-slate-200/60 dark:bg-brand-indigo-950/80 border border-slate-300/40 dark:border-white/5 p-1 rounded-2xl flex gap-1 shadow-inner w-full mb-6">
+        <div className="flex bg-slate-100 dark:bg-brand-indigo-950/85 p-1 rounded-2xl w-full gap-1 border border-slate-200/60 dark:border-white/5 transition-colors duration-300 shrink-0">
           <button
             onClick={() => setProfileSubTab('personal')}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
               profileSubTab === 'personal' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
-          >Meu Perfil</button>
+          >
+            {t('meu_perfil')}
+          </button>
           <button
             onClick={() => setProfileSubTab('business')}
             className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
               profileSubTab === 'business' ? 'bg-brand-coral-500 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
-          >Meu Negócio</button>
+          >
+            {t('meu_negocio')}
+          </button>
         </div>
 
         <div className="w-full">
@@ -2346,14 +2350,14 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                   <div className="flex-1 text-left min-w-0">
                     <div className="flex justify-between items-center">
                       <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">
-                        Selo {badgeLevel === 'gold' ? 'Ouro' : badgeLevel === 'silver' ? 'Prata' : 'Bronze'}
+                        {t('selo')} {badgeLevel === 'gold' ? t('selo_ouro') : badgeLevel === 'silver' ? t('selo_prata') : t('selo_bronze')}
                       </h3>
                       <span className="text-[10px] font-semibold text-slate-400">
-                        {badgeLevel === 'gold' ? '85%' : badgeLevel === 'silver' ? '60%' : '30%'} ativo
+                        {badgeLevel === 'gold' ? '85%' : badgeLevel === 'silver' ? '60%' : '30%'} {t('ativo')}
                       </span>
                     </div>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
-                      Clique para ciclar selos • Nível de atividade
+                      {t('ciclar_selos')}
                     </p>
                     <div className="w-full h-1.5 bg-slate-100 dark:bg-brand-indigo-950 rounded-full overflow-hidden mt-2">
                       <div className={`h-full rounded-full transition-all duration-500 ${badgeLevel === 'gold' ? 'bg-amber-500 w-[85%]' : badgeLevel === 'silver' ? 'bg-slate-300 w-[60%]' : 'bg-amber-700 w-[30%]'}`} />
@@ -2364,9 +2368,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-3 w-full mt-4">
                   {[
-                    { icon: <Bookmark className="w-4 h-4 text-brand-teal-400 mb-1.5" />, val: favoritesCount, label: 'Salvos' },
-                    { icon: <Edit3 className="w-4 h-4 text-brand-gold-400 mb-1.5" />, val: 12, label: 'Reviews' },
-                    { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: 142, label: 'Ajudou' },
+                    { icon: <Bookmark className="w-4 h-4 text-brand-teal-400 mb-1.5" />, val: favoritesCount, label: t('salvos') },
+                    { icon: <Edit3 className="w-4 h-4 text-brand-gold-400 mb-1.5" />, val: 12, label: t('reviews') },
+                    { icon: <Heart className="w-4 h-4 text-brand-coral-500 mb-1.5" />, val: 142, label: t('ajudou') },
                   ].map((s, i) => (
                     <div key={i} className="glass-card p-3 rounded-2xl flex flex-col items-center justify-center border border-slate-100 dark:border-white/5 shadow-inner">
                       {s.icon}
@@ -2377,12 +2381,13 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 </div>
 
                 {/* Preferências */}
+                {/* Preferências */}
                 <div className="glass-card rounded-3xl p-5 w-full border border-slate-100 dark:border-white/5 mt-4 text-left">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Minhas Preferências</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('minhas_preferencias')}</h3>
                     {userPreferences.length > 0 && (
                       <button onClick={() => setIsPrefsSheetOpen(true)} className="text-xs text-brand-coral-500 hover:text-brand-coral-600 flex items-center gap-1 font-semibold transition-colors">
-                        <Edit2 className="w-3.5 h-3.5" />Editar
+                        <Edit2 className="w-3.5 h-3.5" />{t('editar')}
                       </button>
                     )}
                   </div>
@@ -2390,13 +2395,19 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                     <div className="flex flex-wrap gap-2 mt-3">
                       {prefs.filter((p) => userPreferences.includes(p.id)).map((p) => (
                         <span key={p.id} className="px-3 py-1.5 rounded-full text-xs font-semibold border border-brand-coral-500 bg-brand-coral-500 text-white shadow-md shadow-brand-coral-500/20">
-                          {p.label}
+                          {(() => {
+                            let key = `pref_${p.id.replace(/-/g, '_')}`;
+                            if (p.id === 'accessible-motor') key = 'pref_acc_motor';
+                            else if (p.id === 'accessible-deaf') key = 'pref_acc_deaf';
+                            else if (p.id === 'accessible-blind') key = 'pref_acc_blind';
+                            return t(key as any) || p.label;
+                          })()}
                         </span>
                       ))}
                     </div>
                   ) : (
                     <button onClick={() => setIsPrefsSheetOpen(true)} className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white mt-3 transition-colors">
-                      Nenhuma preferência. <span className="text-brand-coral-500">[+ Adicionar]</span>
+                      {t('nenhuma_preferencia')} <span className="text-brand-coral-500">{t('adicionar')}</span>
                     </button>
                   )}
                 </div>
@@ -2404,9 +2415,9 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                 {/* Menu */}
                 <div className="glass-card rounded-3xl w-full border border-slate-100 dark:border-white/5 mt-4 overflow-hidden">
                   {[
-                    { icon: <User className="w-4 h-4 text-slate-400" />, label: 'Dados Cadastrais', onClick: openCadastrais, danger: false },
-                    { icon: <Bell className="w-4 h-4 text-slate-400" />, label: 'Gerenciar Notificações', onClick: () => alert('Em breve!'), danger: false },
-                    { icon: <Trash2 className="w-4 h-4 text-rose-400" />, label: 'Excluir Conta Definitivamente', onClick: () => setIsDeleteConfirmOpen(true), danger: true },
+                    { icon: <User className="w-4 h-4 text-slate-400" />, label: t('dados_cadastrais'), onClick: openCadastrais, danger: false },
+                    { icon: <Bell className="w-4 h-4 text-slate-400" />, label: t('gerenciar_notificacoes'), onClick: () => alert('Em breve!'), danger: false },
+                    { icon: <Trash2 className="w-4 h-4 text-rose-400" />, label: t('excluir_conta_definitiva'), onClick: () => setIsDeleteConfirmOpen(true), danger: true },
                   ].map((item, idx, arr) => (
                     <button
                       key={idx}
@@ -2428,7 +2439,7 @@ export default function Profile({ favoritesCount }: ProfileProps) {
                   >
                     <div className="flex items-center gap-3">
                       <LogOut className="w-4 h-4 text-rose-400" />
-                      <span className="text-xs font-bold text-rose-400">Sair da Conta</span>
+                      <span className="text-xs font-bold text-rose-400">{t('sair_conta')}</span>
                     </div>
                   </button>
                 </div>
