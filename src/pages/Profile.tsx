@@ -395,22 +395,6 @@ function OnboardingOverlay({
                 {t('continue_google')}
               </button>
 
-              {/* Divider */}
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold">ou</span>
-                <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
-              </div>
-
-              {/* Email login */}
-              <button
-                onClick={() => { setErr(''); setView('email-login'); }}
-                className="w-full h-14 rounded-2xl bg-slate-200/60 dark:bg-white/5 border border-slate-300 dark:border-white/10 text-slate-800 dark:text-white hover:bg-slate-300/60 dark:hover:bg-white/10 active:scale-[0.97] transition-all flex items-center justify-center gap-3"
-              >
-                <Mail className="w-5 h-5 text-slate-500 dark:text-slate-300 shrink-0" />
-                {t('enter_email')}
-              </button>
-
               {/* Create account */}
               <button
                 onClick={() => { setErr(''); setView('signup-1'); }}
@@ -419,6 +403,18 @@ function OnboardingOverlay({
                 {t('create_account_btn')}
                 <ArrowRight className="w-4 h-4" />
               </button>
+
+              {/* Already have an account text link */}
+              <p className="text-xs text-center text-slate-500 pt-3">
+                {t('ja_tem_conta')}{' '}
+                <button
+                  type="button"
+                  onClick={() => { setErr(''); setView('email-login'); }}
+                  className="text-brand-coral-500 font-bold hover:text-brand-coral-400 transition-colors"
+                >
+                  {t('fazer_login')}
+                </button>
+              </p>
             </div>
 
             <p className="text-[11px] text-slate-600 text-center mt-2 max-w-[260px] leading-relaxed">
