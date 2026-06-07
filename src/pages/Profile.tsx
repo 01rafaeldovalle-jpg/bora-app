@@ -496,8 +496,8 @@ function OnboardingOverlay({
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-7 h-7 text-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Crie seu acesso</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">E-mail e uma senha forte</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">{t('crie_acesso')}</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('email_senha_forte')}</p>
             </div>
 
             <div className="space-y-3">
@@ -515,7 +515,7 @@ function OnboardingOverlay({
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type={showPwd ? 'text' : 'password'}
-                  placeholder="Senha (mín. 6 caracteres)"
+                  placeholder={t('senha_min')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-14 rounded-2xl form-input pl-11 pr-12 text-sm"
@@ -533,7 +533,7 @@ function OnboardingOverlay({
               {password && (
                 <div className="space-y-1.5 px-1">
                   <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-slate-500">Força da senha</span>
+                    <span className="text-slate-500">{t('forca_senha')}</span>
                     <span className="font-bold text-slate-300">{pwdStrength(password).label}</span>
                   </div>
                   <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
@@ -558,13 +558,13 @@ function OnboardingOverlay({
                   {acceptTerms && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                 </div>
                 <span className="text-xs text-slate-400 leading-snug pt-0.5">
-                  Li e aceito os{' '}
+                  {t('li_aceito')}{' '}
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setIsTermsOpen(true); }}
                     className="text-brand-coral-500 font-semibold hover:underline"
                   >
-                    Termos de Uso e Política de Privacidade
+                    {t('termos_uso')}
                   </button>
                 </span>
               </label>
@@ -577,17 +577,17 @@ function OnboardingOverlay({
               disabled={!email || password.length < 6 || !acceptTerms}
               className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
-              Continuar
+              {t('continuar')}
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <p className="text-xs text-center text-slate-500">
-              Já tem conta?{' '}
+              {t('ja_tem_conta')}{' '}
               <button
                 onClick={() => { setErr(''); setView('email-login'); }}
                 className="text-brand-coral-500 font-bold"
               >
-                Fazer login
+                {t('fazer_login')}
               </button>
             </p>
           </div>
@@ -600,8 +600,8 @@ function OnboardingOverlay({
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <User className="w-7 h-7 text-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Quem é você?</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Como você quer ser chamado no Giro</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">{t('quem_e_voce')}</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('como_ser_chamado')}</p>
             </div>
 
             <div className="space-y-3">
@@ -609,7 +609,7 @@ function OnboardingOverlay({
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Nome completo"
+                  placeholder={t('nome_completo')}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full h-14 rounded-2xl form-input pl-11 pr-4 text-sm"
@@ -623,12 +623,12 @@ function OnboardingOverlay({
                   value={username.replace(/^@/, '')}
                   onChange={(e) => {
                     const clean = e.target.value
-                      .replace(/^@/, '') // Remove @ duplicado no início
-                      .normalize("NFD") // Decompõe caracteres acentuados (ex: "ã" vira "a" + "~")
-                      .replace(/[\u0300-\u036f]/g, "") // Remove os acentos/til isolados
-                      .toLowerCase() // Converte tudo para minúsculas
-                      .replace(/\s+/g, '_') // Substitui espaços por underline
-                      .replace(/[^a-z0-9_]/g, ''); // Remove qualquer caractere que não seja letra, número ou underline
+                      .replace(/^@/, '')
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "")
+                      .toLowerCase()
+                      .replace(/\s+/g, '_')
+                      .replace(/[^a-z0-9_]/g, '');
                     setUsername(`@${clean}`);
                   }}
                   className="w-full h-14 rounded-2xl form-input pl-11 pr-4 text-sm"
@@ -643,7 +643,7 @@ function OnboardingOverlay({
               disabled={!name.trim() || username.replace(/^@/, '').length < 3}
               className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
-              Continuar
+              {t('continuar')}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -653,13 +653,13 @@ function OnboardingOverlay({
         {view === 'signup-3' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 animate-[fadeInUp_0.35s_ease-out]">
             <div className="text-center mt-2">
-              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Sua foto</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Escolha um avatar para seu perfil (opcional)</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">{t('sua_foto')}</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('escolha_avatar')}</p>
             </div>
 
             {/* Avatar picker */}
             <div className="relative group">
-              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-brand-coral-500/40 bg-slate-200 dark:bg-brand-indigo-900 flex items-center justify-center shadow-2xl shadow-brand-coral-500/20">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-brand-coral-500/40 bg-slate-200 dark:bg-brand-indigo-950 flex items-center justify-center shadow-2xl shadow-brand-coral-500/20">
                 {avatar ? (
                   <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -677,20 +677,18 @@ function OnboardingOverlay({
                 <Camera className="w-4 h-4 text-white" />
               </label>
 
-              {/* Inputs Ocultos de Arquivo */}
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
               <input ref={cameraInputRef} type="file" accept="image/*" capture="user" className="hidden" onChange={handleAvatarUpload} />
             </div>
 
             <div className="w-full space-y-3">
-              {/* Botões Lado a Lado */}
               <div className="w-full flex gap-3">
                 <button
                   onClick={() => cameraInputRef.current?.click()}
                   className="flex-1 h-14 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all btn-premium shadow-md"
                 >
                   <Camera className="w-4 h-4 text-brand-coral-500" />
-                  Tirar Foto
+                  {t('tirar_foto')}
                 </button>
 
                 <button
@@ -698,7 +696,7 @@ function OnboardingOverlay({
                   className="flex-1 h-14 rounded-2xl bg-slate-100 dark:bg-brand-indigo-900/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-200 dark:hover:bg-brand-indigo-900/60 active:scale-95 transition-all btn-premium shadow-md"
                 >
                   <Image className="w-4 h-4 text-brand-coral-500" />
-                  Galeria
+                  {t('galeria')}
                 </button>
               </div>
 
@@ -706,49 +704,55 @@ function OnboardingOverlay({
                 onClick={() => setView('signup-4')}
                 className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2"
               >
-                Continuar
+                {t('continuar')}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         )}
 
-        {/* ══════════ SIGNUP STEP 4 – Preferências ══════════ */}
+        {/* ══════════ SIGNUP STEP 4 – Interesses ══════════ */}
         {view === 'signup-4' && (
-          <div className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]">
+          <div className="w-full max-w-sm flex flex-col gap-6 animate-[fadeInUp_0.35s_ease-out]">
             <div className="text-center mt-2">
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <Heart className="w-7 h-7 text-brand-coral-500 animate-pulse fill-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Seus interesses</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Escolha pelo menos 3 para calibrar seu Swipe ⚡</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">{t('seus_interesses')}</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed max-w-[260px] mx-auto">
+                {t('escolha_tres')}
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {allPrefs.map((pref) => {
-                const active = prefs.includes(pref.id);
-                return (
-                  <button
-                    key={pref.id}
-                    onClick={() => togglePref(pref.id)}
-                    className={`h-12 rounded-2xl text-xs font-semibold border flex items-center gap-2.5 px-3 transition-all duration-200 active:scale-95 ${
-                      active
-                        ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md shadow-brand-coral-500/20'
-                        : 'bg-slate-200/50 dark:bg-white/5 border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-300/50 dark:hover:bg-white/10'
-                    }`}
-                  >
-                    <span className="text-base shrink-0">{pref.label.split(' ')[0]}</span>
-                    <span className="truncate">{pref.label.split(' ').slice(1).join(' ')}</span>
-                    {active && <CheckCircle2 className="w-3.5 h-3.5 ml-auto shrink-0" />}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-center gap-2">
-              <div className={`text-xs font-bold transition-colors ${prefs.length >= 3 ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-500'}`}>
-                {prefs.length >= 3 ? `✓ ${prefs.length} selecionadas` : `${prefs.length}/3 mínimo`}
+            <div className="flex-1 overflow-y-auto max-h-[40vh] pr-1 scrollbar-thin">
+              <div className="grid grid-cols-2 gap-3 pb-4">
+                {allPrefs.map((pref) => {
+                  const isActive = prefs.includes(pref.id);
+                  return (
+                    <button
+                      key={pref.id}
+                      onClick={() => togglePref(pref.id)}
+                      className={`h-14 rounded-2xl border text-xs font-bold transition-all flex items-center px-4 gap-3 select-none ${
+                        isActive
+                          ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-lg shadow-brand-coral-500/15 scale-[1.02]'
+                          : 'bg-white dark:bg-brand-indigo-950 border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-white/10 active:scale-98'
+                      }`}
+                    >
+                      <span className="text-sm">{(() => {
+                        let key = `pref_${pref.id.replace(/-/g, '_')}`;
+                        if (pref.id === 'accessible-motor') key = 'pref_acc_motor';
+                        else if (pref.id === 'accessible-deaf') key = 'pref_acc_deaf';
+                        else if (pref.id === 'accessible-blind') key = 'pref_acc_blind';
+                        return t(key as any) || pref.label;
+                      })()}</span>
+                    </button>
+                  );
+                })}
               </div>
+            </div>
+
+            <div className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">
+              {prefs.length}/3 {t('minimo')}
             </div>
 
             <button
@@ -756,7 +760,7 @@ function OnboardingOverlay({
               disabled={prefs.length < 3}
               className="w-full h-14 rounded-2xl btn-primary disabled:opacity-40 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
             >
-              Continuar
+              {t('continuar')}
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -765,14 +769,14 @@ function OnboardingOverlay({
         {/* ══════════ SIGNUP STEP 5 – GPS ══════════ */}
         {view === 'signup-5' && (
           <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center animate-[fadeInUp_0.35s_ease-out]">
-            <div className="w-24 h-24 rounded-full bg-brand-teal-500/15 border-2 border-brand-teal-500/30 flex items-center justify-center shadow-2xl shadow-brand-teal-500/10">
+            <div className="w-24 h-24 rounded-full bg-brand-teal-500/15 border-2 border-brand-teal-500/30 flex items-center justify-center mx-auto shadow-2xl shadow-brand-teal-500/10">
               <MapPin className="w-12 h-12 text-brand-teal-400 animate-bounce" />
             </div>
 
             <div>
-              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Ativar Localização</h2>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">{t('ativar_localizacao')}</h2>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed max-w-[260px] mx-auto">
-                O Giro usa sua localização para recomendar os melhores lugares perto de você em tempo real.
+                {t('gps_desc')}
               </p>
             </div>
 
@@ -801,7 +805,7 @@ function OnboardingOverlay({
                 className="w-full h-14 rounded-2xl bg-brand-teal-500 hover:bg-brand-teal-600 disabled:opacity-50 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-teal-500/20 active:scale-[0.97] transition-all"
               >
                 <MapPin className="w-5 h-5 shrink-0" />
-                {loading ? 'Criando sua conta...' : 'Ativar GPS (Recomendado)'}
+                {loading ? t('criando_conta') : t('ativar_gps')}
               </button>
 
               <button
@@ -809,7 +813,7 @@ function OnboardingOverlay({
                 disabled={loading}
                 className="w-full h-14 rounded-2xl btn-secondary text-sm"
               >
-                {loading ? 'Criando sua conta...' : 'Continuar sem GPS'}
+                {loading ? t('criando_conta') : t('sem_gps')}
               </button>
             </div>
           </div>
@@ -826,61 +830,137 @@ function OnboardingOverlay({
             >
               <X className="w-4 h-4" />
             </button>
-            <h3 className="text-base font-outfit font-bold text-slate-900 dark:text-white mb-1 text-center">Termos e Privacidade</h3>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-4 text-center">Sua privacidade e conformidade com a LGPD ⚖️</p>
+            <h3 className="text-base font-outfit font-bold text-slate-900 dark:text-white mb-1 text-center">
+              {lang === 'en' ? 'Terms & Privacy' : lang === 'es' ? 'Términos y Privacidad' : 'Termos e Privacidade'}
+            </h3>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mb-4 text-center">
+              {lang === 'en' ? 'Your privacy and compliance with LGPD ⚖️' : lang === 'es' ? 'Su privacidad y conformidad con la LGPD ⚖️' : 'Sua privacidade e conformidade com a LGPD ⚖️'}
+            </p>
             <div className="flex-1 overflow-y-auto text-xs text-slate-650 dark:text-slate-400 space-y-4 leading-relaxed pr-1 mb-5 scrollbar-thin">
-              
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Aceitação dos Termos e Legislação</h4>
-                <p>Ao criar uma conta ou utilizar os serviços do Giro, você declara estar ciente e concordar integralmente com este Termo de Uso e Política de Privacidade, regidos pelo Marco Civil da Internet (Lei nº 12.965/14) e pela LGPD (Lei nº 13.709/18).</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Elegibilidade e Faixa Etária</h4>
-                <p>O aplicativo Giro possui curadoria de locais e eventos voltados ao público geral, incluindo vida noturna e consumo de bebidas alcoólicas por terceiros. O cadastro é permitido apenas para usuários com capacidade civil plena (maiores de 18 anos ou menores emancipados conforme a lei civil brasileira).</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Coleta e Finalidade do Tratamento de Dados</h4>
-                <p>Sob a base legal do consentimento e execução de contrato, coletamos: nome completo, endereço de e-mail, fotografia de perfil e dados de geolocalização. Estes dados são utilizados exclusivamente para criação de conta, prevenção de fraudes, customização do perfil e funcionamento do radar dinâmico do app. Não comercializamos dados pessoais com terceiros.</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Uso de Serviços de Geolocalização</h4>
-                <p>O Giro requer acesso aos dados de GPS do dispositivo para mapear e indicar estabelecimentos e eventos próximos. Você pode revogar essa permissão a qualquer momento nas configurações do seu aparelho, ciente de que algumas funções de radar serão limitadas à busca manual.</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">5. Isenção Total de Responsabilidade</h4>
-                <p>O Giro funciona unicamente como plataforma de facilitação e curadoria de informações de entretenimento. Não garantimos a veracidade de preços, horários de funcionamento, segurança, lotação, integridade física ou qualidade dos serviços prestados pelos locais parceiros ou indicados no app. O usuário isenta o Giro de qualquer dano, perda ou acidente ocorrido em eventos e estabelecimentos listados.</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">6. Responsabilidade pelo Conteúdo e Avaliações</h4>
-                <p>Você é civil e penalmente responsável por qualquer conteúdo (texto, fotos ou notas) que publicar no Giro. É terminantemente proibido publicar conteúdo difamatório, ofensivo, ilícito ou mentiroso. O Giro se reserva o direito de excluir postagens e banir contas de usuários que violarem as diretrizes de comunidade, sem aviso prévio.</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">7. Segurança de Armazenamento</h4>
-                <p>Seus dados são criptografados e hospedados em servidores de banco de dados em nuvem de alta segurança. Embora adotemos rígidos padrões técnicos de segurança, não há garantia absoluta contra invasões, e o Giro não será responsável por vazamentos decorrentes de ataques de terceiros fora do nosso controle razoável.</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">8. Seus Direitos de Titular e Exclusão</h4>
-                <p>Em conformidade com o Art. 18 da LGPD, você possui direito de acesso, retificação e portabilidade de dados. A exclusão definitiva de sua conta, com a eliminação permanente de todos os seus dados coletados e preferências dos nossos servidores ativos, pode ser solicitada diretamente no seu perfil ou pelo e-mail: suporte@giroapp.com.br.</p>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 dark:text-white mb-1">9. Foro de Eleição</h4>
-                <p>Para dirimir quaisquer controvérsias oriundas deste contrato, fica eleito o Foro da Comarca de Curitiba, Estado do Paraná, com renúncia expressa a qualquer outro, por mais privilegiado que seja.</p>
-              </div>
-
+              {lang === 'en' ? (
+                <>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Acceptance of Terms & Legislation</h4>
+                    <p>By creating an account or using Giro, you agree to these Terms of Use and Privacy Policy, governed by the Brazilian Civil Rights Framework for the Internet and General Data Protection Law (LGPD).</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Age Limit</h4>
+                    <p>The Giro app features venues and events including nightlife. Registration is allowed only for users 18 years of age or older.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Data Collection & Purpose</h4>
+                    <p>We collect: full name, email, profile picture, and geolocation. These are used only for account setup and the proximity radar. We do not sell data.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Geolocation Services</h4>
+                    <p>Giro requires GPS access to show nearby places. You can disable this in your settings, limiting the radar to manual neighborhood searches.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">5. Total Disclaimer of Liability</h4>
+                    <p>Giro is an information curation platform. We do not guarantee prices, hours, security, or service quality of third-party venues. The user holds Giro harmless from any event incident.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">6. User Conduct & Reviews</h4>
+                    <p>You are solely liable for any review, photo, or comment you post. Offensive or unlawful content will be removed, and accounts may be banned.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">7. Storage Security</h4>
+                    <p>Your data is encrypted on secure cloud servers. We take high-level measures, but Giro is not liable for data leaks caused by unforeseen hacks.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">8. Your Rights & Deletion</h4>
+                    <p>Under LGPD, you have the right to access, edit, and delete your data. You can delete your account permanently in your profile or email: suporte@giroapp.com.br.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">9. Jurisdiction</h4>
+                    <p>Any disputes arising under this agreement will be settled under the jurisdiction of Curitiba, Paraná, Brazil.</p>
+                  </div>
+                </>
+              ) : lang === 'es' ? (
+                <>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Aceptación de los Términos</h4>
+                    <p>Al crear una cuenta o usar Giro, usted acepta estos Términos de Uso y Política de Privacidad, regidos por el Marco Civil de Internet y la Ley General de Protección de Datos (LGPD) de Brasil.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Edad Mínima</h4>
+                    <p>El Giro muestra lugares y eventos incluyendo vida nocturna. El registro está permitido únicamente para mayores de 18 años.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Recopilación de Datos y Finalidad</h4>
+                    <p>Recopilamos: nombre, email, foto de perfil y geolocalización para configurar la cuenta, prevenir fraudes y el radar. No vendemos sus datos.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Servicios de Geolocalización</h4>
+                    <p>Giro requiere acceso GPS para mostrar lugares cercanos. Puede desactivarlo en sus ajustes, limitando el radar a búsquedas manuales.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">5. Exención Total de Responsabilidad</h4>
+                    <p>Giro es una plataforma de curación de información. No garantizamos precios, horarios o seguridad de los locales indicados. El usuario exime a Giro de incidentes.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">6. Conducta del Usuario y Reseñas</h4>
+                    <p>Usted es responsable legal por sus comentarios o fotos. Se eliminará contenido ofensivo y se banearán cuentas infractoras.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">7. Seguridad del Almacenamiento</h4>
+                    <p>Sus datos se encriptan en servidores en la nube seguros. Giro no se responsabiliza por filtraciones causadas por hackers fuera de nuestro control.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">8. Sus Derechos y Eliminación</h4>
+                    <p>Bajo la LGPD, tiene derecho a acceder y borrar sus datos. Puede eliminar su cuenta en el perfil o enviar un correo a: suporte@giroapp.com.br.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">9. Jurisdicción</h4>
+                    <p>Cualquier disputa se resolverá bajo la jurisdicción de la Comarca de Curitiba, Paraná, Brasil.</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">1. Aceitação dos Termos e Legislação</h4>
+                    <p>Ao criar uma conta ou utilizar os serviços do Giro, você declara estar ciente e concordar integralmente com este Termo de Uso e Política de Privacidade, regidos pelo Marco Civil da Internet (Lei nº 12.965/14) e pela LGPD (Lei nº 13.709/18).</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">2. Elegibilidade e Faixa Etária</h4>
+                    <p>O aplicativo Giro possui curadoria de locais e eventos voltados ao público geral, incluindo vida noturna e consumo de bebidas alcoólicas por terceiros. O cadastro é permitido apenas para usuários com capacidade civil plena (maiores de 18 anos ou menores emancipados conforme a lei civil brasileira).</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">3. Coleta e Finalidade do Tratamento de Dados</h4>
+                    <p>Sob a base legal do consentimento e execução de contrato, coletamos: nome completo, endereço de e-mail, fotografia de perfil e dados de geolocalização. Estes dados são utilizados exclusivamente para criação de conta, prevenção de fraudes, customização do perfil e funcionamento do radar dinâmico do app. Não comercializamos dados pessoais com terceiros.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">4. Uso de Serviços de Geolocalização</h4>
+                    <p>O Giro requer acesso aos dados de GPS do dispositivo para mapear e indicar estabelecimentos e eventos próximos. Você pode revogar essa permissão a qualquer momento nas configurações do seu aparelho, ciente de que algumas funções de radar serão limitadas à busca manual.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">5. Isenção Total de Responsabilidade</h4>
+                    <p>O Giro funciona unicamente como plataforma de facilitação e curadoria de informações de entretenimento. Não garantimos a veracidade de preços, horários de funcionamento, segurança, lotação, integridade física ou qualidade dos serviços prestados pelos locais parceiros ou indicados no app. O usuário isenta o Giro de qualquer dano, perda ou acidente ocorrido em eventos e estabelecimentos listados.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">6. Responsabilidade pelo Conteúdo e Avaliações</h4>
+                    <p>Você é civil e penalmente responsável por qualquer conteúdo (texto, fotos ou notas) que publicar no Giro. É terminantemente proibido publicar conteúdo difamatório, ofensivo, ilícito ou mentiroso. O Giro se reserva o direito de excluir postagens e banir contas de usuários que violarem as diretrizes de comunidade, sem aviso prévio.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">7. Segurança de Armazenamento</h4>
+                    <p>Seus dados são criptografados e hospedados em servidores de banco de dados em nuvem de alta segurança. Embora adotemos rígidos padrões técnicos de segurança, não há garantia absoluta contra invasões, e o Giro não será responsável por vazamentos decorrentes de ataques de terceiros fora do nosso controle razoável.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">8. Seus Direitos de Titular e Exclusão</h4>
+                    <p>Em conformidade com o Art. 18 da LGPD, você possui direito de acesso, retificação e portabilidade de dados. A exclusão definitiva de sua conta, com a eliminação permanente de todos os seus dados coletados e preferências dos nossos servidores ativos, pode ser solicitada diretamente no seu perfil ou pelo e-mail: suporte@giroapp.com.br.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-1">9. Foro de Eleição</h4>
+                    <p>Para dirimir quaisquer controvérsias oriundas deste contrato, fica eleito o Foro da Comarca de Curitiba, Estado do Paraná, com renúncia expressa a qualquer outro, por mais privilegiado que seja.</p>
+                  </div>
+                </>
+              )}
             </div>
             <button
               onClick={() => setIsTermsOpen(false)}
               className="w-full h-12 rounded-2xl bg-brand-coral-500 hover:bg-brand-coral-600 text-white font-bold text-sm active:scale-95 transition-all shrink-0"
             >
-              Entendido
+              {lang === 'en' ? 'Understand' : lang === 'es' ? 'Entendido' : 'Entendido'}
             </button>
           </div>
         </div>
