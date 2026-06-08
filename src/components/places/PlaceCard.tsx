@@ -212,23 +212,7 @@ export default function PlaceCard({
               <span className="text-brand-coral-500 font-bold ml-1">• a {place.distance < 1 ? `${Math.round(place.distance * 1000)} m` : `${place.distance.toFixed(1)} km`} de você</span>
             )}
           </p>
-          
-          {/* Waze highlighted link */}
-          <div className="mt-2.5 mb-1 text-left">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsWazeOpen(true);
-                setWazeStep('ask');
-                setSelectedQuestion(null);
-              }}
-              className="text-[10px] font-bold text-brand-coral-500 hover:text-brand-coral-600 flex items-center gap-1 bg-brand-coral-500/5 px-2.5 py-1.5 rounded-xl border border-brand-coral-500/10 active:scale-95 transition-all cursor-pointer"
-            >
-              <MessageSquare className="w-3.5 h-3.5 fill-brand-coral-500/10" />
-              {t('como_esta_agora')}
-            </button>
-          </div>
+
         </div>
 
         {/* Ações e Rotas Integradas */}
