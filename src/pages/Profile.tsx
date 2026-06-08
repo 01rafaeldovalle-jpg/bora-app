@@ -71,9 +71,41 @@ function OnboardingOverlay({
   const [pronouns, setPronouns] = useState('');
   const [city, setCity] = useState('Curitiba');
   const [neighborhood, setNeighborhood] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
+
+  const fetchLocationSuggestions = async (query: string) => {
+    if (query.trim().length < 3) {
+      setLocationSuggestions([]);
+      return;
+    }
+    setSearchLoading(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      const filtered = data.map((item: any) => {
+        const addr = item.address || {};
+        const bairro = addr.suburb || addr.neighbourhood || addr.city_district || '';
+        const cidade = addr.city || addr.town || addr.village || addr.municipality || '';
+        const estado = addr.state || '';
+        return {
+          label: [bairro, cidade, estado].filter(Boolean).join(', '),
+          bairro,
+          cidade
+        };
+      }).filter((item: any) => item.bairro && item.cidade);
+      setLocationSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
 
   // Crop states
   const [cropOpen, setCropOpen] = useState(false);
@@ -773,7 +805,7 @@ function OnboardingOverlay({
                 />
               </div>
 
-              {/* Gênero Dropdown */}
+              {/* Gênero */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gênero</label>
                 <select
@@ -824,8 +856,8 @@ function OnboardingOverlay({
                 </select>
               </div>
 
-              {/* Cidade & Bairro */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Localização (Cidade & Bairro Autocomplete) */}
+              <div className="grid grid-cols-2 gap-3 relative">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Cidade</label>
                   <input
@@ -837,15 +869,45 @@ function OnboardingOverlay({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Bairro</label>
-                  <input
-                    type="text"
-                    placeholder="Bairro"
-                    value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
-                    className="w-full h-14 rounded-2xl form-input px-4 text-sm bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                  />
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Buscar Bairro</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Ex: Batel, Pinheiros"
+                      value={neighborhood}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNeighborhood(val);
+                        fetchLocationSuggestions(val);
+                      }}
+                      onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
+                      className="w-full h-14 rounded-2xl form-input px-4 text-sm bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                    />
+                    {searchLoading && (
+                      <span className="absolute right-3 top-4 text-xs text-brand-coral-500 animate-pulse">Buscando...</span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Dropdown de sugestões flutuante */}
+                {showSuggestions && locationSuggestions.length > 0 && (
+                  <div className="absolute top-[68px] left-0 right-0 z-50 bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto">
+                    {locationSuggestions.map((s, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setNeighborhood(s.bairro);
+                          setCity(s.cidade);
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full px-4 py-3 text-left text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-brand-indigo-950 border-b border-slate-100 dark:border-white/5 last:border-b-0"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1606,6 +1668,35 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
   const [editPronouns, setEditPronouns] = useState('');
   const [editCity, setEditCity] = useState('');
   const [editNeighborhood, setEditNeighborhood] = useState('');
+  const [editSuggestions, setEditSuggestions] = useState<any[]>([]);
+  const [showEditSuggestions, setShowEditSuggestions] = useState(false);
+
+  const fetchEditLocationSuggestions = async (query: string) => {
+    if (query.trim().length < 3) {
+      setEditSuggestions([]);
+      return;
+    }
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      const filtered = data.map((item: any) => {
+        const addr = item.address || {};
+        const bairro = addr.suburb || addr.neighbourhood || addr.city_district || '';
+        const cidade = addr.city || addr.town || addr.village || addr.municipality || '';
+        const estado = addr.state || '';
+        return {
+          label: [bairro, cidade, estado].filter(Boolean).join(', '),
+          bairro,
+          cidade
+        };
+      }).filter((item: any) => item.bairro && item.cidade);
+      setEditSuggestions(filtered);
+      setShowEditSuggestions(filtered.length > 0);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -3125,8 +3216,8 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                 </select>
               </div>
 
-              {/* Cidade & Bairro */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Cidade & Bairro com Autocomplete */}
+              <div className="grid grid-cols-2 gap-3 relative">
                 <div>
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Cidade</label>
                   <input
@@ -3142,11 +3233,36 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                   <input
                     type="text"
                     value={editNeighborhood}
-                    onChange={(e) => setEditNeighborhood(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setEditNeighborhood(val);
+                      fetchEditLocationSuggestions(val);
+                    }}
+                    onFocus={() => setShowEditSuggestions(editSuggestions.length > 0)}
                     placeholder="Bairro"
                     className="w-full h-12 rounded-2xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
                   />
                 </div>
+
+                {/* Dropdown de sugestões flutuante no Edit Profile */}
+                {showEditSuggestions && editSuggestions.length > 0 && (
+                  <div className="absolute top-[62px] left-0 right-0 z-50 bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto">
+                    {editSuggestions.map((s, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setEditNeighborhood(s.bairro);
+                          setEditCity(s.cidade);
+                          setShowEditSuggestions(false);
+                        }}
+                        className="w-full px-4 py-3 text-left text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-brand-indigo-950 border-b border-slate-100 dark:border-white/5 last:border-b-0"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Seção Expansível de Alterar Senha */}
