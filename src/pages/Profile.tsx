@@ -69,6 +69,7 @@ function OnboardingOverlay({
   const [gender, setGender] = useState('');
   const [genderDetails, setGenderDetails] = useState('');
   const [pronouns, setPronouns] = useState('');
+  const [city, setCity] = useState('Curitiba');
   const [neighborhood, setNeighborhood] = useState('');
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
@@ -240,7 +241,16 @@ function OnboardingOverlay({
           email,
           password,
           options: {
-            data: { full_name: name, avatar_url: avatar },
+            data: { 
+              full_name: name, 
+              avatar_url: avatar,
+              birthday: birthday,
+              gender: gender,
+              gender_details: genderDetails,
+              pronouns: pronouns,
+              city: city,
+              neighborhood: neighborhood
+            },
           },
         });
         if (error) {
@@ -291,6 +301,7 @@ function OnboardingOverlay({
           gender,
           genderDetails,
           pronouns,
+          city,
           neighborhood 
         })
       );
@@ -304,6 +315,7 @@ function OnboardingOverlay({
             gender,
             gender_details: genderDetails,
             pronouns,
+            city,
             neighborhood 
           } 
         },
@@ -730,10 +742,10 @@ function OnboardingOverlay({
           <div className="w-full max-w-sm flex flex-col gap-5 animate-[fadeInUp_0.35s_ease-out]">
             <div className="text-center mt-2">
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-7 h-7 text-brand-coral-500" />
+                <User className="w-7 h-7 text-brand-coral-500" />
               </div>
               <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Sobre você</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Dados rápidos para liberar benefícios e localização.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Queremos deixar sua experiência a sua cara! Conta pra gente um pouco mais sobre você.</p>
             </div>
 
             <div className="space-y-4 text-left">
@@ -761,37 +773,34 @@ function OnboardingOverlay({
                 />
               </div>
 
-              {/* Gênero */}
+              {/* Gênero Dropdown */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gênero</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Feminino', 'Masculino', 'Não-binário', 'Prefiro não dizer'].map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => {
-                        setGender(g);
-                        if (g !== 'Não-binário') setGenderDetails('');
-                      }}
-                      className={`h-11 rounded-xl text-xs font-bold border active:scale-95 transition-all select-none ${
-                        gender === g
-                          ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md'
-                          : 'bg-white dark:bg-brand-indigo-950 border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-slate-350'
-                      }`}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
+                <select
+                  value={gender}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setGender(val);
+                    if (val !== 'Não-binário' && val !== 'Outro') setGenderDetails('');
+                  }}
+                  className="w-full h-14 rounded-2xl form-input px-4 text-sm cursor-pointer bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                >
+                  <option value="">Selecione seu gênero...</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Não-binário">Não-binário</option>
+                  <option value="Outro">Outro</option>
+                  <option value="Prefiro não dizer">Prefiro não dizer</option>
+                </select>
               </div>
 
-              {/* Detalhes de Gênero (Apenas se Não-binário/Outro) */}
-              {gender === 'Não-binário' && (
+              {/* Detalhes de Gênero (Apenas se Não-binário ou Outro) */}
+              {(gender === 'Não-binário' || gender === 'Outro') && (
                 <div className="space-y-1.5 animate-fadeIn">
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Como você se descreve? (Opcional)</label>
                   <input
                     type="text"
-                    placeholder="Ex: Trans, Gênero Fluido, Agênero"
+                    placeholder="Ex: Transgênero, Gênero Fluido, Agênero"
                     value={genderDetails}
                     onChange={(e) => setGenderDetails(e.target.value)}
                     className="w-full h-12 rounded-xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
@@ -815,19 +824,28 @@ function OnboardingOverlay({
                 </select>
               </div>
 
-              {/* Bairro */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Onde você mora em Curitiba?</label>
-                <select
-                  value={neighborhood}
-                  onChange={(e) => setNeighborhood(e.target.value)}
-                  className="w-full h-14 rounded-2xl form-input px-4 text-sm cursor-pointer bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                >
-                  <option value="" className="text-slate-400">Selecione seu Bairro...</option>
-                  {['Água Verde', 'Batel', 'Bigorrilho', 'Boqueirão', 'Cabral', 'Cajuru', 'Centro', 'Cristo Rei', 'Juvevê', 'Mercês', 'Novo Mundo', 'Portão', 'Prado Velho', 'Santa Felicidade', 'Outro'].map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
+              {/* Cidade & Bairro */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Cidade</label>
+                  <input
+                    type="text"
+                    placeholder="Cidade"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full h-14 rounded-2xl form-input px-4 text-sm bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Bairro</label>
+                  <input
+                    type="text"
+                    placeholder="Bairro"
+                    value={neighborhood}
+                    onChange={(e) => setNeighborhood(e.target.value)}
+                    className="w-full h-14 rounded-2xl form-input px-4 text-sm bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                  />
+                </div>
               </div>
             </div>
 
@@ -839,7 +857,8 @@ function OnboardingOverlay({
                 setErr('');
                 if (!birthday) { setErr('A data de nascimento é obrigatória.'); return; }
                 if (!gender) { setErr('A seleção de gênero é obrigatória.'); return; }
-                if (!neighborhood) { setErr('Por favor, informe seu bairro.'); return; }
+                if (!city.trim()) { setErr('Por favor, informe sua cidade.'); return; }
+                if (!neighborhood.trim()) { setErr('Por favor, informe seu bairro.'); return; }
                 setView('signup-4');
               }}
               className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2 mt-2"
@@ -1585,6 +1604,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
   const [editGender, setEditGender] = useState('');
   const [editGenderDetails, setEditGenderDetails] = useState('');
   const [editPronouns, setEditPronouns] = useState('');
+  const [editCity, setEditCity] = useState('');
   const [editNeighborhood, setEditNeighborhood] = useState('');
   const [isPasswordSectionOpen, setIsPasswordSectionOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -1637,6 +1657,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
   const userGender = metadata?.gender || '';
   const userGenderDetails = metadata?.gender_details || '';
   const userPronouns = metadata?.pronouns || '';
+  const userCity = metadata?.city || 'Curitiba';
   const userNeighborhood = metadata?.neighborhood || '';
 
   const openCadastrais = () => {
@@ -1646,6 +1667,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
     setEditGender(userGender);
     setEditGenderDetails(userGenderDetails);
     setEditPronouns(userPronouns);
+    setEditCity(userCity);
     setEditNeighborhood(userNeighborhood);
     setIsPasswordSectionOpen(false);
     setCurrentPassword('');
@@ -1663,6 +1685,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
           gender: editGender,
           gender_details: editGenderDetails,
           pronouns: editPronouns,
+          city: editCity,
           neighborhood: editNeighborhood
         } 
       });
@@ -1685,6 +1708,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
       u.gender = editGender;
       u.gender_details = editGenderDetails;
       u.pronouns = editPronouns;
+      u.city = editCity;
       u.neighborhood = editNeighborhood;
       localStorage.setItem('giro_mock_user', JSON.stringify(u));
     }
@@ -1700,6 +1724,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
             gender: editGender,
             gender_details: editGenderDetails,
             pronouns: editPronouns,
+            city: editCity,
             neighborhood: editNeighborhood
           } 
         } 
@@ -3033,6 +3058,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                   * Por questões de segurança, o e-mail não pode ser alterado diretamente.
                 </p>
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Aniversário</label>
@@ -3059,38 +3085,35 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-550 dark:text-slate-450 uppercase block">Como você se identifica? (Gênero)</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Feminino', 'Masculino', 'Não-binário', 'Prefiro não dizer'].map((g) => (
-                    <button
-                      key={g}
-                      type="button"
-                      onClick={() => {
-                        setEditGender(g);
-                        if (g !== 'Não-binário') setEditGenderDetails('');
-                      }}
-                      className={`h-9 rounded-xl text-xs font-bold border active:scale-95 transition-all select-none ${
-                        editGender === g
-                          ? 'bg-brand-coral-500 border-brand-coral-500 text-white shadow-md'
-                          : 'bg-white dark:bg-brand-indigo-950 border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-slate-350'
-                      }`}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
+                <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block">Como você se identifica? (Gênero)</label>
+                <select
+                  value={editGender}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditGender(val);
+                    if (val !== 'Não-binário' && val !== 'Outro') setEditGenderDetails('');
+                  }}
+                  className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                >
+                  <option value="">Selecione seu gênero...</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Não-binário">Não-binário</option>
+                  <option value="Outro">Outro</option>
+                  <option value="Prefiro não dizer">Prefiro não dizer</option>
+                </select>
               </div>
 
-              {editGender === 'Não-binário' && (
+              {(editGender === 'Não-binário' || editGender === 'Outro') && (
                 <div className="space-y-1.5 animate-fadeIn">
-                  <label className="text-[10px] font-bold text-slate-550 dark:text-slate-450 uppercase block">Descreva seu gênero (Opcional)</label>
+                  <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block">Descreva seu gênero (Opcional)</label>
                   <input type="text" value={editGenderDetails} onChange={(e) => setEditGenderDetails(e.target.value)} placeholder="Ex: Transgênero, Gênero Fluido"
                     className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
                 </div>
               )}
 
               <div>
-                <label className="text-[10px] font-bold text-slate-550 dark:text-slate-455 uppercase block mb-1.5">Pronomes no Perfil</label>
+                <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block mb-1.5">Pronomes no Perfil</label>
                 <select value={editPronouns} onChange={(e) => setEditPronouns(e.target.value)}
                   className="w-full h-11 rounded-xl form-input px-3 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
                 >
@@ -3102,16 +3125,28 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                 </select>
               </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Bairro de Residência</label>
-                <select value={editNeighborhood} onChange={(e) => setEditNeighborhood(e.target.value)}
-                  className="w-full h-12 rounded-2xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                >
-                  <option value="">Selecione seu Bairro...</option>
-                  {['Água Verde', 'Batel', 'Bigorrilho', 'Boqueirão', 'Cabral', 'Cajuru', 'Centro', 'Cristo Rei', 'Juvevê', 'Mercês', 'Novo Mundo', 'Portão', 'Prado Velho', 'Santa Felicidade', 'Outro'].map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
+              {/* Cidade & Bairro */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Cidade</label>
+                  <input
+                    type="text"
+                    value={editCity}
+                    onChange={(e) => setEditCity(e.target.value)}
+                    placeholder="Cidade"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Bairro</label>
+                  <input
+                    type="text"
+                    value={editNeighborhood}
+                    onChange={(e) => setEditNeighborhood(e.target.value)}
+                    placeholder="Bairro"
+                    className="w-full h-12 rounded-2xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
+                  />
+                </div>
               </div>
 
               {/* Seção Expansível de Alterar Senha */}
