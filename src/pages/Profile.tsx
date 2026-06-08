@@ -32,7 +32,7 @@ export const PREFERENCES_LIST = [
   { id: 'accessible-motor', label: '♿ Acessibilidade Motora' },
   { id: 'accessible-deaf', label: '🤟 Atendimento em LIBRAS' },
   { id: 'accessible-blind', label: '🔊 Cardápio Acessível' },
-  { id: 'speak-en', label: '🇬🇧 Atendimento em Inglês' },
+  { id: 'speak-en', label: '🇺🇸 Atendimento em Inglês' },
   { id: 'speak-es', label: '🇪🇸 Atendimento em Espanhol' },
 ];
 
