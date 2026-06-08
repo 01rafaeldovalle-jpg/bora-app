@@ -106,43 +106,11 @@ function OnboardingOverlay({
   const [gender, setGender] = useState('');
   const [genderDetails, setGenderDetails] = useState('');
   const [pronouns, setPronouns] = useState('');
-  const [city, setCity] = useState('Curitiba');
-  const [neighborhood, setNeighborhood] = useState('');
-  const [locationSuggestions, setLocationSuggestions] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [err, setErr] = useState('');
   const [loading, setLoading] = useState(false);
   const [isTermsOpen, setIsTermsOpen] = useState(false);
 
-  const fetchLocationSuggestions = async (query: string) => {
-    if (query.trim().length < 3) {
-      setLocationSuggestions([]);
-      return;
-    }
-    setSearchLoading(true);
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&addressdetails=1&limit=5&q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      const filtered = data.map((item: any) => {
-        const addr = item.address || {};
-        const bairro = addr.suburb || addr.neighbourhood || addr.city_district || '';
-        const cidade = addr.city || addr.town || addr.village || addr.municipality || '';
-        const estado = addr.state || '';
-        return {
-          label: [bairro, cidade, estado].filter(Boolean).join(', '),
-          bairro,
-          cidade
-        };
-      }).filter((item: any) => item.bairro && item.cidade);
-      setLocationSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSearchLoading(false);
-    }
-  };
+
 
   // Crop states
   const [cropOpen, setCropOpen] = useState(false);
@@ -260,23 +228,9 @@ function OnboardingOverlay({
     }
   };
 
-  const handleFinishSignup = async () => {
+  const handleFinishSignup = async (signupCity = 'Curitiba', signupNeighborhood = '') => {
     setErr('');
     setLoading(true);
-
-    // Request GPS first
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          window.dispatchEvent(
-            new CustomEvent('giro-location-change', {
-              detail: { lat: pos.coords.latitude, lng: pos.coords.longitude },
-            })
-          );
-        },
-        () => {}
-      );
-    }
 
     // Save prefs locally
     localStorage.setItem('giro_preferences', JSON.stringify(prefs));
@@ -317,8 +271,8 @@ function OnboardingOverlay({
               gender: gender,
               gender_details: genderDetails,
               pronouns: pronouns,
-              city: city,
-              neighborhood: neighborhood
+              city: signupCity,
+              neighborhood: signupNeighborhood
             },
           },
         });
@@ -339,7 +293,7 @@ function OnboardingOverlay({
             gender: gender,
             gender_details: genderDetails,
             pronouns: pronouns,
-            neighborhood: neighborhood,
+            neighborhood: signupNeighborhood
           });
           onComplete(authData.session || { user: authData.user });
         }
@@ -370,8 +324,8 @@ function OnboardingOverlay({
           gender,
           genderDetails,
           pronouns,
-          city,
-          neighborhood 
+          city: signupCity,
+          neighborhood: signupNeighborhood
         })
       );
       onComplete({
@@ -384,8 +338,8 @@ function OnboardingOverlay({
             gender,
             gender_details: genderDetails,
             pronouns,
-            city,
-            neighborhood 
+            city: signupCity,
+            neighborhood: signupNeighborhood
           } 
         },
       });
@@ -1064,19 +1018,41 @@ function OnboardingOverlay({
                 type="button"
                 onClick={() => {
                   if (navigator.geolocation) {
+                    setLoading(true);
                     navigator.geolocation.getCurrentPosition(
-                      (pos) => {
+                      async (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
                         window.dispatchEvent(
                           new CustomEvent('giro-location-change', {
-                            detail: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+                            detail: { lat, lng },
                           })
                         );
-                        handleFinishSignup();
+                        
+                        let resolvedCity = 'Curitiba';
+                        let resolvedNeighborhood = '';
+                        
+                        try {
+                          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`, {
+                            headers: { 'Accept-Language': 'pt-BR' }
+                          });
+                          const data = await res.json();
+                          if (data && data.address) {
+                            resolvedCity = data.address.city || data.address.town || data.address.village || data.address.municipality || 'Curitiba';
+                            resolvedNeighborhood = data.address.suburb || data.address.neighbourhood || data.address.city_district || '';
+                          }
+                        } catch (e) {
+                          console.error("Erro ao obter geolocalização no onboarding:", e);
+                        }
+
+                        await handleFinishSignup(resolvedCity, resolvedNeighborhood);
                       },
-                      () => handleFinishSignup()
+                      async () => {
+                        await handleFinishSignup('Curitiba', '');
+                      }
                     );
                   } else {
-                    handleFinishSignup();
+                    handleFinishSignup('Curitiba', '');
                   }
                 }}
                 disabled={loading}
@@ -1088,7 +1064,7 @@ function OnboardingOverlay({
 
               <button
                 type="button"
-                onClick={handleFinishSignup}
+                onClick={() => handleFinishSignup('Curitiba', '')}
                 disabled={loading}
                 className="w-full h-14 rounded-2xl btn-secondary text-sm"
               >
