@@ -3,28 +3,6 @@ import { Place } from '../../types';
 import { Bookmark, Navigation, Star, Phone, CheckCircle, Share2, ArrowRight, Instagram, Globe, X, MapPin, ShoppingBag, Calendar, Clock, Ticket, MessageSquare } from 'lucide-react';
 import { getLanguage, t } from '../../utils/i18n';
 
-// Custom Motorcycle icon for compatibility with lucide-react version icon sets
-const MotorcycleIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="6" cy="18" r="3" />
-    <circle cx="18" cy="18" r="3" />
-    <path d="M10 18h4" />
-    <path d="M12 18v-6" />
-    <path d="M12 12h5l2-4h-7z" />
-    <path d="M6 18l3-8h4" />
-    <path d="M18 18l-1-6" />
-    <path d="M11 7l-1-3h-2" />
-  </svg>
-);
-
 interface PlaceCardProps {
   place: Place;
   isFavorited: boolean;
@@ -301,7 +279,6 @@ export default function PlaceCard({
                   onClick={(e) => e.stopPropagation()}
                   className="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#EA1D2C] hover:opacity-90 active:scale-95 text-white text-[10px] font-extrabold tracking-wide uppercase transition-all shadow-md shadow-red-600/10 decoration-none no-underline"
                 >
-                  <MotorcycleIcon className="w-4 h-4" />
                   Delivery
                 </a>
               )}
