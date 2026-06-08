@@ -38,6 +38,43 @@ export const PREFERENCES_LIST = [
 
 // ─── Onboarding full-screen overlay ────────────────────────────────────────────
 
+const validateDate = (dateStr: string): boolean => {
+  const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+  if (!regex.test(dateStr)) return false;
+
+  const [, dayStr, monthStr, yearStr] = dateStr.match(regex) || [];
+  const day = parseInt(dayStr, 10);
+  const month = parseInt(monthStr, 10);
+  const year = parseInt(yearStr, 10);
+
+  if (month < 1 || month > 12) return false;
+
+  const daysInMonth = [
+    31,
+    (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31
+  ];
+  if (day < 1 || day > daysInMonth[month - 1]) return false;
+
+  const currentYear = new Date().getFullYear();
+  if (year < 1900 || year > currentYear) return false;
+
+  const birthDate = new Date(year, month - 1, day);
+  const today = new Date();
+  if (birthDate > today) return false;
+
+  return true;
+};
+
 type OnboardingView = 'splash' | 'email-login' | 'signup-1' | 'signup-2' | 'signup-3' | 'signup-4' | 'signup-5' | 'signup-6';
 
 function OnboardingOverlay({
@@ -429,7 +466,7 @@ function OnboardingOverlay({
       {isSignup && (
         <div className="relative z-10 text-center mt-3">
           <span className="text-[10px] font-bold tracking-widest text-brand-coral-500 uppercase">
-            Passo {currentStep} de 5
+            {lang === 'en' ? `Step ${currentStep} of 6` : lang === 'es' ? `Paso ${currentStep} de 6` : `Passo ${currentStep} de 6`}
           </span>
         </div>
       )}
@@ -776,14 +813,14 @@ function OnboardingOverlay({
               <div className="w-14 h-14 rounded-2xl bg-brand-coral-500/15 border border-brand-coral-500/30 flex items-center justify-center mx-auto mb-4">
                 <User className="w-7 h-7 text-brand-coral-500" />
               </div>
-              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">Sobre você</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Queremos deixar sua experiência a sua cara! Conta pra gente um pouco mais sobre você.</p>
+              <h2 className="text-2xl font-outfit font-black text-slate-800 dark:text-white">{t('sobre_voce')}</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{t('sobre_voce_desc')}</p>
             </div>
 
             <div className="space-y-4 text-left">
               {/* Aniversário */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Data de Nascimento</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">{t('data_nascimento')}</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -807,7 +844,7 @@ function OnboardingOverlay({
 
               {/* Gênero (Dropdown Menor) */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gênero</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">{t('genero')}</label>
                 <select
                   value={gender}
                   onChange={(e) => {
@@ -817,22 +854,22 @@ function OnboardingOverlay({
                   }}
                   className="w-full h-14 rounded-2xl form-input px-4 text-sm cursor-pointer bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
                 >
-                  <option value="">Selecione seu gênero...</option>
-                  <option value="Feminino">Feminino</option>
-                  <option value="Masculino">Masculino</option>
-                  <option value="Não-binário">Não-binário</option>
-                  <option value="Outro">Outro</option>
-                  <option value="Prefiro não dizer">Prefiro não dizer</option>
+                  <option value="">{t('genero_select')}</option>
+                  <option value="Feminino">{t('genero_f')}</option>
+                  <option value="Masculino">{t('genero_m')}</option>
+                  <option value="Não-binário">{t('genero_nb')}</option>
+                  <option value="Outro">{t('genero_outro')}</option>
+                  <option value="Prefiro não dizer">{t('genero_pnd')}</option>
                 </select>
               </div>
 
               {/* Detalhes de Gênero (Apenas se Não-binário ou Outro) */}
               {(gender === 'Não-binário' || gender === 'Outro') && (
                 <div className="space-y-1.5 animate-fadeIn">
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Como você se descreve? (Opcional)</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">{t('genero_descreva')}</label>
                   <input
                     type="text"
-                    placeholder="Ex: Transgênero, Gênero Fluido, Agênero"
+                    placeholder={t('genero_descreva_placeholder')}
                     value={genderDetails}
                     onChange={(e) => setGenderDetails(e.target.value)}
                     className="w-full h-12 rounded-xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
@@ -842,17 +879,17 @@ function OnboardingOverlay({
 
               {/* Pronomes */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Pronomes (Exibido no perfil)</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">{t('pronomes')}</label>
                 <select
                   value={pronouns}
                   onChange={(e) => setPronouns(e.target.value)}
                   className="w-full h-14 rounded-2xl form-input px-4 text-sm cursor-pointer bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
                 >
-                  <option value="">Selecione seus pronomes...</option>
-                  <option value="ela/dela">Ela / Dela (She/Her)</option>
-                  <option value="ele/dele">Ele / Dele (He/Him)</option>
-                  <option value="elu/delu">Elu / Delu (Neutro)</option>
-                  <option value="não-exibir">Prefiro não exibir pronomes</option>
+                  <option value="">{t('pronomes_select')}</option>
+                  <option value="ela/dela">{t('pronomes_ela_dela')} (She/Her)</option>
+                  <option value="ele/dele">{t('pronomes_ele_dele')} (He/Him)</option>
+                  <option value="elu/delu">{t('pronomes_elu_delu')}</option>
+                  <option value="não-exibir">{t('pronomes_pnd')}</option>
                 </select>
               </div>
             </div>
@@ -863,13 +900,23 @@ function OnboardingOverlay({
               type="button"
               onClick={() => {
                 setErr('');
-                if (!birthday) { setErr('A data de nascimento é obrigatória.'); return; }
-                if (!gender) { setErr('A seleção de gênero é obrigatória.'); return; }
+                if (!birthday) {
+                  setErr(lang === 'en' ? 'Date of birth is required.' : lang === 'es' ? 'La fecha de nacimiento es obligatória.' : 'A data de nascimento é obrigatória.');
+                  return;
+                }
+                if (!validateDate(birthday)) {
+                  setErr(lang === 'en' ? 'Please enter a valid date (DD/MM/YYYY).' : lang === 'es' ? 'Por favor ingrese una fecha válida (DD/MM/AAAA).' : 'Por favor, insira uma data de nascimento válida (DD/MM/AAAA).');
+                  return;
+                }
+                if (!gender) {
+                  setErr(lang === 'en' ? 'Gender selection is required.' : lang === 'es' ? 'La selección de género es obligatória.' : 'A seleção de gênero é obrigatória.');
+                  return;
+                }
                 setView('signup-4');
               }}
               className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2 mt-2"
             >
-              Avançar <ArrowRight className="w-4 h-4" />
+              {t('avancar')} <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -1712,6 +1759,10 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
   };
 
   const saveCadastrais = async () => {
+    if (editBirthday && !validateDate(editBirthday)) {
+      alert(lang === 'en' ? 'Please enter a valid date of birth (DD/MM/YYYY).' : lang === 'es' ? 'Por favor ingrese una fecha de nacimiento válida (DD/MM/AAAA).' : 'Por favor, insira uma data de nascimento válida (DD/MM/AAAA).');
+      return;
+    }
     if (supabase && session) {
       await supabase.auth.updateUser({ 
         data: { 
@@ -3121,7 +3172,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
 
               {/* Gênero (Dropdown Menor) */}
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block">Como você se identifica? (Gênero)</label>
+                <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block">{t('genero')}</label>
                 <select
                   value={editGender}
                   onChange={(e) => {
@@ -3131,35 +3182,35 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                   }}
                   className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
                 >
-                  <option value="">Selecione seu gênero...</option>
-                  <option value="Feminino">Feminino</option>
-                  <option value="Masculino">Masculino</option>
-                  <option value="Não-binário">Não-binário</option>
-                  <option value="Outro">Outro</option>
-                  <option value="Prefiro não dizer">Prefiro não dizer</option>
+                  <option value="">{t('genero_select')}</option>
+                  <option value="Feminino">{t('genero_f')}</option>
+                  <option value="Masculino">{t('genero_m')}</option>
+                  <option value="Não-binário">{t('genero_nb')}</option>
+                  <option value="Outro">{t('genero_outro')}</option>
+                  <option value="Prefiro não dizer">{t('genero_pnd')}</option>
                 </select>
               </div>
 
               {/* Detalhes de Gênero (Apenas se Não-binário ou Outro) */}
               {(editGender === 'Não-binário' || editGender === 'Outro') && (
                 <div className="space-y-1.5 animate-fadeIn">
-                  <label className="text-[10px] font-bold text-slate-555 dark:text-slate-450 uppercase block">Descreva seu gênero (Opcional)</label>
-                  <input type="text" value={editGenderDetails} onChange={(e) => setEditGenderDetails(e.target.value)} placeholder="Ex: Transgênero, Gênero Fluido"
+                  <label className="text-[10px] font-bold text-slate-555 dark:text-slate-450 uppercase block">{t('genero_descreva')}</label>
+                  <input type="text" value={editGenderDetails} onChange={(e) => setEditGenderDetails(e.target.value)} placeholder={t('genero_descreva_placeholder')}
                     className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
                 </div>
               )}
 
               {/* Pronomes */}
               <div>
-                <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block mb-1.5">Pronomes no Perfil</label>
+                <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block mb-1.5">{t('pronomes')}</label>
                 <select value={editPronouns} onChange={(e) => setEditPronouns(e.target.value)}
                   className="w-full h-11 rounded-xl form-input px-3 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
                 >
-                  <option value="">Selecione seus pronomes...</option>
-                  <option value="ela/dela">Ela / Dela (She/Her)</option>
-                  <option value="ele/dele">Ele / Dele (He/Him)</option>
-                  <option value="elu/delu">Elu / Delu (Neutro)</option>
-                  <option value="não-exibir">Prefiro não exibir</option>
+                  <option value="">{t('pronomes_select')}</option>
+                  <option value="ela/dela">{t('pronomes_ela_dela')} (She/Her)</option>
+                  <option value="ele/dele">{t('pronomes_ele_dele')} (He/Him)</option>
+                  <option value="elu/delu">{t('pronomes_elu_delu')}</option>
+                  <option value="não-exibir">{t('pronomes_pnd')}</option>
                 </select>
               </div>
 
