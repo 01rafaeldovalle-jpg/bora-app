@@ -805,7 +805,7 @@ function OnboardingOverlay({
                 />
               </div>
 
-              {/* Gênero */}
+              {/* Gênero (Dropdown Menor) */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Gênero</label>
                 <select
@@ -855,60 +855,6 @@ function OnboardingOverlay({
                   <option value="não-exibir">Prefiro não exibir pronomes</option>
                 </select>
               </div>
-
-              {/* Localização (Cidade & Bairro Autocomplete) */}
-              <div className="grid grid-cols-2 gap-3 relative">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Cidade</label>
-                  <input
-                    type="text"
-                    placeholder="Cidade"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full h-14 rounded-2xl form-input px-4 text-sm bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Buscar Bairro</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Ex: Batel, Pinheiros"
-                      value={neighborhood}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setNeighborhood(val);
-                        fetchLocationSuggestions(val);
-                      }}
-                      onFocus={() => setShowSuggestions(locationSuggestions.length > 0)}
-                      className="w-full h-14 rounded-2xl form-input px-4 text-sm bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                    />
-                    {searchLoading && (
-                      <span className="absolute right-3 top-4 text-xs text-brand-coral-500 animate-pulse">Buscando...</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Dropdown de sugestões flutuante */}
-                {showSuggestions && locationSuggestions.length > 0 && (
-                  <div className="absolute top-[68px] left-0 right-0 z-50 bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto">
-                    {locationSuggestions.map((s, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          setNeighborhood(s.bairro);
-                          setCity(s.cidade);
-                          setShowSuggestions(false);
-                        }}
-                        className="w-full px-4 py-3 text-left text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-brand-indigo-950 border-b border-slate-100 dark:border-white/5 last:border-b-0"
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
 
             {err && <p className="text-xs text-rose-400 font-semibold text-center">{err}</p>}
@@ -919,8 +865,6 @@ function OnboardingOverlay({
                 setErr('');
                 if (!birthday) { setErr('A data de nascimento é obrigatória.'); return; }
                 if (!gender) { setErr('A seleção de gênero é obrigatória.'); return; }
-                if (!city.trim()) { setErr('Por favor, informe sua cidade.'); return; }
-                if (!neighborhood.trim()) { setErr('Por favor, informe seu bairro.'); return; }
                 setView('signup-4');
               }}
               className="w-full h-14 rounded-2xl btn-primary text-sm flex items-center justify-center gap-2 mt-2"
@@ -3175,6 +3119,7 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                 </div>
               </div>
 
+              {/* Gênero (Dropdown Menor) */}
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block">Como você se identifica? (Gênero)</label>
                 <select
@@ -3195,14 +3140,16 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                 </select>
               </div>
 
+              {/* Detalhes de Gênero (Apenas se Não-binário ou Outro) */}
               {(editGender === 'Não-binário' || editGender === 'Outro') && (
                 <div className="space-y-1.5 animate-fadeIn">
-                  <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block">Descreva seu gênero (Opcional)</label>
+                  <label className="text-[10px] font-bold text-slate-555 dark:text-slate-450 uppercase block">Descreva seu gênero (Opcional)</label>
                   <input type="text" value={editGenderDetails} onChange={(e) => setEditGenderDetails(e.target.value)} placeholder="Ex: Transgênero, Gênero Fluido"
                     className="w-full h-11 rounded-xl form-input px-3.5 text-xs bg-white dark:bg-brand-indigo-950 border border-slate-200 dark:border-white/5" />
                 </div>
               )}
 
+              {/* Pronomes */}
               <div>
                 <label className="text-[10px] font-bold text-slate-555 dark:text-slate-455 uppercase block mb-1.5">Pronomes no Perfil</label>
                 <select value={editPronouns} onChange={(e) => setEditPronouns(e.target.value)}
@@ -3214,55 +3161,6 @@ export default function Profile({ favoritesCount, setTab }: ProfileProps) {
                   <option value="elu/delu">Elu / Delu (Neutro)</option>
                   <option value="não-exibir">Prefiro não exibir</option>
                 </select>
-              </div>
-
-              {/* Cidade & Bairro com Autocomplete */}
-              <div className="grid grid-cols-2 gap-3 relative">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Cidade</label>
-                  <input
-                    type="text"
-                    value={editCity}
-                    onChange={(e) => setEditCity(e.target.value)}
-                    placeholder="Cidade"
-                    className="w-full h-12 rounded-2xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Bairro</label>
-                  <input
-                    type="text"
-                    value={editNeighborhood}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setEditNeighborhood(val);
-                      fetchEditLocationSuggestions(val);
-                    }}
-                    onFocus={() => setShowEditSuggestions(editSuggestions.length > 0)}
-                    placeholder="Bairro"
-                    className="w-full h-12 rounded-2xl form-input px-4 text-xs bg-white dark:bg-brand-indigo-950 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5"
-                  />
-                </div>
-
-                {/* Dropdown de sugestões flutuante no Edit Profile */}
-                {showEditSuggestions && editSuggestions.length > 0 && (
-                  <div className="absolute top-[62px] left-0 right-0 z-50 bg-white dark:bg-brand-indigo-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden max-h-48 overflow-y-auto">
-                    {editSuggestions.map((s, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          setEditNeighborhood(s.bairro);
-                          setEditCity(s.cidade);
-                          setShowEditSuggestions(false);
-                        }}
-                        className="w-full px-4 py-3 text-left text-xs text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-brand-indigo-950 border-b border-slate-100 dark:border-white/5 last:border-b-0"
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Seção Expansível de Alterar Senha */}
