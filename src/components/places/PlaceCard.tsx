@@ -22,6 +22,7 @@ export default function PlaceCard({
   const [isWazeOpen, setIsWazeOpen] = useState(false);
   const [wazeStep, setWazeStep] = useState<'ask' | 'loading' | 'reply' | 'thanked'>('ask');
   const [selectedQuestion, setSelectedQuestion] = useState<string | null>(null);
+  const [customQuestion, setCustomQuestion] = useState('');
 
   // Helper para abrir as rotas do celular
   const handleDirections = (e: React.MouseEvent, type: 'google-maps' | 'uber' | '99') => {
@@ -149,6 +150,7 @@ export default function PlaceCard({
                   setIsWazeOpen(true);
                   setWazeStep('ask');
                   setSelectedQuestion(null);
+                  setCustomQuestion('');
                 }}
                 className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-555 dark:text-slate-350 transition-colors"
                 title={t('como_esta_agora')}
@@ -342,7 +344,11 @@ export default function PlaceCard({
                   ].map((q) => (
                     <button
                       key={q.id}
-                      onClick={() => setSelectedQuestion(q.id)}
+                      type="button"
+                      onClick={() => {
+                        setSelectedQuestion(q.id);
+                        setCustomQuestion('');
+                      }}
                       className={`w-full p-4 text-left text-xs font-bold rounded-2xl border transition-all cursor-pointer ${
                         selectedQuestion === q.id
                           ? 'border-brand-coral-500 bg-brand-coral-500/5 text-brand-coral-500 shadow-sm shadow-brand-coral-500/10'
@@ -352,9 +358,32 @@ export default function PlaceCard({
                       {q.label}
                     </button>
                   ))}
+
+                  {/* Campo para pergunta personalizada */}
+                  <div className="space-y-1 pt-1.5 border-t border-slate-100 dark:border-white/5">
+                    <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">
+                      {getLanguage() === 'en' ? 'Or write your own question...' : getLanguage() === 'es' ? 'O escribe tu propia pregunta...' : 'Ou escreva sua própria pergunta...'}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={getLanguage() === 'en' ? 'Is the playground open?' : getLanguage() === 'es' ? '¿Está abierto el parque infantil?' : 'Ex: Aceita reservas para hoje?'}
+                      value={customQuestion}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomQuestion(val);
+                        if (val.trim().length > 0) {
+                          setSelectedQuestion('custom');
+                        } else {
+                          setSelectedQuestion(null);
+                        }
+                      }}
+                      className="w-full h-11 rounded-xl px-3.5 text-xs bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-white focus:border-brand-coral-500 focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => {
                     if (selectedQuestion) {
                       setWazeStep('loading');
@@ -408,8 +437,10 @@ export default function PlaceCard({
                       getLanguage() === 'en' ? 'Está tranquilo, com mesas livres!' : getLanguage() === 'es' ? 'Está tranquilo, con mesas libres!' : 'Está tranquilo, com mesas livres!'
                     ) : selectedQuestion === 'line' ? (
                       getLanguage() === 'en' ? 'Fila super rápida, menos de 5 minutos.' : getLanguage() === 'es' ? 'Fila súper rápida, menos de 5 minutos.' : 'Fila super rápida, menos de 5 minutos.'
-                    ) : (
+                    ) : selectedQuestion === 'vibe' ? (
                       getLanguage() === 'en' ? 'Música ao vivo incrível e chopp trincando!' : getLanguage() === 'es' ? '¡Música en vivo increíble y cerveza fría!' : 'Música ao vivo incrível e chopp trincando!'
+                    ) : (
+                      getLanguage() === 'en' ? 'Yes! Everything is working normally here.' : getLanguage() === 'es' ? '¡Sí! Todo está funcionando con normalidad por aquí.' : 'Sim! Está tudo funcionando normalmente por aqui.'
                     )}
                   </p>
                 </div>
